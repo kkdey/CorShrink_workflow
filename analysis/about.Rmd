@@ -2,7 +2,30 @@
 title: "About"
 output:
   html_document:
-    toc: false
+    toc: true
 ---
 
-Describe your project.
+`CorShrink` is an algorithm to adaptively shrink a sample correlation matrix or a 
+vector of correlations, where the correlations are estimated for each pair of features 
+on a varying number of samples.
+
+We try to motivate why we need `CorShrink` by citing the GTEx (Genotype Tissue Expression) Project which collected expression data for each gene across 53 tissues contributed by nearly 550 patients immediately after death. However each patient contributed a few of the tissues resulting in large scale missing data. If one looks at the persons by tissues matrix of gene expression per for each gene, we will observe many NA values corresponding the tissues not contributed by a person. One is then left with the choice of either imputing the NA values and then construct the correlation matrix from the imputed data or derive the correlation matrix from the available data. The former would be pegged by imputation error while the latter by sample size error. 
+
+This is where `CorShrink` comes in. With the help of `CorShrink`, one can shrink the correlation matrix adaptively without imputation and the shrinkage level for a particular pair of tissues depends on the number of patients who have contributed both the tissues. As a result, for tissues largely shared across the patients, the shrinkage level would be lower in comparison to the tissues less shared.
+
+The main steps in `CorShrink` are as follows 
+
+- Convert the correlations $R_{ij}$ into Fisher z-scores $Z_{ij}$ for each pair $i$ and $j$.
+
+- Use adaptive shrinkage of the Fisher z-scores with the standard error $\frac{1}{n_{ij} - 3}$
+  where $n_{ij}$ is the number of common samples between the two tissues $i$ and $j$. This step
+  uses the **ash** software due to M.Stephens and the shrinkage target and the 
+  shrinkage distribution can be chosen by the user.
+  
+- Reverse transform the posterior mean of the shrunk Fisher z-scores obtained from adaptive 
+  shrinkage to the correlation space.
+  
+- Find the PD meatrix nearest to the matrix obtained above in order to restore the correlation
+  structure property even after shrinkage. This is the matrix we report.
+  
+For more details on the adaptive shrinkage framework, check [Stephens 2016](https://academic.oup.com/biostatistics/article/18/2/275/2557030/False-discovery-rates-a-new-deal).
