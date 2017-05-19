@@ -1,8 +1,5 @@
-
-
 url: "http://kkdey.github.io/CorShrink"
 baseurl: "/CorShrink"
-
 
 name: CorShrink_workflow
 output_dir: "../docs"
