@@ -1,9 +1,9 @@
-name: CorShrink-workflow
+name: CorShrink_workflow
 output_dir: "../docs"
 include: [".nojekyll"]
 exclude: ["include"]
 navbar:
-  title: CorShrink-workflow
+  title: CorShrink_workflow
   left:
     - text: "Home"
       href: index.html
