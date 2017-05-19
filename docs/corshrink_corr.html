@@ -8,32 +8,17 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <meta name="author" content="Kushal K Dey" />
 
 
 <title>corshrink vs correlation matrix: GTEx data</title>
 
-<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
-<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
-<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
-<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
-<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
-<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
-<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
-<script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-1.1/highlight.js"></script>
-<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 
 <style type="text/css">code{white-space: pre;}</style>
-<style type="text/css">
-  pre:not([class]) {
-    background-color: white;
-  }
-</style>
 <script type="text/javascript">
 if (window.hljs && document.readyState && document.readyState === "complete") {
    window.setTimeout(function() {
@@ -44,278 +29,76 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 
 
 
-<style type="text/css">
-h1 {
-  font-size: 34px;
-}
-h1.title {
-  font-size: 38px;
-}
-h2 {
-  font-size: 30px;
-}
-h3 {
-  font-size: 24px;
-}
-h4 {
-  font-size: 18px;
-}
-h5 {
-  font-size: 16px;
-}
-h6 {
-  font-size: 12px;
-}
-.table th:not([align]) {
-  text-align: left;
-}
-</style>
 
+<link rel="stylesheet" href="cosmo.css" type="text/css" />
 
 </head>
 
 <body>
 
-<style type = "text/css">
-.main-container {
-  max-width: 940px;
-  margin-left: auto;
-  margin-right: auto;
-}
-code {
-  color: inherit;
-  background-color: rgba(0, 0, 0, 0.04);
-}
-img {
-  max-width:100%;
-  height: auto;
-}
-.tabbed-pane {
-  padding-top: 12px;
-}
-button.code-folding-btn:focus {
-  outline: none;
-}
-</style>
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
+    <link href="../../docs/cosmo.css" rel="stylesheet">
+    <link href="../../docs/cosmo.min.css" rel="stylesheet">
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../../docs/bootstrap/js/bootstrap.min.js"></script>
 
-<style type="text/css">
-/* padding for bootstrap navbar */
-body {
-  padding-top: 51px;
-  padding-bottom: 40px;
-}
-/* offset scroll position for anchor links (for fixed navbar)  */
-.section h1 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
+<body>
 
-.section h2 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h3 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h4 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h5 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h6 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-</style>
+<div class = "nav" align = "middle">
+<div class= "p1"></div>
+<p>
+  <a class="btn btn-large btn btn-primary" type="button" href = "../../docs/corshrink_front.html">HOME</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "../../docs/index.html">WORKFLOW</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "../../docs/tissue_corr.html">GTEx DEMO</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "../../docs/about.html">METHODS</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "../../docs/license.html">LICENSE</a> 
+   &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
+ </p>
+</div>  
+<!-- <div class="nav">
+  <a href="index.html">Home page</a> &nbsp &nbsp
+  <a href="musings.html">Musings</a> &nbsp &nbsp
+  <a href="town.html">My town</a> &nbsp &nbsp
+  <a href="links.html">Links</a>
+</div> -->
 
-<script>
-// manage active state of menu based on current page
-$(document).ready(function () {
-  // active menu anchor
-  href = window.location.pathname
-  href = href.substr(href.lastIndexOf('/') + 1)
-  if (href === "")
-    href = "index.html";
-  var menuAnchor = $('a[href="' + href + '"]');
-
-  // mark it active
-  menuAnchor.parent().addClass('active');
-
-  // if it's got a parent navbar menu mark it active as well
-  menuAnchor.closest('li.dropdown').addClass('active');
-});
-</script>
-
-
-<div class="container-fluid main-container">
-
-<!-- tabsets -->
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-</script>
-
-<!-- code folding -->
-
-
-
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
-
-<style type="text/css">
-
-#TOC {
-  margin: 25px 0px 20px 0px;
-}
-@media (max-width: 768px) {
-#TOC {
-  position: relative;
-  width: 100%;
-}
-}
-
-
-.toc-content {
-  padding-left: 30px;
-  padding-right: 40px;
-}
-
-div.main-container {
-  max-width: 1200px;
-}
-
-div.tocify {
-  width: 20%;
-  max-width: 260px;
-  max-height: 85%;
-}
-
-@media (min-width: 768px) and (max-width: 991px) {
-  div.tocify {
-    width: 25%;
-  }
-}
-
-@media (max-width: 767px) {
-  div.tocify {
-    width: 100%;
-    max-width: none;
-  }
-}
-
-.tocify ul, .tocify li {
-  line-height: 20px;
-}
-
-.tocify-subheader .tocify-item {
-  font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
-}
-
-.tocify .list-group-item {
-  border-radius: 0px;
-}
-
-
-</style>
-
-<!-- setup 3col/9col grid for toc_float and main content  -->
-<div class="row-fluid">
-<div class="col-xs-12 col-sm-4 col-md-3">
-<div id="TOC" class="tocify">
-</div>
-</div>
-
-<div class="toc-content col-xs-12 col-sm-8 col-md-9">
-
-
-
-
-<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
-  <div class="container">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href="index.html">CorShrink-workflow</a>
-    </div>
-    <div id="navbar" class="navbar-collapse collapse">
-      <ul class="nav navbar-nav">
-        <li>
-  <a href="index.html">Home</a>
-</li>
-<li>
-  <a href="about.html">About</a>
-</li>
-<li>
-  <a href="license.html">License</a>
-</li>
-      </ul>
-      <ul class="nav navbar-nav navbar-right">
-        <li>
-  <a href="https://github.com/jdblischak/workflowr">
-    <span class="fa fa-github"></span>
-     
-  </a>
-</li>
-      </ul>
-    </div><!--/.nav-collapse -->
-  </div><!--/.container -->
-</div><!--/.navbar -->
-
-<div class="fluid-row" id="header">
-
+<!-- Main content -->
+</body>
+</html>
 
 
 <h1 class="title toc-ignore">corshrink vs correlation matrix: GTEx data</h1>
 <h4 class="author"><em>Kushal K Dey</em></h4>
 <h4 class="date"><em>5/12/2017</em></h4>
 
-</div>
 
+<div id="TOC">
+<ul>
+<li><a href="#session-information">Session information</a></li>
+</ul>
+</div>
 
 <!-- The file analysis/chunks.R contains chunks that define default settings
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2017-05-18</p>
+<p><strong>Last updated:</strong> 2017-05-19</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 9489f00</p>
+<p><strong>Code version:</strong> 716e30d</p>
 <p>We propose CorShrink as a method to clean up the correlation matrix adaptively specially when the correlation values have varying degree of confidence attached to them as in the GTEx case, since the correlation between two tissues are based on the number of common persons contributing both these tissues, which may vary widely from one tissue to another.</p>
 <pre class="r"><code>cor_result &lt;- get(load(&quot;../output/cor_tissues_non_ash.rda&quot;))
 common_samples &lt;- get(load(&quot;../output/common_samples.rda&quot;))
@@ -343,7 +126,7 @@ source(&quot;../../CorShrink/R/CorShrinkML.R&quot;)
 system.time(cor_sample_ML &lt;-  CorShrinkML(cor_mat, nsamp_mat = as.matrix(common_samples), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.422   0.178   0.713 </code></pre>
+  0.416   0.179   0.604 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_only)[order_index, order_index],
@@ -360,7 +143,7 @@ system.time(cor_sample_ML &lt;-  CorShrinkML(cor_mat, common_samples, sd_boot = 
                                                              nullweight = 100)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.318   0.119   0.503 </code></pre>
+  0.307   0.118   0.445 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index, order_index],
@@ -374,7 +157,7 @@ axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_ind
                                                              nullweight = 1000)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.226   0.062   0.312 </code></pre>
+  0.211   0.063   0.283 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],
@@ -388,7 +171,7 @@ axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_ind
                                                              nullweight = 10)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.357   0.124   0.519 </code></pre>
+  0.331   0.119   0.454 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],
@@ -402,7 +185,7 @@ axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_ind
                                                              nullweight = 1)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  1.089   0.484   1.878 </code></pre>
+  0.945   0.419   1.375 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],
@@ -420,7 +203,7 @@ system.time(cor_sample_ML &lt;-  CorShrinkML(cor_mat, common_samples, sd_boot = 
                                                              nullweight = 10)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.552   0.156   0.779 </code></pre>
+  0.519   0.143   0.667 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],
@@ -434,7 +217,7 @@ axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_ind
                                                              nullweight = 10)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.532   0.157   0.732 </code></pre>
+  0.535   0.158   0.698 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],
@@ -448,7 +231,7 @@ axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_ind
                                                              nullweight = 10)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.441   0.147   0.727 </code></pre>
+  0.336   0.123   0.472 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],
@@ -462,7 +245,7 @@ axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_ind
                                                              nullweight = 10)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.465   0.112   0.672 </code></pre>
+  0.376   0.086   0.465 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],
@@ -477,7 +260,7 @@ axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_ind
                                                              mode = 0)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  1.006   0.409   1.564 </code></pre>
+  0.951   0.392   1.365 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],
@@ -492,7 +275,7 @@ axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_ind
                                                              mode = &quot;estimate&quot;)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.977   0.293   1.432 </code></pre>
+  0.884   0.250   1.142 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],
@@ -519,56 +302,52 @@ other attached packages:
 [1] knitr_1.15.1     CorShrink_0.99.0 workflowr_0.4.0  rmarkdown_1.5   
 
 loaded via a namespace (and not attached):
-  [1] Biobase_2.34.0             httr_1.2.1                
-  [3] pkgload_0.0.0.9000         jsonlite_1.4              
-  [5] splines_3.3.3              foreach_1.4.3             
-  [7] gsubfn_0.6-6               Formula_1.2-1             
-  [9] assertthat_0.2.0           expm_0.999-2              
- [11] highr_0.6                  stats4_3.3.3              
- [13] latticeExtra_0.6-28        Rsamtools_1.26.1          
- [15] yaml_2.1.14                RSQLite_1.1-2             
- [17] backports_1.0.5            lattice_0.20-35           
- [19] chron_2.3-50               digest_0.6.12             
- [21] GenomicRanges_1.26.1       XVector_0.14.0            
- [23] RColorBrewer_1.1-2         checkmate_1.8.2           
- [25] colorspace_1.3-2           htmltools_0.3.6           
- [27] Matrix_1.2-8               plyr_1.8.4                
- [29] XML_3.98-1.6               devtools_1.13.1.9000      
- [31] biomaRt_2.30.0             zlibbioc_1.20.0           
- [33] corpcor_1.6.9              scales_0.4.1              
- [35] processx_1.0.0.9000        glasso_1.8                
- [37] BiocParallel_1.8.2         git2r_0.18.0              
- [39] htmlTable_1.9              tibble_1.3.1              
- [41] sqldf_0.4-10               IRanges_2.8.1             
- [43] ggplot2_2.2.1              SummarizedExperiment_1.4.0
- [45] withr_1.0.2                GenomicFeatures_1.26.0    
- [47] ashr_2.0.5                 nnet_7.3-12               
- [49] BiocGenerics_0.20.0        lazyeval_0.2.0            
- [51] proto_1.0.0                survival_2.41-3           
- [53] magrittr_1.5               crayon_1.3.2              
- [55] memoise_1.1.0              evaluate_0.10             
- [57] doParallel_1.0.10          MASS_7.3-45               
- [59] foreign_0.8-67             truncnorm_1.0-7           
- [61] pkgbuild_0.0.0.9000        rsconnect_0.7             
- [63] tools_3.3.3                data.table_1.10.4         
- [65] REBayes_0.73               stringr_1.2.0             
- [67] S4Vectors_0.12.0           munsell_0.4.3             
- [69] cluster_2.0.6              Biostrings_2.42.0         
- [71] AnnotationDbi_1.36.0       callr_1.0.0.9000          
- [73] GenomeInfoDb_1.10.1        rlang_0.1.1.9000          
- [75] debugme_1.0.2              grid_3.3.3                
- [77] RCurl_1.95-4.8             iterators_1.0.8           
- [79] htmlwidgets_0.8            bitops_1.0-6              
- [81] base64enc_0.1-3            gtable_0.2.0              
- [83] codetools_0.2-15           DBI_0.6-1                 
- [85] curl_2.6                   mygene_1.10.0             
- [87] reshape2_1.4.2.9000        R6_2.2.1                  
- [89] GenomicAlignments_1.10.1   gridExtra_2.2.1           
- [91] rtracklayer_1.34.1         Hmisc_4.0-2               
- [93] rprojroot_1.2              stringi_1.1.5             
- [95] pscl_1.4.9                 parallel_3.3.3            
- [97] SQUAREM_2016.8-2           Rcpp_0.12.10              
- [99] rpart_4.1-10               acepack_1.4.1             </code></pre>
+ [1] Biobase_2.34.0             httr_1.2.1                
+ [3] jsonlite_1.4               splines_3.3.3             
+ [5] foreach_1.4.3              gsubfn_0.6-6              
+ [7] Formula_1.2-1              expm_0.999-2              
+ [9] highr_0.6                  stats4_3.3.3              
+[11] latticeExtra_0.6-28        Rsamtools_1.26.1          
+[13] yaml_2.1.14                RSQLite_1.1-2             
+[15] backports_1.0.5            lattice_0.20-35           
+[17] chron_2.3-50               digest_0.6.12             
+[19] GenomicRanges_1.26.1       RColorBrewer_1.1-2        
+[21] XVector_0.14.0             checkmate_1.8.2           
+[23] colorspace_1.3-2           htmltools_0.3.6           
+[25] Matrix_1.2-8               plyr_1.8.4                
+[27] XML_3.98-1.6               biomaRt_2.30.0            
+[29] zlibbioc_1.20.0            corpcor_1.6.9             
+[31] scales_0.4.1               glasso_1.8                
+[33] BiocParallel_1.8.2         git2r_0.18.0              
+[35] htmlTable_1.9              tibble_1.3.1              
+[37] sqldf_0.4-10               IRanges_2.8.1             
+[39] ggplot2_2.2.1              SummarizedExperiment_1.4.0
+[41] GenomicFeatures_1.26.0     ashr_2.0.5                
+[43] nnet_7.3-12                BiocGenerics_0.20.0       
+[45] lazyeval_0.2.0             proto_1.0.0               
+[47] survival_2.41-3            magrittr_1.5              
+[49] memoise_1.1.0              evaluate_0.10             
+[51] doParallel_1.0.10          MASS_7.3-45               
+[53] foreign_0.8-67             truncnorm_1.0-7           
+[55] rsconnect_0.7              tools_3.3.3               
+[57] data.table_1.10.4          REBayes_0.73              
+[59] stringr_1.2.0              S4Vectors_0.12.0          
+[61] munsell_0.4.3              cluster_2.0.6             
+[63] AnnotationDbi_1.36.0       Biostrings_2.42.0         
+[65] GenomeInfoDb_1.10.1        rlang_0.1.1.9000          
+[67] grid_3.3.3                 RCurl_1.95-4.8            
+[69] iterators_1.0.8            htmlwidgets_0.8           
+[71] bitops_1.0-6               base64enc_0.1-3           
+[73] gtable_0.2.0               codetools_0.2-15          
+[75] curl_2.6                   DBI_0.6-1                 
+[77] mygene_1.10.0              reshape2_1.4.2.9000       
+[79] R6_2.2.1                   GenomicAlignments_1.10.1  
+[81] gridExtra_2.2.1            rtracklayer_1.34.1        
+[83] Hmisc_4.0-2                rprojroot_1.2             
+[85] stringi_1.1.5              pscl_1.4.9                
+[87] parallel_3.3.3             SQUAREM_2016.8-2          
+[89] Rcpp_0.12.10               rpart_4.1-10              
+[91] acepack_1.4.1             </code></pre>
 </div>
 
 <hr>
@@ -596,24 +375,6 @@ loaded via a namespace (and not attached):
     <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
 -->
 
-
-</div>
-</div>
-
-</div>
-
-<script>
-
-// add bootstrap table styles to pandoc tables
-function bootstrapStylePandocTables() {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
-}
-$(document).ready(function () {
-  bootstrapStylePandocTables();
-});
-
-
-</script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>
