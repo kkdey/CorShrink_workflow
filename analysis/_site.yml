@@ -2,22 +2,6 @@ name: CorShrink_workflow
 output_dir: "../docs"
 include: [".nojekyll"]
 exclude: ["include"]
-navbar:
-  title: CorShrink
-  left:
-    - text: "Home"
-      href: index.html
-    - text: "About"
-      href: about.html
-    - text: "License"
-      href: license.html
-  right:
-    - icon: fa-github
-      href: https://github.com/jdblischak/workflowr
-      
-avatar: "../docs/start.gif"
-
-      
 navbar-links:
   About Me: "aboutme"
   Resources:
@@ -26,6 +10,8 @@ navbar-links:
     - GitHub Pages: "https://pages.github.com/"
   Author's home: "http://deanattali.com"
   
+avatar: "../docs/start.gif"
+
 output:
   html_document:
     toc: true
