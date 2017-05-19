@@ -15,6 +15,9 @@ navbar:
     - icon: fa-github
       href: https://github.com/jdblischak/workflowr
       
+avatar: "../docs/start.gif"
+
+      
 navbar-links:
   About Me: "aboutme"
   Resources:
