@@ -3,7 +3,7 @@ output_dir: "../docs"
 include: [".nojekyll"]
 exclude: ["include"]
 navbar:
-  title: CorShrink_workflow
+  title: CorShrink
   left:
     - text: "Home"
       href: index.html
