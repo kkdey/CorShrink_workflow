@@ -1,34 +1,21 @@
 ---
-title: "PMD analysis of GTEx correlation structure"
+title: "GTEx : One gene correlation vs Corshrink"
 author: "Kushal K Dey"
-date: "5/16/2017"
+date: "5/18/2017"
 output: html_document
 ---
 
-<!-- The file analysis/chunks.R contains chunks that define default settings
-shared across the workflowr files. -->
-```{r read-chunk, include=FALSE, cache=FALSE}
-knitr::read_chunk("chunks.R")
-```
-
-<!-- Update knitr chunk options -->
-```{r knitr-opts-chunk, include=FALSE}
-```
-
-<!-- Insert the date the file was last updated -->
-```{r last-updated, echo=FALSE, results='asis'}
-```
-
-<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
- package git2r is installed -->
-```{r code-version, echo=FALSE, results='asis'}
-```
-
-We perform a PMD Sparse Factor Analysis of the GTEx tissue-tissue correlation structure based on the gene expression data across 16,069 genes.
+This is the start of the GTEx analysis using CorShrink. Here we pick up one gene and use look at the Corshrink estimation of the tissue-tissue correlation for that single gene. This script can be used as a model script to check the Corshrink function as well when under development.
 
 ```{r}
-data <- get(load("../output/ash_cor_only_voom_pearson_gtex_tissues.rda"))
+name <- "ENSG00000197971"
+```
 
+```{r}
+cor_data <- get(load("../output/cor_tissues_non_ash_voom_pearson.rda"))
+```
+
+```{r}
 gene_names <- as.character(read.table(file = "../data/GTEX_V6/gene_names_GTEX_V6.txt")[,1])
 gene_names_1 <- as.character(sapply(gene_names, function(x) return(strsplit(x, "[.]")[[1]][1])))
  
@@ -88,52 +75,55 @@ order_index <- c(order_index, grep("Uterus", U))
 order_index <- c(order_index, grep("Bladder", U))
 ```
 
+Now we apply CorShrink on this data.
+
 ```{r}
-pmd_data <- matrix(0, dim(data)[1]*(dim(data)[1]-1)/2, dim(data)[3])
-
-for(g in 1:dim(pmd_data)[2]){
-  z <- data[,,g]
-  pmd_data[,g] <- z[lower.tri(z)]
-}
-
-pmd_data_trans <- 0.5*log((1+pmd_data)/(1-pmd_data))
-
-```
-
-```{r echo=TRUE, eval=FALSE}
-pmd_out <- PMA::PMD(pmd_data_trans, K = 20, niter = 50);
-save(pmd_out, file="../output/PMA_analysis_corr_mat.rda")
+numg <- grep(name, gene_names_1)
+cor_mat <- diag(1,53)+cor_data[,,numg]
+common_samples <- get(load("../output/common_samples.rda"))
+system.time(cor_sample_ML <-  CorShrink::CorShrinkML(cor_mat, common_samples, sd_boot = FALSE,
+                                            ash.control = list(mixcompdist = "normal",
+                                                               nullweight = 100)))
 ```
 
 ```{r}
-pma <- get(load("../output/PMA_analysis_corr_mat.rda"))
-u_mat <- pma$u
-corr_mat_vectors_facs <- u_mat
-corr_mat_vectors_facs_trans <- (exp(2*corr_mat_vectors_facs)-1)/(exp(2*corr_mat_vectors_facs)+1)
-corr_mat_fac <- array(0, c(dim(data)[1], dim(data)[2], 20));
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(cor_mat)[order_index, order_index],
+      col=col, main=paste0("cor mat:", name), cex.main=1,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = ncol(cor_mat)), labels = U[order_index], las=2, cex.axis = 0.4)
+axis(2, at = seq(0, 1, length.out = ncol(cor_mat)), labels = U[order_index], las=2, cex.axis = 0.4)
+```
+
+
+```{r}
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(cor_sample_ML$ash_cor_only)[order_index, order_index],
+      col=col, main=paste0("CorShrink mat: ", name), cex.main=1,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = ncol(cor_mat)), labels = U[order_index], las=2, cex.axis = 0.4)
+axis(2, at = seq(0, 1, length.out = ncol(cor_mat)), labels = U[order_index], las=2, cex.axis = 0.4)
+
 ```
 
 ```{r}
-for(k in 1:20){
-  mat2 <- matrix(0, dim(data)[1], dim(data)[2])
-  mat2[lower.tri(mat2)] <- corr_mat_vectors_facs_trans[,k]
-  diag(mat2) <- 1
-  corr_mat_fac[,,k] <- (mat2 + t(mat2))
-}
-
-for(num in 1:20){
-      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
-          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
-    image(as.matrix(corr_mat_fac[order_index,order_index, num]),
-          col=col, main=paste0("corr structure PC: ", num), cex.main=2,
-          xaxt = "n", yaxt = "n", zlim=c(-0.05,0.05))
-    axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
-    axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
-}
+numg <- grep(name, gene_names_1)
+cor_mat <- diag(1,53)+cor_data[,,numg]
+common_samples <- get(load("../output/common_samples.rda"))
+system.time(cor_sample_ML <-  CorShrink::CorShrinkML(cor_mat, common_samples, sd_boot = FALSE,
+                                            ash.control = list(mixcompdist = "halfuniform",
+                                                               nullweight = 100)))
 ```
 
-## Session information
+```{r}
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(cor_sample_ML$ash_cor_only)[order_index, order_index],
+      col=col, main=paste0("CorShrink mat: ", name), cex.main=1,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = ncol(cor_mat)), labels = U[order_index], las=2, cex.axis = 0.4)
+axis(2, at = seq(0, 1, length.out = ncol(cor_mat)), labels = U[order_index], las=2, cex.axis = 0.4)
 
-<!-- Insert the session information into the document -->
-```{r session-info}
 ```

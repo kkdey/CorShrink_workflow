@@ -46,8 +46,6 @@ cor_data <- get(load("../output/cor_tissues_non_ash_voom_pearson.rda"))
 ```
 
 ```{r}
-data <- get(load("../output/ash_cor_only_voom_pearson_gtex_tissues.rda"))
-
 gene_names <- as.character(read.table(file = "../data/GTEX_V6/gene_names_GTEX_V6.txt")[,1])
 gene_names_1 <- as.character(sapply(gene_names, function(x) return(strsplit(x, "[.]")[[1]][1])))
  

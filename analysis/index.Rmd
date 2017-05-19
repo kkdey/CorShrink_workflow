@@ -37,10 +37,19 @@ a low dimensional structure representation to impute the values.
 obtained clusters of GTEx tissue samples from the gene expression data using a Grade of Membership approach. Here we try to relate the clusters obtained there and the genes that were found to drive these clusters with their tissue-tissue correlation structure patterns. Also of 
 interest is how this correlation structure depends on the expression patterns of the genes.
 
+- [CorShrink demo on one gene in GTEx](../docs/one_gene_correlation.html)
 - [CorShrink of top genes driving GTEx Countclust clusters](../docs/gtex_corshrink.html)
 - [Curious case of high correlation in Brain](../docs/corshrink_brain_func.html)
 - [GSEA of CorShrink correlation patterns on all tissues ](../docs/gsea_corshrink_corpcor.html)
 - [GSEA of CorShrink correlation patterns on brain tissues ](../docs/gsea_corshrink_corpcor_2.html)
+
+
+### Expression vs CorShrink
+
+In this section, we check how the reads expression of the genes in the GTEx data are connected to the CorShrink correlations and how small sample size can indeed produce big correlation values.
+
+- [Reads expression and CorShrink](../docs/reads_expression_CorShrink.html)
+
 
 ### Dimension Reduction and CorShrink
 
