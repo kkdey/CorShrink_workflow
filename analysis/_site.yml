@@ -1,25 +1,15 @@
-url: "http://kkdey.github.io/CorShrink"
-baseurl: "/CorShrink"
-
-name: CorShrink
+name: CorShrink workflow
 output_dir: "../docs"
 include: [".nojekyll"]
 exclude: ["include"]
-navbar-links:
-  About Me: "aboutme"
-  Resources:
-    - Beautiful Jekyll: "http://deanattali.com/beautiful-jekyll/"
-    - Learn markdown: "http://www.markdowntutorial.com/"
-    - GitHub Pages: "https://pages.github.com/"
-  Author's home: "http://deanattali.com"
-  
-avatar: "../docs/start.gif"
 
 output:
   html_document:
     toc: true
     toc_float: true
-    theme: cosmo
+    theme: null
     highlight: textmate
+    css: cosmo.css
     include:
+      before_body: include/header.html
       after_body: include/footer.html
