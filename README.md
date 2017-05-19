@@ -1,5 +1,4 @@
-# CorShrink-workflow
 
-A [workflowr][] project.
+# CorShrink_workflow
 
-[workflowr]: https://github.com/jdblischak/workflowr
+Workflow to maintain the codes and analysis for the CorShrink paper
