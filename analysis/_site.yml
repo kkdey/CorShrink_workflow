@@ -1,7 +1,7 @@
 
 
-url: "http://kkdey.github.io"
-baseurl: "CorShrink"
+url: "http://kkdey.github.io/CorShrink"
+baseurl: "/CorShrink"
 
 
 name: CorShrink_workflow
