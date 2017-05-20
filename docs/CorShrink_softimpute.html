@@ -53,9 +53,9 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <div class = "nav" align = "middle">
 <div class= "p1"></div>
 <p>
-  <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "index.html">HOME</a> 
   &nbsp &nbsp
-  <a class="btn btn-large btn btn-primary" type="button" href = "index.html">WORKFLOW</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "workflow.html">WORKFLOW</a> 
   &nbsp &nbsp
   <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
   &nbsp &nbsp
@@ -100,7 +100,7 @@ shared across the workflowr files. -->
 <p><strong>Last updated:</strong> 2017-05-19</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 8b3b17c</p>
+<p><strong>Code version:</strong> 9867b10</p>
 <p>We compare <code>CorShrink</code> with <code>corpcor</code> and <code>GLASSO</code> under a better imputation method, designed to empower the latter methods. Instead of doing simple imputation, we use the <code>softImpute</code> method due to Mazumdar, Hastie.</p>
 <pre class="r"><code>library(softImpute)
 library(CorShrink)</code></pre>
@@ -150,23 +150,23 @@ system.time(strimmer_sample &lt;- corpcor::cov.shrink(fitted_mat))</code></pre>
 
 Estimating optimal shrinkage intensity lambda (correlation matrix): 0.0098 </code></pre>
 <pre><code>   user  system elapsed 
-  0.013   0.003   0.017 </code></pre>
+  0.018   0.004   0.022 </code></pre>
 <pre class="r"><code>system.time(glasso_sample_005 &lt;- glasso::glasso(cov_mat, rho = 0.05))</code></pre>
 <pre><code>   user  system elapsed 
-   0.08    0.00    0.08 </code></pre>
+  0.079   0.000   0.080 </code></pre>
 <pre class="r"><code>system.time(glasso_sample_05 &lt;- glasso::glasso(cov_mat, rho = 0.5))</code></pre>
 <pre><code>   user  system elapsed 
-  0.006   0.001   0.006 </code></pre>
+  0.008   0.000   0.008 </code></pre>
 <pre class="r"><code>system.time(glasso_sample_1 &lt;- glasso::glasso(cov_mat, rho = 1))</code></pre>
 <pre><code>   user  system elapsed 
-  0.001   0.000   0.000 </code></pre>
+  0.001   0.000   0.001 </code></pre>
 <pre class="r"><code>system.time(glasso_sample_10 &lt;- glasso::glasso(cov_mat, rho = 10))</code></pre>
 <pre><code>   user  system elapsed 
-  0.001   0.000   0.000 </code></pre>
+  0.001   0.000   0.001 </code></pre>
 <pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = 550, sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 1)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.229   0.077   0.326 </code></pre>
+  0.270   0.083   0.371 </code></pre>
 <pre class="r"><code>cor_result &lt;- get(load(&quot;../output/cor_tissues_non_ash_voom_pearson.rda&quot;))
 ash_cor_result &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_gtex_tissues.rda&quot;))
 par(mfrow=c(3,2))
@@ -280,23 +280,23 @@ system.time(strimmer_sample &lt;- corpcor::cov.shrink(fitted_mat))</code></pre>
 
 Estimating optimal shrinkage intensity lambda (correlation matrix): 0.0046 </code></pre>
 <pre><code>   user  system elapsed 
-  0.014   0.003   0.017 </code></pre>
+  0.016   0.004   0.020 </code></pre>
 <pre class="r"><code>system.time(glasso_sample_005 &lt;- glasso::glasso(cov_mat, rho = 0.05))</code></pre>
 <pre><code>   user  system elapsed 
-  0.655   0.001   0.658 </code></pre>
+  0.642   0.012   0.690 </code></pre>
 <pre class="r"><code>system.time(glasso_sample_05 &lt;- glasso::glasso(cov_mat, rho = 0.5))</code></pre>
 <pre><code>   user  system elapsed 
-   0.08    0.00    0.08 </code></pre>
+  0.077   0.000   0.079 </code></pre>
 <pre class="r"><code>system.time(glasso_sample_1 &lt;- glasso::glasso(cov_mat, rho = 1))</code></pre>
 <pre><code>   user  system elapsed 
-  0.065   0.000   0.067 </code></pre>
+  0.063   0.000   0.063 </code></pre>
 <pre class="r"><code>system.time(glasso_sample_10 &lt;- glasso::glasso(cov_mat, rho = 10))</code></pre>
 <pre><code>   user  system elapsed 
-  0.001   0.000   0.001 </code></pre>
+  0.000   0.000   0.001 </code></pre>
 <pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = 550, sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 1)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.183   0.044   0.227 </code></pre>
+  0.184   0.048   0.234 </code></pre>
 <pre class="r"><code>cor_result &lt;- get(load(&quot;../output/cor_tissues_non_ash_voom_pearson.rda&quot;))
 ash_cor_result &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_gtex_tissues.rda&quot;))
 par(mfrow=c(3,2))
