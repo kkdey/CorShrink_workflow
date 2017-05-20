@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CorShrink with D3</title>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
+    <link href="http://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css" rel="stylesheet" type="text/css">
+    <link type="text/css" rel="stylesheet" href="style.css">
+   <!-- <link rel="stylesheet" href="main.css"> -->
+    <script  type="text/javascript" src="d3.min.js"></script>
+    <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+</head>
+
+<style>
+
+.body {
+  width:1200px;
+  height:1200px;
+  font: 20px sans-serif;
+}
+
+.frame {
+    width:1000px;
+    height:1000px;
+    border:1px solid red;
+    margin-right:10px;
+    float:left;
+}
+
+.dot {
+  float:left;
+  margin-right:5px;
+}
+
+.c2 {
+  float:left;
+  margin-right:5px;
+}
+
+.d3-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
+
+.container1 {
+  width:300px;
+  height:300px;
+  float: center;
+}
+
+.container2 {
+  width:300px;
+  height:300px;
+  float: center;
+}
+
+</style>
+
+<body>
+
+     <div class="top">
+         <div class="budget">
+            <div class="budget__title">
+                    <p style="font-size:70px; font-weight:bold"> CorShrink </p>
+                    <p style="font-size:20px"><em> for GTEx tissue-tissue Correlation Shrinkage </em></p>
+                    <br></br>
+                    <br></br>
+                    <p style="font-size:15px"> Kushal K Dey and M. Stephens </p>
+            </div>
+         </div>
+     </div>
+
+
+      <div class="bottom">
+            <div class="add">
+                <div class="add__container">
+                    <input type="text" class="add__description" style="height:50px;width:500px" placeholder="Enter Gene Ensembl ID">
+                    <button class="add__btn" style="height:50px;width:50px"><i class="ion-ios-checkmark-outline"></i></button>
+                </div>
+            </div>
+        </div>
+            
+                
+
+<div id="image"></div>
+<div id="scatter"></div>
+
+<script>
+
+d3.select("body").style("background-color", "white");
+
+var gridSize = 20,
+h = gridSize,
+w = gridSize,
+rectPadding = 0;
+
+var tip = d3.tip()
+  .attr('class', 'd3-tip')
+  .offset([-10, 0])
+  .html(function(d) {
+    return "<strong> Name:</strong> <span style='color:white'>" + d.name +  "</span>" + "<br/>" + "<strong> X:</strong> <span style='color:white'>" + d3.format("0.3f")(d.cx) +  "</span>" + "<br/>" + "<strong> Y:</strong> <span style='color:white'>" + d3.format("0.3f")(d.cy) +  "</span>" ;
+  });
+
+var colorLow = 'green', colorMed = 'white', colorHigh = 'red';
+
+var margin = {top: 300, right: 50, bottom: 50, left: 250},
+    width = 1500 - margin.left - margin.right,
+    height = 1500 - margin.top - margin.bottom;
+
+var colorScale = d3.scale.linear()
+     .domain([-1, 0, 1])
+     .range([colorLow, colorMed, colorHigh]);
+
+ function highlightpoint(d) {
+                d3.select(this).style("fill", "red");
+            }
+
+function dehighlightpoint(d) {
+                d3.select(this).style("fill", "black");
+            }
+
+
+/*var xValue = function(d) { return d[0].set.x;}, // data -> value
+    xScale = d3.scale.linear().range([0, width]), // value -> display
+    xMap = function(d) { return xScale(xValue(d));}, // data -> display
+    xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+
+var yValue = function(d) { return d[0].set.y;}, // data -> value
+    yScale = d3.scale.linear().range([0, height]), // value -> display
+    yMap = function(d) { return yScale(yValue(d));}, // data -> display
+    yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+*/
+
+
+d3.csv("gene1_corr.csv", function(data) {
+  
+            console.log(data[0]);
+
+            var arrX = [];
+            for(var i = 1; i <= 10; i++){
+                arrX.push("X-" + i)
+            }
+
+            var arrY = [];
+            for(var i = 1; i <= 10; i++){
+                arrY.push("Y-" + i)
+            }
+
+            var svg = d3.select("#image").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+              .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            var heatMap = svg.selectAll("#image")
+                .data(data, function(d) { return d.col + ':' + d.row; })
+              .enter().append("svg:rect")
+                .attr("x", function(d) { return d.row * w; })
+                .attr("y", function(d) { return d.col * h; })
+                .attr("width", function(d) { return w; })
+                .attr("height", function(d) { return h; })
+                .style("fill", function(d) { return colorScale(d.value); })
+                .on("mouseover", function(d, i){ 
+                        d3.select(this)
+                            .style("fill", "yellow");
+                            })
+                // .on("mousemove", function(d, i){ 
+                //         d3.select(this)
+                //             .style("fill", "yellow");
+                //             })
+                .on("mouseout", function(d, i){ 
+                        d3.select(this)
+                            .style("fill", function(d) { return colorScale(d.value); });
+                            })
+                .on("click", function(d, i){ 
+
+                    var tempset = [];
+
+                    tempset = {
+                        x : [],
+                        y: []
+                    };
+
+                    for(var j = 0; j < 10; j++){
+                                tempset.x.push(+data[i][arrX[j]]);
+                                tempset.y.push(+data[i][arrY[j]]);
+                    }
+
+                    d.set = tempset;
+                    var tissue1 = d.tissue1;
+                    var tissue2 = d.tissue2;
+
+                    var xScale = d3.scale.linear().range([0, width*0.6]);
+                    var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+
+                    var yScale = d3.scale.linear().range([0, height*0.6]);
+                    var yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+
+                    xScale.domain([d3.min(d.set.x) - 0.5, d3.max(d.set.x) + 0.5]);
+                    yScale.domain([d3.max(d.set.y) + 0.5, d3.min(d.set.y) - 0.5]);
+
+                    
+                    svg.call(tip);
+
+                    temp_tab = new Array();
+
+                    for(var j = 0; j < 10; j++){
+                        var obj = {cx : d.set.x[j],
+                                   cy : d.set.y[j],
+                                  name: arrX[j]};
+                        temp_tab.push(obj);
+                    }
+
+                    console.log(tip.show);
+                    console.log(tip.hide);
+
+                    d3.select("#scatter").selectAll("svg").remove();
+
+                    var margin_scatter = {top: 100, right: 50, bottom: 50, left: 250},
+
+                    width_scatter = 1500 - (margin_scatter.left) - margin_scatter.right ,
+                    height_scatter = 1500 - margin_scatter.top - margin_scatter.bottom ;
+
+
+                    var svgscatter = d3.select("#scatter").append("svg")
+                                    .attr("align","middle")
+                                    .attr("width", width_scatter + margin_scatter.left - 100 + margin_scatter.right)
+                                    .attr("height", height_scatter + margin_scatter.top - 600 + margin_scatter.bottom)
+                                    .append("g")
+                                    .attr("transform", "translate(" + margin_scatter.left + "," + margin_scatter.top + ")");
+
+
+
+                    svgscatter.selectAll("#scatter")
+                         .data(temp_tab)
+                         .enter().append("circle")
+                        // .attr("class", "dot")
+                         .attr("r", 5.5)
+                         .attr("cx", function(d) {//console.log(d.cx); 
+                                                  return xScale(d.cx); })
+                         .attr("cy", function(d) {return yScale(d.cy); })
+                         .style("fill", "black")
+                         .on("mouseover", function(d) {
+                                                tip.show.call(this, d);
+                                                highlightpoint.call(this, d);
+                                            })
+                         .on("mouseout", function(d) { 
+                                                tip.hide.call(this, d);
+                                                dehighlightpoint.call(this, d);
+                                            });
+
+
+                    svgscatter.append("g")
+                        .attr("class", "x axis")
+                        .attr("transform", "translate(0," + height*0.6 + ")")
+                        .call(xAxis);
+
+                    svgscatter.append("text")             
+                          .attr("transform",
+                                "translate(" + (width*0.3) + " ," + 
+                                               (height*0.5 + margin_scatter.top + 75) + ")")
+                          .style("text-anchor", "middle")
+                          .style("font-size", "20px")
+                          .style("font-weight", "bold")
+                          .text(function(d) { console.log(tissue1); return tissue1});
+
+                    // Add the Y Axis
+                    svgscatter.append("g")
+                        .attr("class", "y axis")
+                        .call(yAxis);
+
+                    svgscatter.append("text")
+                              .attr("transform", "rotate(-90)")
+                              .attr("y", 0 - (margin_scatter.left*0.3))
+                              .attr("x",0 - (height / 5))
+                              .attr("dy", "1em")
+                              .style("text-anchor", "middle")
+                              .style("font-size", "20px")
+                              .style("font-weight", "bold")
+                              .text(function(d) { console.log(tissue2); return tissue2});    
+
+                    return console.log(d.value);})
+
+                .on("dblclick", function(d, i){ 
+                            return console.log(d.value);})
+
+            svg.selectAll("#image")
+                .data(data)
+                .enter().append("svg:text")
+                .text(function(d) { return d.value ; })
+                .attr("x", function(d) { return (d.row * w + 0.5*w); })
+                .attr("y", function(d) { return (d.col * h + 0.5*h); })
+                .attr("text-anchor", "middle")
+                .style("font-size", "8px")
+                .style("font-weight", "bold");
+
+             svg.selectAll("#image")
+                .data(data)
+                .enter().append("svg:text")
+                .text(function(d) { return d.tissue2; })
+                .attr("y", function(d) { return (d.col * h + 0.6*h); })
+                .attr("x",  -30)
+                .attr("text-anchor", "end")
+                .style("fill", "black")
+                .style("font-family", "Times New Roman")
+                .style("font-size", "10px");  
+
+
+            svg.selectAll("#image")
+                .data(data)
+                .enter().append("svg:text")
+                .text(function(d) { return d.tissue2; })
+                .attr("x", function(d) { return (d.row * w + w); })
+                .attr("y",  0)
+                .attr("text-anchor", "start")
+                .attr("transform", function(d) { return ("translate(" + (d.col *h + 0.5*w) + "," + (d.row*h + 0.5*w) + ")rotate(270)") })
+                .style("fill", "black")
+                .style("font-family", "Times New Roman")
+                .style("font-size", "10px");
+
+});
+
+</script>
+</body>
+</html>
