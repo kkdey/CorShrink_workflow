@@ -55,7 +55,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <p>
   <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
   &nbsp &nbsp
-  <a class="btn btn-large btn btn-primary" type="button" href = "index.html">WORKFLOW</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "workflow.html">WORKFLOW</a> 
   &nbsp &nbsp
   <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
   &nbsp &nbsp
@@ -98,7 +98,7 @@ shared across the workflowr files. -->
 <p><strong>Last updated:</strong> 2017-05-19</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 1950a71</p>
+<p><strong>Code version:</strong> 369a047</p>
 <p>In this script, we try to perform some gene set enrichment analysis of the CountClust clusters with respect to the CorShrink patterns observed.</p>
 <pre class="r"><code>cor_result &lt;- get(load(&quot;../output/ash_cor_only_gtex_tissues.rda&quot;))
 common_samples &lt;- get(load(&quot;../output/common_samples.rda&quot;))
@@ -150,12 +150,12 @@ out &lt;- fgsea(pathways = cluster_list,
              nperm = 100000)
 out</code></pre>
 <pre><code>           pval         padj         ES       NES nMoreExtreme size
-1: 1.370840e-05 4.121898e-05  0.6534141  2.573478            0  101
-2: 4.686900e-02 7.030350e-02  0.3456568  1.361373         3418  101
-3: 1.734856e-01 1.734856e-01  0.2990933  1.186712        12758  106
-4: 5.991918e-02 7.190301e-02 -0.2815261 -1.273796         1630  100
-5: 3.673769e-05 7.347539e-05 -0.7138533 -3.229908            0  100
-6: 1.373966e-05 4.121898e-05  0.5400921  2.123829            0  100
+1: 1.365561e-05 4.103125e-05  0.6534141  2.570885            0  101
+2: 4.586918e-02 6.880377e-02  0.3456568  1.360001         3358  101
+3: 1.735207e-01 1.735207e-01  0.2990933  1.185147        12805  106
+4: 6.162830e-02 7.395396e-02 -0.2815261 -1.272442         1656  100
+5: 3.719270e-05 7.438539e-05 -0.7138533 -3.226475            0  100
+6: 1.367708e-05 4.103125e-05  0.5400921  2.122038            0  100
                                                                                         leadingEdge
 1: ENSG00000106211,ENSG00000099860,ENSG00000124762,ENSG00000125148,ENSG00000132002,ENSG00000134531,
 2: ENSG00000143153,ENSG00000125814,ENSG00000165943,ENSG00000177432,ENSG00000084731,ENSG00000096384,
@@ -194,12 +194,12 @@ out &lt;- fgsea(pathways = cluster_list,
              nperm = 100000)
 out</code></pre>
 <pre><code>           pval         padj         ES        NES nMoreExtreme size
-1: 1.307771e-05 3.930097e-05  0.6815598  2.5420087            0  101
-2: 9.651871e-01 9.651871e-01  0.1825037  0.6806826        73803  101
-3: 7.588618e-01 9.106342e-01  0.2237805  0.8405027        58486  106
-4: 4.225114e-05 6.337671e-05 -0.5228272 -2.3327625            0  100
-5: 4.225114e-05 6.337671e-05 -0.6237657 -2.7831326            0  100
-6: 1.310032e-05 3.930097e-05  0.5514387  2.0538048            0  100
+1: 1.311733e-05 3.943840e-05  0.6815598  2.5409517            0  101
+2: 9.648455e-01 9.648455e-01  0.1825037  0.6803996        73554  101
+3: 7.581521e-01 9.097825e-01  0.2237805  0.8402734        58357  106
+4: 4.178157e-05 6.267235e-05 -0.5228272 -2.3334829            0  100
+5: 4.178157e-05 6.267235e-05 -0.6237657 -2.7839920            0  100
+6: 1.314613e-05 3.943840e-05  0.5514387  2.0524944            0  100
                                                                                         leadingEdge
 1: ENSG00000184557,ENSG00000124762,ENSG00000149257,ENSG00000099860,ENSG00000167772,ENSG00000173110,
 2: ENSG00000143153,ENSG00000125814,ENSG00000096384,ENSG00000177432,ENSG00000165943,ENSG00000087152,
@@ -263,13 +263,13 @@ We are at iteration:  29
 We are at iteration:  30 </code></pre>
 <pre class="r"><code>out</code></pre>
 <pre><code>           pval         padj         ES        NES nMoreExtreme size
-1: 0.0001323452 0.0004652399  0.6815598  2.5415364            0  101
-2: 0.9641344627 0.9641344627  0.1825037  0.6805561         7284  101
-3: 0.7591643674 0.9641344627  0.2237805  0.8392954         5777  106
-4: 0.0004033885 0.0007059298 -0.5228272 -2.3413173            0  100
-5: 0.0004033885 0.0007059298 -0.6237657 -2.7933390            0  100
-6: 0.0001329257 0.0004652399  0.5514387  2.0524243            0  100
-7: 0.8680919726 0.9641344627 -0.1860037 -0.8329592         2151  100
+1: 0.0001311303 0.0004589562  0.6815598  2.5421129            0  101
+2: 0.9666928927 0.9666928927  0.1825037  0.6807105         7371  101
+3: 0.7573864376 0.8836175105  0.2237805  0.8404639         5818  106
+4: 0.0004222973 0.0007390203 -0.5228272 -2.3270786            0  100
+5: 0.0004222973 0.0007390203 -0.6237657 -2.7763513            0  100
+6: 0.0001309929 0.0004589562  0.5514387  2.0552367            0  100
+7: 0.5941722973 0.8318412162 -0.2128297 -0.9472946         1406  100
                                                                                         leadingEdge
 1: ENSG00000184557,ENSG00000124762,ENSG00000149257,ENSG00000099860,ENSG00000167772,ENSG00000173110,
 2: ENSG00000143153,ENSG00000125814,ENSG00000096384,ENSG00000177432,ENSG00000165943,ENSG00000087152,
@@ -277,7 +277,7 @@ We are at iteration:  30 </code></pre>
 4: ENSG00000062282,ENSG00000072110,ENSG00000103316,ENSG00000242265,ENSG00000088832,ENSG00000102780,
 5: ENSG00000078269,ENSG00000104419,ENSG00000138593,ENSG00000099194,ENSG00000164124,ENSG00000118271,
 6: ENSG00000047457,ENSG00000225972,ENSG00000173369,ENSG00000249119,ENSG00000090920,ENSG00000159189,
-7: ENSG00000112208,ENSG00000072062,ENSG00000204396,ENSG00000168283,ENSG00000106605,ENSG00000167077,</code></pre>
+7: ENSG00000078124,ENSG00000139620,ENSG00000105426,ENSG00000269388,ENSG00000075624,ENSG00000259661,</code></pre>
 <pre class="r"><code>plot(density(pval_others))</code></pre>
 <p><img src="figure/gsea_corshrink_corpcor.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
 <div id="session-information" class="section level2">
