@@ -26,8 +26,8 @@ In this section, we perform simulation experiments to compare out `CorShrink` ap
 of the more popular approaches to correlation shrinkage - namely `corpcor` and `GLASSO`. We focus on two simulation designs with missing data. We consider two approaches to imputing the missing data. Approach 1 is an ad-hoc way of replacing the missing values by resampling from each tissue distribution over the non-NA samples for each gene. Approach 2 was to use SoftImpute that uses 
 a low dimensional structure representation to impute the values.
 
-- [CorShrink vs corpcor vs GLASSO : Approach 1](../docs/corshrink_corpcor_glasso.html)
-- [CorShrink vs corpcor vs GLASSO : Approach 2](../docs/CorShrink_softimpute.html)
+- [CorShrink vs corpcor vs GLASSO : Approach 1](corshrink_corpcor_glasso.html)
+- [CorShrink vs corpcor vs GLASSO : Approach 2](CorShrink_softimpute.html)
 
 ### CorShrink and CountClust clusters on GTEx data
 
@@ -35,28 +35,28 @@ a low dimensional structure representation to impute the values.
 obtained clusters of GTEx tissue samples from the gene expression data using a Grade of Membership approach. Here we try to relate the clusters obtained there and the genes that were found to drive these clusters with their tissue-tissue correlation structure patterns. Also of 
 interest is how this correlation structure depends on the expression patterns of the genes.
 
-- [CorShrink demo on one gene in GTEx](../docs/one_gene_correlation.html)
-- [CorShrink of top genes driving GTEx Countclust clusters](../docs/gtex_corshrink.html)
-- [Curious case of high correlation in Brain](../docs/corshrink_brain_func.html)
-- [GSEA of CorShrink correlation patterns on all tissues ](../docs/gsea_corshrink_corpcor.html)
-- [GSEA of CorShrink correlation patterns on brain tissues ](../docs/gsea_corshrink_corpcor_2.html)
+- [CorShrink demo on one gene in GTEx](one_gene_correlation.html)
+- [CorShrink of top genes driving GTEx Countclust clusters](gtex_corshrink.html)
+- [Curious case of high correlation in Brain](corshrink_brain_func.html)
+- [GSEA of CorShrink correlation patterns on all tissues ](gsea_corshrink_corpcor.html)
+- [GSEA of CorShrink correlation patterns on brain tissues ](gsea_corshrink_corpcor_2.html)
 
 
 ### Expression vs CorShrink
 
 In this section, we check how the reads expression of the genes in the GTEx data are connected to the CorShrink correlations and how small sample size can indeed produce big correlation values.
 
-- [Reads expression and CorShrink](../docs/reads_expression_CorShrink.html)
+- [Reads expression and CorShrink](reads_expression_CorShrink.html)
 
 
 ### Dimension Reduction and CorShrink
 
 In the GTEx data, CorShrink was previously applied one gene at a time on its tissue-tissue correlation matrix. However, one would assume that there will be sharing of information among genes and we can pool in this shared information while performing shrinkage to get a low dimensionla structyre of the correlation matrix together with shrinkage. To answer that question, we perform PCA, PMD and FLASH on the vectorized CorShrink matrices across genes. For the latter (FLASH), we also compare between FLASH on vectorized CorShrink and sample correlation matrices.
 
-- [Principal Component Analysis on CorShrink matrix](../docs/corshrink_pca.html)
-- [Penalized Matrix Decomposition on CorShrink matrix](../docs/corshrink_pmd.html)
-- [FLASH on CorShrink matrix](../docs/corshrink_flash.html)
-- [FLASH on sample correlation matrix](../docs/cor_flash.html)
+- [Principal Component Analysis on CorShrink matrix](corshrink_pca.html)
+- [Penalized Matrix Decomposition on CorShrink matrix](corshrink_pmd.html)
+- [FLASH on CorShrink matrix](corshrink_flash.html)
+- [FLASH on sample correlation matrix](cor_flash.html)
 
 
 
