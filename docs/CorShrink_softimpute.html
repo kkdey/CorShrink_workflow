@@ -42,28 +42,28 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <head>
     <meta charset="UTF-8">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
-    <link href="../../docs/cosmo.css" rel="stylesheet">
-    <link href="../../docs/cosmo.min.css" rel="stylesheet">
+    <link href="../docs/cosmo.css" rel="stylesheet">
+    <link href="../docs/cosmo.min.css" rel="stylesheet">
 </head>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-<script src="../../docs/bootstrap/js/bootstrap.min.js"></script>
+<script src="../docs/bootstrap/js/bootstrap.min.js"></script>
 
 <body>
 
 <div class = "nav" align = "middle">
 <div class= "p1"></div>
 <p>
-  <a class="btn btn-large btn btn-primary" type="button" href = "../../docs/corshrink_front.html">HOME</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "../docs/corshrink_front.html">HOME</a> 
   &nbsp &nbsp
-  <a class="btn btn-large btn btn-primary" type="button" href = "../../docs/index.html">WORKFLOW</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "../docs/index.html">WORKFLOW</a> 
   &nbsp &nbsp
-  <a class="btn btn-large btn btn-primary" type="button" href = "../../docs/tissue_corr.html">GTEx DEMO</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "../docs/tissue_corr.html">GTEx DEMO</a> 
   &nbsp &nbsp
-  <a class="btn btn-large btn btn-primary" type="button" href = "../../docs/about.html">METHODS</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "../docs/about.html">METHODS</a> 
   &nbsp &nbsp
   <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
   &nbsp &nbsp
-  <a class="btn btn-large btn btn-primary" type="button" href = "../../docs/license.html">LICENSE</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "../docs/license.html">LICENSE</a> 
    &nbsp &nbsp
   <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
  </p>
@@ -100,12 +100,10 @@ shared across the workflowr files. -->
 <p><strong>Last updated:</strong> 2017-05-19</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 716e30d</p>
+<p><strong>Code version:</strong> 262d6b2</p>
 <p>We compare <code>CorShrink</code> with <code>corpcor</code> and <code>GLASSO</code> under a better imputation method, designed to empower the latter methods. Instead of doing simple imputation, we use the <code>softImpute</code> method due to Mazumdar, Hastie.</p>
-<pre class="r"><code>library(softImpute)</code></pre>
-<pre><code>Loading required package: Matrix</code></pre>
-<pre><code>Loaded softImpute 1.4</code></pre>
-<pre class="r"><code>library(CorShrink)</code></pre>
+<pre class="r"><code>library(softImpute)
+library(CorShrink)</code></pre>
 <div id="gene-1-example-ensg00000115138-pomc" class="section level2">
 <h2>Gene 1 Example : ENSG00000115138 (POMC)</h2>
 <pre class="r"><code>gene &lt;- &quot;ENSG00000115138&quot; ## update and rerun to see the plots for your gene
@@ -152,23 +150,23 @@ system.time(strimmer_sample &lt;- corpcor::cov.shrink(fitted_mat))</code></pre>
 
 Estimating optimal shrinkage intensity lambda (correlation matrix): 0.0098 </code></pre>
 <pre><code>   user  system elapsed 
-  0.014   0.003   0.017 </code></pre>
+  0.016   0.003   0.019 </code></pre>
 <pre class="r"><code>system.time(glasso_sample_005 &lt;- glasso::glasso(cov_mat, rho = 0.05))</code></pre>
 <pre><code>   user  system elapsed 
-  0.081   0.000   0.081 </code></pre>
+  0.072   0.001   0.072 </code></pre>
 <pre class="r"><code>system.time(glasso_sample_05 &lt;- glasso::glasso(cov_mat, rho = 0.5))</code></pre>
 <pre><code>   user  system elapsed 
-  0.007   0.000   0.006 </code></pre>
+  0.006   0.000   0.007 </code></pre>
 <pre class="r"><code>system.time(glasso_sample_1 &lt;- glasso::glasso(cov_mat, rho = 1))</code></pre>
 <pre><code>   user  system elapsed 
-  0.000   0.000   0.001 </code></pre>
+  0.001   0.000   0.001 </code></pre>
 <pre class="r"><code>system.time(glasso_sample_10 &lt;- glasso::glasso(cov_mat, rho = 10))</code></pre>
 <pre><code>   user  system elapsed 
-  0.001   0.000   0.001 </code></pre>
+  0.000   0.000   0.001 </code></pre>
 <pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = 550, sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 1)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.211   0.063   0.278 </code></pre>
+  0.224   0.066   0.297 </code></pre>
 <pre class="r"><code>cor_result &lt;- get(load(&quot;../output/cor_tissues_non_ash_voom_pearson.rda&quot;))
 ash_cor_result &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_gtex_tissues.rda&quot;))
 par(mfrow=c(3,2))
@@ -282,23 +280,23 @@ system.time(strimmer_sample &lt;- corpcor::cov.shrink(fitted_mat))</code></pre>
 
 Estimating optimal shrinkage intensity lambda (correlation matrix): 0.0046 </code></pre>
 <pre><code>   user  system elapsed 
-  0.014   0.004   0.017 </code></pre>
+  0.017   0.004   0.020 </code></pre>
 <pre class="r"><code>system.time(glasso_sample_005 &lt;- glasso::glasso(cov_mat, rho = 0.05))</code></pre>
 <pre><code>   user  system elapsed 
-  0.652   0.002   0.655 </code></pre>
+  0.607   0.002   0.613 </code></pre>
 <pre class="r"><code>system.time(glasso_sample_05 &lt;- glasso::glasso(cov_mat, rho = 0.5))</code></pre>
 <pre><code>   user  system elapsed 
-  0.083   0.000   0.084 </code></pre>
+  0.078   0.001   0.079 </code></pre>
 <pre class="r"><code>system.time(glasso_sample_1 &lt;- glasso::glasso(cov_mat, rho = 1))</code></pre>
 <pre><code>   user  system elapsed 
-  0.062   0.000   0.062 </code></pre>
+  0.060   0.000   0.061 </code></pre>
 <pre class="r"><code>system.time(glasso_sample_10 &lt;- glasso::glasso(cov_mat, rho = 10))</code></pre>
 <pre><code>   user  system elapsed 
-      0       0       0 </code></pre>
+  0.001   0.000   0.001 </code></pre>
 <pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = 550, sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 1)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.172   0.041   0.213 </code></pre>
+  0.193   0.050   0.244 </code></pre>
 <pre class="r"><code>cor_result &lt;- get(load(&quot;../output/cor_tissues_non_ash_voom_pearson.rda&quot;))
 ash_cor_result &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_gtex_tissues.rda&quot;))
 par(mfrow=c(3,2))
@@ -379,8 +377,8 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] softImpute_1.4   Matrix_1.2-8     knitr_1.15.1     CorShrink_0.99.0
-[5] workflowr_0.4.0  rmarkdown_1.5   
+[1] fgsea_1.1.2      Rcpp_0.12.10     softImpute_1.4   Matrix_1.2-8    
+[5] knitr_1.15.1     CorShrink_0.99.0 workflowr_0.4.0  rmarkdown_1.5   
 
 loaded via a namespace (and not attached):
  [1] Biobase_2.34.0             httr_1.2.1                
@@ -423,10 +421,10 @@ loaded via a namespace (and not attached):
 [75] DBI_0.6-1                  mygene_1.10.0             
 [77] reshape2_1.4.2.9000        R6_2.2.1                  
 [79] GenomicAlignments_1.10.1   gridExtra_2.2.1           
-[81] rtracklayer_1.34.1         Hmisc_4.0-2               
-[83] rprojroot_1.2              stringi_1.1.5             
-[85] pscl_1.4.9                 parallel_3.3.3            
-[87] SQUAREM_2016.8-2           Rcpp_0.12.10              
+[81] rtracklayer_1.34.1         fastmatch_1.1-0           
+[83] Hmisc_4.0-2                rprojroot_1.2             
+[85] stringi_1.1.5              pscl_1.4.9                
+[87] parallel_3.3.3             SQUAREM_2016.8-2          
 [89] rpart_4.1-10               acepack_1.4.1             </code></pre>
 </div>
 

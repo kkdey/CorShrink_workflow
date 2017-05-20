@@ -42,28 +42,28 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <head>
     <meta charset="UTF-8">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
-    <link href="../../docs/cosmo.css" rel="stylesheet">
-    <link href="../../docs/cosmo.min.css" rel="stylesheet">
+    <link href="../docs/cosmo.css" rel="stylesheet">
+    <link href="../docs/cosmo.min.css" rel="stylesheet">
 </head>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-<script src="../../docs/bootstrap/js/bootstrap.min.js"></script>
+<script src="../docs/bootstrap/js/bootstrap.min.js"></script>
 
 <body>
 
 <div class = "nav" align = "middle">
 <div class= "p1"></div>
 <p>
-  <a class="btn btn-large btn btn-primary" type="button" href = "../../docs/corshrink_front.html">HOME</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "../docs/corshrink_front.html">HOME</a> 
   &nbsp &nbsp
-  <a class="btn btn-large btn btn-primary" type="button" href = "../../docs/index.html">WORKFLOW</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "../docs/index.html">WORKFLOW</a> 
   &nbsp &nbsp
-  <a class="btn btn-large btn btn-primary" type="button" href = "../../docs/tissue_corr.html">GTEx DEMO</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "../docs/tissue_corr.html">GTEx DEMO</a> 
   &nbsp &nbsp
-  <a class="btn btn-large btn btn-primary" type="button" href = "../../docs/about.html">METHODS</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "../docs/about.html">METHODS</a> 
   &nbsp &nbsp
   <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
   &nbsp &nbsp
-  <a class="btn btn-large btn btn-primary" type="button" href = "../../docs/license.html">LICENSE</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "../docs/license.html">LICENSE</a> 
    &nbsp &nbsp
   <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
  </p>
@@ -98,7 +98,7 @@ shared across the workflowr files. -->
 <p><strong>Last updated:</strong> 2017-05-19</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 716e30d</p>
+<p><strong>Code version:</strong> 262d6b2</p>
 <p>Corhrink is an ideal choice for shrinking tissue-tissue correlation matrix in GTEx data, because these correlations are computed over varying number of samples for different tissues. <code>corpcor</code> is designed to take a data matrix as input, whereas the input for glasso is a covariance matrix. So, how do we use corpcor in this case to compare with corshrink?</p>
 <p>So, if one computes a person by tissues by genes matrix, there will be many NAs corresponding to cells where a person did not contribute a tissue for all genes. In order to empower corpcor, I decided to simulate the NA values per person per gene from the non-NA values in the tissues the person contributed.</p>
 <p>The idea behind doing this is that if a person has given very few tissues, we are going to assign a bunch of random samples in the NA places which will bring down the the correlation between tissues that this person contributes to. As number of persons with NA for a tissue grows, there is a likely chance that the correlation will shrink more and more towards zero.</p>
@@ -156,28 +156,28 @@ for(u in 1:dim(mat)[1]){
 <p>Now we fit the different correlation shrinkage algorithms (Shafer-Strimmer, GLASSO at different scales and even CorShrink on this new data).</p>
 <pre class="r"><code>cov_mat &lt;- cov(rank_mat);
 system.time(strimmer_sample &lt;- corpcor::cov.shrink(mat))</code></pre>
-<pre><code>Estimating optimal shrinkage intensity lambda.var (variance vector): 0.0756 
+<pre><code>Estimating optimal shrinkage intensity lambda.var (variance vector): 0.0795 
 
-Estimating optimal shrinkage intensity lambda (correlation matrix): 0.1726 </code></pre>
+Estimating optimal shrinkage intensity lambda (correlation matrix): 0.1749 </code></pre>
 <pre><code>   user  system elapsed 
-  0.026   0.009   0.044 </code></pre>
+  0.017   0.004   0.022 </code></pre>
 <pre class="r"><code>system.time(glasso_sample_005 &lt;- glasso::glasso(cov_mat, rho = 0.05))</code></pre>
 <pre><code>   user  system elapsed 
-  0.149   0.003   0.159 </code></pre>
+  0.129   0.000   0.131 </code></pre>
 <pre class="r"><code>system.time(glasso_sample_05 &lt;- glasso::glasso(cov_mat, rho = 0.5))</code></pre>
 <pre><code>   user  system elapsed 
-  0.048   0.000   0.049 </code></pre>
+  0.042   0.000   0.042 </code></pre>
 <pre class="r"><code>system.time(glasso_sample_1 &lt;- glasso::glasso(cov_mat, rho = 1))</code></pre>
 <pre><code>   user  system elapsed 
   0.031   0.000   0.032 </code></pre>
 <pre class="r"><code>system.time(glasso_sample_10 &lt;- glasso::glasso(cov_mat, rho = 10))</code></pre>
 <pre><code>   user  system elapsed 
-  0.006   0.000   0.006 </code></pre>
+  0.005   0.000   0.005 </code></pre>
 <pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrink::CorShrinkML(cov2cor(cov_mat), nsamp_mat = 550, sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;,
                                         nullweight = 1)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.262   0.074   0.352 </code></pre>
+  0.140   0.037   0.177 </code></pre>
 <p>Now we plot the image plots of these correlation matrices.</p>
 <pre class="r"><code>cor_result &lt;- get(load(&quot;../output/ash_cor_only_gtex_tissues.rda&quot;))
 
@@ -240,7 +240,8 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] knitr_1.15.1     CorShrink_0.99.0 workflowr_0.4.0  rmarkdown_1.5   
+[1] fgsea_1.1.2      Rcpp_0.12.10     softImpute_1.4   Matrix_1.2-8    
+[5] knitr_1.15.1     CorShrink_0.99.0 workflowr_0.4.0  rmarkdown_1.5   
 
 loaded via a namespace (and not attached):
  [1] Biobase_2.34.0             httr_1.2.1                
@@ -255,40 +256,39 @@ loaded via a namespace (and not attached):
 [19] GenomicRanges_1.26.1       RColorBrewer_1.1-2        
 [21] XVector_0.14.0             checkmate_1.8.2           
 [23] colorspace_1.3-2           htmltools_0.3.6           
-[25] Matrix_1.2-8               plyr_1.8.4                
-[27] XML_3.98-1.6               biomaRt_2.30.0            
-[29] zlibbioc_1.20.0            corpcor_1.6.9             
-[31] scales_0.4.1               glasso_1.8                
-[33] BiocParallel_1.8.2         git2r_0.18.0              
-[35] htmlTable_1.9              tibble_1.3.1              
-[37] sqldf_0.4-10               IRanges_2.8.1             
-[39] ggplot2_2.2.1              SummarizedExperiment_1.4.0
-[41] GenomicFeatures_1.26.0     ashr_2.0.5                
-[43] nnet_7.3-12                BiocGenerics_0.20.0       
-[45] lazyeval_0.2.0             proto_1.0.0               
-[47] survival_2.41-3            magrittr_1.5              
-[49] memoise_1.1.0              evaluate_0.10             
-[51] doParallel_1.0.10          MASS_7.3-45               
-[53] foreign_0.8-67             truncnorm_1.0-7           
-[55] rsconnect_0.7              tools_3.3.3               
-[57] data.table_1.10.4          REBayes_0.73              
-[59] stringr_1.2.0              S4Vectors_0.12.0          
-[61] munsell_0.4.3              cluster_2.0.6             
-[63] AnnotationDbi_1.36.0       Biostrings_2.42.0         
-[65] GenomeInfoDb_1.10.1        rlang_0.1.1.9000          
-[67] grid_3.3.3                 RCurl_1.95-4.8            
-[69] iterators_1.0.8            htmlwidgets_0.8           
-[71] bitops_1.0-6               base64enc_0.1-3           
-[73] gtable_0.2.0               codetools_0.2-15          
-[75] curl_2.6                   DBI_0.6-1                 
-[77] mygene_1.10.0              reshape2_1.4.2.9000       
-[79] R6_2.2.1                   GenomicAlignments_1.10.1  
-[81] gridExtra_2.2.1            rtracklayer_1.34.1        
+[25] plyr_1.8.4                 XML_3.98-1.6              
+[27] biomaRt_2.30.0             zlibbioc_1.20.0           
+[29] corpcor_1.6.9              scales_0.4.1              
+[31] glasso_1.8                 BiocParallel_1.8.2        
+[33] git2r_0.18.0               htmlTable_1.9             
+[35] tibble_1.3.1               sqldf_0.4-10              
+[37] IRanges_2.8.1              ggplot2_2.2.1             
+[39] SummarizedExperiment_1.4.0 GenomicFeatures_1.26.0    
+[41] ashr_2.0.5                 nnet_7.3-12               
+[43] BiocGenerics_0.20.0        lazyeval_0.2.0            
+[45] proto_1.0.0                survival_2.41-3           
+[47] magrittr_1.5               memoise_1.1.0             
+[49] evaluate_0.10              doParallel_1.0.10         
+[51] MASS_7.3-45                foreign_0.8-67            
+[53] truncnorm_1.0-7            rsconnect_0.7             
+[55] tools_3.3.3                data.table_1.10.4         
+[57] REBayes_0.73               stringr_1.2.0             
+[59] S4Vectors_0.12.0           munsell_0.4.3             
+[61] cluster_2.0.6              AnnotationDbi_1.36.0      
+[63] Biostrings_2.42.0          GenomeInfoDb_1.10.1       
+[65] rlang_0.1.1.9000           grid_3.3.3                
+[67] RCurl_1.95-4.8             iterators_1.0.8           
+[69] htmlwidgets_0.8            bitops_1.0-6              
+[71] base64enc_0.1-3            gtable_0.2.0              
+[73] codetools_0.2-15           curl_2.6                  
+[75] DBI_0.6-1                  mygene_1.10.0             
+[77] reshape2_1.4.2.9000        R6_2.2.1                  
+[79] GenomicAlignments_1.10.1   gridExtra_2.2.1           
+[81] rtracklayer_1.34.1         fastmatch_1.1-0           
 [83] Hmisc_4.0-2                rprojroot_1.2             
 [85] stringi_1.1.5              pscl_1.4.9                
 [87] parallel_3.3.3             SQUAREM_2016.8-2          
-[89] Rcpp_0.12.10               rpart_4.1-10              
-[91] acepack_1.4.1             </code></pre>
+[89] rpart_4.1-10               acepack_1.4.1             </code></pre>
 </div>
 
 <hr>

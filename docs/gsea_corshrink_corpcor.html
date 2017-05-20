@@ -42,28 +42,28 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <head>
     <meta charset="UTF-8">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
-    <link href="../../docs/cosmo.css" rel="stylesheet">
-    <link href="../../docs/cosmo.min.css" rel="stylesheet">
+    <link href="../docs/cosmo.css" rel="stylesheet">
+    <link href="../docs/cosmo.min.css" rel="stylesheet">
 </head>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-<script src="../../docs/bootstrap/js/bootstrap.min.js"></script>
+<script src="../docs/bootstrap/js/bootstrap.min.js"></script>
 
 <body>
 
 <div class = "nav" align = "middle">
 <div class= "p1"></div>
 <p>
-  <a class="btn btn-large btn btn-primary" type="button" href = "../../docs/corshrink_front.html">HOME</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "../docs/corshrink_front.html">HOME</a> 
   &nbsp &nbsp
-  <a class="btn btn-large btn btn-primary" type="button" href = "../../docs/index.html">WORKFLOW</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "../docs/index.html">WORKFLOW</a> 
   &nbsp &nbsp
-  <a class="btn btn-large btn btn-primary" type="button" href = "../../docs/tissue_corr.html">GTEx DEMO</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "../docs/tissue_corr.html">GTEx DEMO</a> 
   &nbsp &nbsp
-  <a class="btn btn-large btn btn-primary" type="button" href = "../../docs/about.html">METHODS</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "../docs/about.html">METHODS</a> 
   &nbsp &nbsp
   <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
   &nbsp &nbsp
-  <a class="btn btn-large btn btn-primary" type="button" href = "../../docs/license.html">LICENSE</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "../docs/license.html">LICENSE</a> 
    &nbsp &nbsp
   <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
  </p>
@@ -98,7 +98,7 @@ shared across the workflowr files. -->
 <p><strong>Last updated:</strong> 2017-05-19</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 716e30d</p>
+<p><strong>Code version:</strong> 262d6b2</p>
 <p>In this script, we try to perform some gene set enrichment analysis of the CountClust clusters with respect to the CorShrink patterns observed.</p>
 <pre class="r"><code>cor_result &lt;- get(load(&quot;../output/ash_cor_only_gtex_tissues.rda&quot;))
 common_samples &lt;- get(load(&quot;../output/common_samples.rda&quot;))
@@ -150,12 +150,12 @@ out &lt;- fgsea(pathways = cluster_list,
              nperm = 100000)
 out</code></pre>
 <pre><code>           pval         padj         ES       NES nMoreExtreme size
-1: 1.363977e-05 4.096402e-05  0.6534141  2.570318            0  101
-2: 4.745277e-02 7.117916e-02  0.3456568  1.359702         3478  101
-3: 1.745063e-01 1.745063e-01  0.2990933  1.184509        12865  106
-4: 6.272649e-02 7.527179e-02 -0.2815261 -1.272544         1678  100
-5: 3.735944e-05 7.471887e-05 -0.7138533 -3.226734            0  100
-6: 1.365467e-05 4.096402e-05  0.5400921  2.121576            0  100
+1: 1.365020e-05 4.103855e-05  0.6534141  2.572201            0  101
+2: 4.665638e-02 6.998458e-02  0.3456568  1.360698         3417  101
+3: 1.739142e-01 1.739142e-01  0.2990933  1.185213        12817  106
+4: 6.286245e-02 7.543494e-02 -0.2815261 -1.272054         1690  100
+5: 3.717472e-05 7.434944e-05 -0.7138533 -3.225492            0  100
+6: 1.367952e-05 4.103855e-05  0.5400921  2.122322            0  100
                                                                                         leadingEdge
 1: ENSG00000106211,ENSG00000099860,ENSG00000124762,ENSG00000125148,ENSG00000132002,ENSG00000134531,
 2: ENSG00000143153,ENSG00000125814,ENSG00000165943,ENSG00000177432,ENSG00000084731,ENSG00000096384,
@@ -194,12 +194,12 @@ out &lt;- fgsea(pathways = cluster_list,
              nperm = 100000)
 out</code></pre>
 <pre><code>           pval         padj         ES        NES nMoreExtreme size
-1: 1.300356e-05 3.908286e-05  0.6815598  2.5429528            0  101
-2: 9.636810e-01 9.636810e-01  0.1825037  0.6809354        74108  101
-3: 7.574846e-01 9.089816e-01  0.2237805  0.8404805        58698  106
-4: 4.302556e-05 6.453834e-05 -0.5228272 -2.3312805            0  100
-5: 4.302556e-05 6.453834e-05 -0.6237657 -2.7813644            0  100
-6: 1.302762e-05 3.908286e-05  0.5514387  2.0541899            0  100
+1: 1.304172e-05 3.917830e-05  0.6815598  2.5392385            0  101
+2: 9.661176e-01 9.661176e-01  0.1825037  0.6799408        74078  101
+3: 7.598374e-01 9.118049e-01  0.2237805  0.8394639        58701  106
+4: 4.268215e-05 6.402322e-05 -0.5228272 -2.3328517            0  100
+5: 4.268215e-05 6.402322e-05 -0.6237657 -2.7832391            0  100
+6: 1.305943e-05 3.917830e-05  0.5514387  2.0517413            0  100
                                                                                         leadingEdge
 1: ENSG00000184557,ENSG00000124762,ENSG00000149257,ENSG00000099860,ENSG00000167772,ENSG00000173110,
 2: ENSG00000143153,ENSG00000125814,ENSG00000096384,ENSG00000177432,ENSG00000165943,ENSG00000087152,
@@ -263,13 +263,13 @@ We are at iteration:  29
 We are at iteration:  30 </code></pre>
 <pre class="r"><code>out</code></pre>
 <pre><code>           pval         padj         ES        NES nMoreExtreme size
-1: 0.0001310101 0.0004594382  0.6815598  2.5388918            0  101
-2: 0.9676405083 0.9676405083  0.1825037  0.6798480         7385  101
-3: 0.7579825362 0.8843129589  0.2237805  0.8390443         5815  106
-4: 0.0004194631 0.0007340604 -0.5228272 -2.3255563            0  100
-5: 0.0004194631 0.0007340604 -0.6237657 -2.7745352            0  100
-6: 0.0001312680 0.0004594382  0.5514387  2.0522322            0  100
-7: 0.4184825413 0.5858755579  0.2759624  1.0270206         3187  100
+1: 0.0001291656 0.0004526057  0.6815598  2.5404840            0  101
+2: 0.9657711186 0.9657711186  0.1825037  0.6802743         7476  101
+3: 0.7572431398 0.9657711186  0.2237805  0.8415301         5932  106
+4: 0.0004407228 0.0007712649 -0.5228272 -2.3407178            0  100
+5: 0.0004407228 0.0007712649 -0.6237657 -2.7926238            0  100
+6: 0.0001293159 0.0004526057  0.5514387  2.0527957            0  100
+7: 0.9055993793 0.9657711186  0.1988786  0.7403491         7002  100
                                                                                         leadingEdge
 1: ENSG00000184557,ENSG00000124762,ENSG00000149257,ENSG00000099860,ENSG00000167772,ENSG00000173110,
 2: ENSG00000143153,ENSG00000125814,ENSG00000096384,ENSG00000177432,ENSG00000165943,ENSG00000087152,
@@ -277,7 +277,7 @@ We are at iteration:  30 </code></pre>
 4: ENSG00000062282,ENSG00000072110,ENSG00000103316,ENSG00000242265,ENSG00000088832,ENSG00000102780,
 5: ENSG00000078269,ENSG00000104419,ENSG00000138593,ENSG00000099194,ENSG00000164124,ENSG00000118271,
 6: ENSG00000047457,ENSG00000225972,ENSG00000173369,ENSG00000249119,ENSG00000090920,ENSG00000159189,
-7: ENSG00000140379,ENSG00000134470,ENSG00000000938,ENSG00000204807,ENSG00000272986,ENSG00000228716,</code></pre>
+7: ENSG00000266903,ENSG00000174807,ENSG00000108187,ENSG00000145386,ENSG00000261556,ENSG00000172115,</code></pre>
 <pre class="r"><code>plot(density(pval_others))</code></pre>
 <p><img src="figure/gsea_corshrink_corpcor.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
 <div id="session-information" class="section level2">
