@@ -46,7 +46,7 @@ interest is how this correlation structure depends on the expression patterns of
 
 In this section, we check how the reads expression of the genes in the GTEx data are connected to the CorShrink correlations and how small sample size can indeed produce big correlation values.
 
-- [Reads expression and CorShrink](../docs/reads_expression_CorShrink.html)
+- [Reads expression and CorShrink](reads_expression_CorShrink.html)
 
 
 ### Dimension Reduction and CorShrink
