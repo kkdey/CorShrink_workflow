@@ -95,10 +95,10 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2017-05-19</p>
+<p><strong>Last updated:</strong> 2017-05-20</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 62e27d6</p>
+<p><strong>Code version:</strong> 311200a</p>
 <p>We propose CorShrink as a method to clean up the correlation matrix adaptively specially when the correlation values have varying degree of confidence attached to them as in the GTEx case, since the correlation between two tissues are based on the number of common persons contributing both these tissues, which may vary widely from one tissue to another.</p>
 <pre class="r"><code>cor_result &lt;- get(load(&quot;../output/cor_tissues_non_ash.rda&quot;))
 common_samples &lt;- get(load(&quot;../output/common_samples.rda&quot;))
@@ -126,7 +126,7 @@ source(&quot;../../CorShrink/R/CorShrinkML.R&quot;)
 system.time(cor_sample_ML &lt;-  CorShrinkML(cor_mat, nsamp_mat = as.matrix(common_samples), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.488   0.169   0.953 </code></pre>
+  0.419   0.198   0.652 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_only)[order_index, order_index],
@@ -143,7 +143,7 @@ system.time(cor_sample_ML &lt;-  CorShrinkML(cor_mat, common_samples, sd_boot = 
                                                              nullweight = 100)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.325   0.099   0.482 </code></pre>
+  0.273   0.115   0.397 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index, order_index],
@@ -157,7 +157,7 @@ axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_ind
                                                              nullweight = 1000)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.299   0.083   0.453 </code></pre>
+  0.221   0.069   0.301 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],
@@ -171,7 +171,7 @@ axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_ind
                                                              nullweight = 10)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.445   0.153   0.667 </code></pre>
+  0.328   0.127   0.474 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],
@@ -185,7 +185,7 @@ axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_ind
                                                              nullweight = 1)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  1.159   0.509   1.837 </code></pre>
+  1.061   0.480   1.677 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],
@@ -203,7 +203,7 @@ system.time(cor_sample_ML &lt;-  CorShrinkML(cor_mat, common_samples, sd_boot = 
                                                              nullweight = 10)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.601   0.169   0.828 </code></pre>
+  0.532   0.161   0.720 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],
@@ -217,7 +217,7 @@ axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_ind
                                                              nullweight = 10)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.656   0.192   0.889 </code></pre>
+  0.594   0.196   0.846 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],
@@ -231,7 +231,7 @@ axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_ind
                                                              nullweight = 10)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.424   0.148   0.613 </code></pre>
+  0.381   0.150   0.553 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],
@@ -245,7 +245,7 @@ axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_ind
                                                              nullweight = 10)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.414   0.104   0.560 </code></pre>
+  0.406   0.103   0.534 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],
@@ -260,7 +260,7 @@ axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_ind
                                                              mode = 0)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  1.047   0.363   1.529 </code></pre>
+  0.999   0.434   1.642 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],
@@ -275,7 +275,7 @@ axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_ind
                                                              mode = &quot;estimate&quot;)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  1.003   0.287   1.363 </code></pre>
+  0.930   0.302   1.347 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],
@@ -299,8 +299,7 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] fgsea_1.1.2      Rcpp_0.12.10     softImpute_1.4   Matrix_1.2-8    
-[5] knitr_1.15.1     CorShrink_0.99.0 workflowr_0.4.0  rmarkdown_1.5   
+[1] knitr_1.15.1     CorShrink_0.99.0 workflowr_0.4.0  rmarkdown_1.5   
 
 loaded via a namespace (and not attached):
  [1] Biobase_2.34.0             httr_1.2.1                
@@ -315,21 +314,21 @@ loaded via a namespace (and not attached):
 [19] GenomicRanges_1.26.1       RColorBrewer_1.1-2        
 [21] XVector_0.14.0             checkmate_1.8.2           
 [23] colorspace_1.3-2           htmltools_0.3.6           
-[25] plyr_1.8.4                 XML_3.98-1.6              
-[27] biomaRt_2.30.0             zlibbioc_1.20.0           
-[29] corpcor_1.6.9              scales_0.4.1              
-[31] glasso_1.8                 BiocParallel_1.8.2        
-[33] git2r_0.18.0               htmlTable_1.9             
-[35] tibble_1.3.1               sqldf_0.4-10              
+[25] Matrix_1.2-8               plyr_1.8.4                
+[27] XML_3.98-1.6               biomaRt_2.30.0            
+[29] zlibbioc_1.20.0            corpcor_1.6.9             
+[31] scales_0.4.1               glasso_1.8                
+[33] BiocParallel_1.8.2         git2r_0.18.0              
+[35] htmlTable_1.9              tibble_1.3.1              
 [37] IRanges_2.8.1              ggplot2_2.2.1             
-[39] SummarizedExperiment_1.4.0 GenomicFeatures_1.26.0    
-[41] ashr_2.0.5                 nnet_7.3-12               
-[43] BiocGenerics_0.20.0        lazyeval_0.2.0            
-[45] proto_1.0.0                survival_2.41-3           
-[47] magrittr_1.5               memoise_1.1.0             
-[49] evaluate_0.10              doParallel_1.0.10         
-[51] MASS_7.3-45                foreign_0.8-67            
-[53] truncnorm_1.0-7            rsconnect_0.7             
+[39] sqldf_0.4-10               SummarizedExperiment_1.4.0
+[41] GenomicFeatures_1.26.0     ashr_2.0.5                
+[43] nnet_7.3-12                BiocGenerics_0.20.0       
+[45] lazyeval_0.2.0             proto_1.0.0               
+[47] survival_2.41-3            magrittr_1.5              
+[49] memoise_1.1.0              evaluate_0.10             
+[51] doParallel_1.0.10          MASS_7.3-45               
+[53] foreign_0.8-67             truncnorm_1.0-7           
 [55] tools_3.3.3                data.table_1.10.4         
 [57] REBayes_0.73               stringr_1.2.0             
 [59] S4Vectors_0.12.0           munsell_0.4.3             
@@ -343,10 +342,10 @@ loaded via a namespace (and not attached):
 [75] DBI_0.6-1                  mygene_1.10.0             
 [77] reshape2_1.4.2.9000        R6_2.2.1                  
 [79] GenomicAlignments_1.10.1   gridExtra_2.2.1           
-[81] rtracklayer_1.34.1         fastmatch_1.1-0           
-[83] Hmisc_4.0-2                rprojroot_1.2             
-[85] stringi_1.1.5              pscl_1.4.9                
-[87] parallel_3.3.3             SQUAREM_2016.8-2          
+[81] rtracklayer_1.34.1         Hmisc_4.0-2               
+[83] rprojroot_1.2              stringi_1.1.5             
+[85] pscl_1.4.9                 parallel_3.3.3            
+[87] SQUAREM_2016.8-2           Rcpp_0.12.10              
 [89] rpart_4.1-10               acepack_1.4.1             </code></pre>
 </div>
 

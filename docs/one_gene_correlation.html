@@ -55,7 +55,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <p>
   <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
   &nbsp &nbsp
-  <a class="btn btn-large btn btn-primary" type="button" href = "index.html">WORKFLOW</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "workflow.html">WORKFLOW</a> 
   &nbsp &nbsp
   <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
   &nbsp &nbsp
@@ -109,7 +109,7 @@ system.time(cor_sample_ML &lt;-  CorShrink::CorShrinkML(cor_mat, common_samples,
                                                                nullweight = 100)))</code></pre>
 <pre><code>## ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.227   0.079   0.327</code></pre>
+##   0.282   0.070   0.379</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_mat)[order_index, order_index],
@@ -134,7 +134,7 @@ system.time(cor_sample_ML &lt;-  CorShrink::CorShrinkML(cor_mat, common_samples,
                                                                nullweight = 100)))</code></pre>
 <pre><code>## ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.896   0.539   1.435</code></pre>
+##   0.963   0.477   1.442</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_only)[order_index, order_index],
