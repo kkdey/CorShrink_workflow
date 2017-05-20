@@ -6,8 +6,6 @@ output:
 ---
 
 
-
-
 ## What is CorShrink? 
 
 `CorShrink` is an adaptive correlation shrinkage algorithm inspired from the adaptive 

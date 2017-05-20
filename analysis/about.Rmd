@@ -1,5 +1,5 @@
 ---
-title: "About"
+title: "Methods"
 output:
   html_document:
     toc: true
