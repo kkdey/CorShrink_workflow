@@ -53,17 +53,17 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <div class = "nav" align = "middle">
 <div class= "p1"></div>
 <p>
-  <a class="btn btn-large btn btn-primary" type="button" href = "../docs/corshrink_front.html">HOME</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
   &nbsp &nbsp
-  <a class="btn btn-large btn btn-primary" type="button" href = "../docs/index.html">WORKFLOW</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "index.html">WORKFLOW</a> 
   &nbsp &nbsp
-  <a class="btn btn-large btn btn-primary" type="button" href = "../docs/tissue_corr.html">GTEx DEMO</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
   &nbsp &nbsp
-  <a class="btn btn-large btn btn-primary" type="button" href = "../docs/about.html">METHODS</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "about.html">METHODS</a> 
   &nbsp &nbsp
   <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
   &nbsp &nbsp
-  <a class="btn btn-large btn btn-primary" type="button" href = "../docs/license.html">LICENSE</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "license.html">LICENSE</a> 
    &nbsp &nbsp
   <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
  </p>
@@ -98,7 +98,7 @@ shared across the workflowr files. -->
 <p><strong>Last updated:</strong> 2017-05-19</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 262d6b2</p>
+<p><strong>Code version:</strong> 8b3b17c</p>
 <p>We propose CorShrink as a method to clean up the correlation matrix adaptively specially when the correlation values have varying degree of confidence attached to them as in the GTEx case, since the correlation between two tissues are based on the number of common persons contributing both these tissues, which may vary widely from one tissue to another.</p>
 <pre class="r"><code>cor_result &lt;- get(load(&quot;../output/cor_tissues_non_ash.rda&quot;))
 common_samples &lt;- get(load(&quot;../output/common_samples.rda&quot;))
@@ -126,7 +126,7 @@ source(&quot;../../CorShrink/R/CorShrinkML.R&quot;)
 system.time(cor_sample_ML &lt;-  CorShrinkML(cor_mat, nsamp_mat = as.matrix(common_samples), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.410   0.183   0.600 </code></pre>
+  0.370   0.162   0.545 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_only)[order_index, order_index],
@@ -143,7 +143,7 @@ system.time(cor_sample_ML &lt;-  CorShrinkML(cor_mat, common_samples, sd_boot = 
                                                              nullweight = 100)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.302   0.121   0.425 </code></pre>
+  0.276   0.124   0.413 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index, order_index],
@@ -157,7 +157,7 @@ axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_ind
                                                              nullweight = 1000)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.226   0.061   0.288 </code></pre>
+  0.209   0.057   0.268 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],
@@ -171,7 +171,7 @@ axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_ind
                                                              nullweight = 10)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.430   0.142   0.611 </code></pre>
+  0.320   0.110   0.434 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],
@@ -185,7 +185,7 @@ axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_ind
                                                              nullweight = 1)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.986   0.437   1.476 </code></pre>
+  0.878   0.392   1.278 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],
@@ -203,7 +203,7 @@ system.time(cor_sample_ML &lt;-  CorShrinkML(cor_mat, common_samples, sd_boot = 
                                                              nullweight = 10)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.494   0.134   0.632 </code></pre>
+  0.492   0.125   0.624 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],
@@ -217,7 +217,7 @@ axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_ind
                                                              nullweight = 10)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.523   0.156   0.698 </code></pre>
+  0.485   0.126   0.613 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],
@@ -231,7 +231,7 @@ axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_ind
                                                              nullweight = 10)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.331   0.120   0.454 </code></pre>
+  0.300   0.105   0.406 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],
@@ -245,7 +245,7 @@ axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_ind
                                                              nullweight = 10)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.404   0.089   0.495 </code></pre>
+  0.355   0.070   0.426 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],
@@ -260,7 +260,7 @@ axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_ind
                                                              mode = 0)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.920   0.308   1.238 </code></pre>
+  0.872   0.261   1.139 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],
@@ -275,7 +275,7 @@ axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_ind
                                                              mode = &quot;estimate&quot;)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.873   0.254   1.133 </code></pre>
+  0.795   0.209   1.007 </code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_PD)[order_index,order_index],

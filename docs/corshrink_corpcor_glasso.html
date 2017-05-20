@@ -53,17 +53,17 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <div class = "nav" align = "middle">
 <div class= "p1"></div>
 <p>
-  <a class="btn btn-large btn btn-primary" type="button" href = "../docs/corshrink_front.html">HOME</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
   &nbsp &nbsp
-  <a class="btn btn-large btn btn-primary" type="button" href = "../docs/index.html">WORKFLOW</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "index.html">WORKFLOW</a> 
   &nbsp &nbsp
-  <a class="btn btn-large btn btn-primary" type="button" href = "../docs/tissue_corr.html">GTEx DEMO</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
   &nbsp &nbsp
-  <a class="btn btn-large btn btn-primary" type="button" href = "../docs/about.html">METHODS</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "about.html">METHODS</a> 
   &nbsp &nbsp
   <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
   &nbsp &nbsp
-  <a class="btn btn-large btn btn-primary" type="button" href = "../docs/license.html">LICENSE</a> 
+  <a class="btn btn-large btn btn-primary" type="button" href = "license.html">LICENSE</a> 
    &nbsp &nbsp
   <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
  </p>
@@ -98,7 +98,7 @@ shared across the workflowr files. -->
 <p><strong>Last updated:</strong> 2017-05-19</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 262d6b2</p>
+<p><strong>Code version:</strong> 8b3b17c</p>
 <p>Corhrink is an ideal choice for shrinking tissue-tissue correlation matrix in GTEx data, because these correlations are computed over varying number of samples for different tissues. <code>corpcor</code> is designed to take a data matrix as input, whereas the input for glasso is a covariance matrix. So, how do we use corpcor in this case to compare with corshrink?</p>
 <p>So, if one computes a person by tissues by genes matrix, there will be many NAs corresponding to cells where a person did not contribute a tissue for all genes. In order to empower corpcor, I decided to simulate the NA values per person per gene from the non-NA values in the tissues the person contributed.</p>
 <p>The idea behind doing this is that if a person has given very few tissues, we are going to assign a bunch of random samples in the NA places which will bring down the the correlation between tissues that this person contributes to. As number of persons with NA for a tissue grows, there is a likely chance that the correlation will shrink more and more towards zero.</p>
@@ -156,28 +156,28 @@ for(u in 1:dim(mat)[1]){
 <p>Now we fit the different correlation shrinkage algorithms (Shafer-Strimmer, GLASSO at different scales and even CorShrink on this new data).</p>
 <pre class="r"><code>cov_mat &lt;- cov(rank_mat);
 system.time(strimmer_sample &lt;- corpcor::cov.shrink(mat))</code></pre>
-<pre><code>Estimating optimal shrinkage intensity lambda.var (variance vector): 0.0795 
+<pre><code>Estimating optimal shrinkage intensity lambda.var (variance vector): 0.0736 
 
-Estimating optimal shrinkage intensity lambda (correlation matrix): 0.1749 </code></pre>
+Estimating optimal shrinkage intensity lambda (correlation matrix): 0.1842 </code></pre>
 <pre><code>   user  system elapsed 
-  0.017   0.004   0.022 </code></pre>
+  0.014   0.004   0.017 </code></pre>
 <pre class="r"><code>system.time(glasso_sample_005 &lt;- glasso::glasso(cov_mat, rho = 0.05))</code></pre>
 <pre><code>   user  system elapsed 
-  0.129   0.000   0.131 </code></pre>
+  0.137   0.001   0.139 </code></pre>
 <pre class="r"><code>system.time(glasso_sample_05 &lt;- glasso::glasso(cov_mat, rho = 0.5))</code></pre>
 <pre><code>   user  system elapsed 
-  0.042   0.000   0.042 </code></pre>
+  0.049   0.000   0.050 </code></pre>
 <pre class="r"><code>system.time(glasso_sample_1 &lt;- glasso::glasso(cov_mat, rho = 1))</code></pre>
 <pre><code>   user  system elapsed 
   0.031   0.000   0.032 </code></pre>
 <pre class="r"><code>system.time(glasso_sample_10 &lt;- glasso::glasso(cov_mat, rho = 10))</code></pre>
 <pre><code>   user  system elapsed 
-  0.005   0.000   0.005 </code></pre>
+  0.005   0.000   0.006 </code></pre>
 <pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrink::CorShrinkML(cov2cor(cov_mat), nsamp_mat = 550, sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;,
                                         nullweight = 1)))</code></pre>
 <pre><code>ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>   user  system elapsed 
-  0.140   0.037   0.177 </code></pre>
+  0.222   0.077   0.300 </code></pre>
 <p>Now we plot the image plots of these correlation matrices.</p>
 <pre class="r"><code>cor_result &lt;- get(load(&quot;../output/ash_cor_only_gtex_tissues.rda&quot;))
 
