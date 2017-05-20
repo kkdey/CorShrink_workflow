@@ -109,7 +109,7 @@ system.time(cor_sample_ML &lt;-  CorShrink::CorShrinkML(cor_mat, common_samples,
                                                                nullweight = 100)))</code></pre>
 <pre><code>## ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.282   0.070   0.379</code></pre>
+##   0.223   0.068   0.300</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_mat)[order_index, order_index],
@@ -134,7 +134,7 @@ system.time(cor_sample_ML &lt;-  CorShrink::CorShrinkML(cor_mat, common_samples,
                                                                nullweight = 100)))</code></pre>
 <pre><code>## ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.963   0.477   1.442</code></pre>
+##   0.846   0.449   1.293</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_only)[order_index, order_index],

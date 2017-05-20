@@ -98,7 +98,7 @@ shared across the workflowr files. -->
 <p><strong>Last updated:</strong> 2017-05-20</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 311200a</p>
+<p><strong>Code version:</strong> 7c7c613</p>
 <p>In this script, we check for the performance of FLASH on the CorShrink matrix.</p>
 <pre class="r"><code>data &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_gtex_tissues.rda&quot;))
 
@@ -278,7 +278,8 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] knitr_1.15.1     CorShrink_0.99.0 workflowr_0.4.0  rmarkdown_1.5   
+[1] fgsea_1.1.2      Rcpp_0.12.10     softImpute_1.4   Matrix_1.2-8    
+[5] knitr_1.15.1     CorShrink_0.99.0 workflowr_0.4.0  rmarkdown_1.5   
 
 loaded via a namespace (and not attached):
  [1] Biobase_2.34.0             httr_1.2.1                
@@ -293,39 +294,39 @@ loaded via a namespace (and not attached):
 [19] GenomicRanges_1.26.1       RColorBrewer_1.1-2        
 [21] XVector_0.14.0             checkmate_1.8.2           
 [23] colorspace_1.3-2           htmltools_0.3.6           
-[25] Matrix_1.2-8               plyr_1.8.4                
-[27] XML_3.98-1.6               biomaRt_2.30.0            
-[29] zlibbioc_1.20.0            corpcor_1.6.9             
-[31] scales_0.4.1               glasso_1.8                
-[33] BiocParallel_1.8.2         git2r_0.18.0              
-[35] htmlTable_1.9              tibble_1.3.1              
-[37] IRanges_2.8.1              ggplot2_2.2.1             
-[39] sqldf_0.4-10               SummarizedExperiment_1.4.0
-[41] GenomicFeatures_1.26.0     ashr_2.0.5                
-[43] nnet_7.3-12                BiocGenerics_0.20.0       
-[45] lazyeval_0.2.0             proto_1.0.0               
-[47] survival_2.41-3            magrittr_1.5              
-[49] memoise_1.1.0              evaluate_0.10             
-[51] doParallel_1.0.10          MASS_7.3-45               
-[53] foreign_0.8-67             truncnorm_1.0-7           
-[55] tools_3.3.3                data.table_1.10.4         
-[57] REBayes_0.73               stringr_1.2.0             
-[59] S4Vectors_0.12.0           munsell_0.4.3             
-[61] cluster_2.0.6              AnnotationDbi_1.36.0      
-[63] Biostrings_2.42.0          GenomeInfoDb_1.10.1       
-[65] rlang_0.1.1.9000           grid_3.3.3                
-[67] RCurl_1.95-4.8             iterators_1.0.8           
-[69] htmlwidgets_0.8            bitops_1.0-6              
-[71] base64enc_0.1-3            gtable_0.2.0              
-[73] codetools_0.2-15           curl_2.6                  
-[75] DBI_0.6-1                  mygene_1.10.0             
-[77] reshape2_1.4.2.9000        R6_2.2.1                  
-[79] GenomicAlignments_1.10.1   gridExtra_2.2.1           
-[81] rtracklayer_1.34.1         Hmisc_4.0-2               
+[25] plyr_1.8.4                 XML_3.98-1.6              
+[27] biomaRt_2.30.0             zlibbioc_1.20.0           
+[29] corpcor_1.6.9              scales_0.4.1              
+[31] glasso_1.8                 BiocParallel_1.8.2        
+[33] git2r_0.18.0               htmlTable_1.9             
+[35] tibble_1.3.1               IRanges_2.8.1             
+[37] ggplot2_2.2.1              sqldf_0.4-10              
+[39] SummarizedExperiment_1.4.0 GenomicFeatures_1.26.0    
+[41] ashr_2.0.5                 nnet_7.3-12               
+[43] BiocGenerics_0.20.0        lazyeval_0.2.0            
+[45] proto_1.0.0                survival_2.41-3           
+[47] magrittr_1.5               memoise_1.1.0             
+[49] evaluate_0.10              doParallel_1.0.10         
+[51] MASS_7.3-45                foreign_0.8-67            
+[53] truncnorm_1.0-7            tools_3.3.3               
+[55] data.table_1.10.4          REBayes_0.73              
+[57] stringr_1.2.0              S4Vectors_0.12.0          
+[59] munsell_0.4.3              cluster_2.0.6             
+[61] AnnotationDbi_1.36.0       Biostrings_2.42.0         
+[63] GenomeInfoDb_1.10.1        rlang_0.1.1.9000          
+[65] grid_3.3.3                 RCurl_1.95-4.8            
+[67] iterators_1.0.8            htmlwidgets_0.8           
+[69] bitops_1.0-6               base64enc_0.1-3           
+[71] gtable_0.2.0               codetools_0.2-15          
+[73] curl_2.6                   DBI_0.6-1                 
+[75] mygene_1.10.0              reshape2_1.4.2.9000       
+[77] R6_2.2.1                   GenomicAlignments_1.10.1  
+[79] gridExtra_2.2.1            rtracklayer_1.34.1        
+[81] fastmatch_1.1-0            Hmisc_4.0-2               
 [83] rprojroot_1.2              stringi_1.1.5             
 [85] pscl_1.4.9                 parallel_3.3.3            
-[87] SQUAREM_2016.8-2           Rcpp_0.12.10              
-[89] rpart_4.1-10               acepack_1.4.1             </code></pre>
+[87] SQUAREM_2016.8-2           rpart_4.1-10              
+[89] acepack_1.4.1             </code></pre>
 </div>
 
 <hr>
