@@ -1,0 +1,477 @@
+---
+title: "Correlation subset specific enrichment analysis of genes"
+author: "Kushal K Dey"
+date: "5/20/2017"
+output: html_document
+---
+
+In this script, we look at which genes are enriched in terms of having higher correlations in specific 
+subsets of tissues. The idea is to calculate the median correlation after CorShrink for the set of tissues
+of interest and then see which set of genes have the highest or lowest median correlations in that region.
+
+We start with the Brain tissues specific enrichment.
+
+```{r}
+corshrink_data <- get(load("../output/ash_cor_only_voom_pearson_normal_gtex_tissues.rda"))
+cor_data <- get(load("../output/cor_tissues_non_ash_voom_spearman.rda"))
+```
+
+```{r}
+common_samples <- get(load("../output/common_samples.rda"))
+tissue_labels <- read.table(file = "../data/GTEX_V6/samples_id.txt")[,3]
+
+#library(data.table)
+#data <- data.frame(fread("../data/GTEX_V6/cis_gene_expression.txt"))
+#matdata <- t(data[,-c(1,2)])
+
+gene_names <- as.character(read.table(file = "../data/GTEX_V6/gene_names_GTEX_V6.txt")[,1])
+gene_names_1 <- as.character(sapply(gene_names, function(x) return(strsplit(x, "[.]")[[1]][1])))
+
+
+U <- unique(tissue_labels)
+```
+
+```{r echo=FALSE, eval=TRUE}
+order_index <- c();
+order_index <- c(order_index, grep("Brain", U))
+order_index <- c(order_index, grep("fibroblast", U))
+order_index <- c(order_index, grep("EBV", U))
+order_index <- c(order_index, grep("Spleen", U))
+order_index <- c(order_index, grep("Whole Blood", U))
+order_index <- c(order_index, grep("Muscle - Skeletal", U))
+order_index <- c(order_index, grep("Liver", U))
+order_index <- c(order_index, grep("Pancreas", U))
+order_index <- c(order_index, grep("Stomach", U))
+order_index <- c(order_index, grep("Kidney - Cortex", U))
+order_index <- c(order_index, grep("Adrenal Gland", U))
+order_index <- c(order_index, grep("Colon - Transverse", U))
+order_index <- c(order_index, grep("Small Intestine - Terminal Ileum", U))
+order_index <- c(order_index, grep("Heart - Atrial Appendage", U))
+order_index <- c(order_index, grep("Heart - Left Ventricle", U))
+order_index <- c(order_index, grep("Minor Salivary Gland", U))
+order_index <- c(order_index, grep("Skin - Sun Exposed", U))
+order_index <- c(order_index, grep("Skin - Not Sun Exposed", U))
+order_index <- c(order_index, grep("Lung", U))
+order_index <- c(order_index, grep("Ovary", U))
+order_index <- c(order_index, grep("Thyroid", U))
+order_index <- c(order_index, grep("Pituitary", U))
+order_index <- c(order_index, grep("Testis", U))
+order_index <- c(order_index, grep("Nerve - Tibial", U))
+order_index <- c(order_index, grep("Breast - Mammary Tissue", U))
+order_index <- c(order_index, grep("Adipose - Visceral", U))
+order_index <- c(order_index, grep("Adipose - Subcutaneous", U))
+order_index <- c(order_index, grep("Artery - Coronary", U))
+order_index <- c(order_index, grep("Artery - Tibial", U))
+order_index <- c(order_index, grep("Artery - Aorta", U))
+order_index <- c(order_index, grep("Esophagus - Mucosa", U))
+order_index <- c(order_index, grep("Vagina", U))
+order_index <- c(order_index, grep("Cervix - Endocervix", U))
+order_index <- c(order_index, grep("Esophagus - Gastroesophageal Junction", U))
+order_index <- c(order_index, grep("Colon - Sigmoid", U))
+order_index <- c(order_index, grep("Esophagus - Muscularis", U))
+order_index <- c(order_index, grep("Cervix - Ectocervix", U))
+order_index <- c(order_index, grep("Fallopian", U))
+order_index <- c(order_index, grep("Prostate", U))
+order_index <- c(order_index, grep("Uterus", U))
+order_index <- c(order_index, grep("Bladder", U))
+```
+
+
+### Brain tissues
+
+```{r}
+brain_set <- grep("Brain", U)
+brain_corshrink_data <- corshrink_data[brain_set, brain_set, ]
+```
+
+```{r}
+median_brain_corshrink_data <- apply(brain_corshrink_data, 3, function(x) return (median(x)))
+ordering_high <- order(median_brain_corshrink_data, decreasing =  TRUE)[1:100]
+ordering_low <- order(median_brain_corshrink_data, decreasing =  FALSE)[1:100]
+```
+
+We do a validation check to see if we are doing things right by looking at the highest ordered gene and the lowest ordered gene (genes with highest and lowest median correlation over brain).
+
+```{r}
+
+top_gene <- gene_names_1[ordering_high[100]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_high[100]]),
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+```
+
+
+```{r}
+bottom_gene <- gene_names_1[ordering_low[100]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_low[100]]),
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+
+```
+
+```{r}
+high_brain_genes <- gene_names_1[ordering_high]
+low_brain_genes <- gene_names_1[ordering_low]
+
+write.table(cbind.data.frame(high_brain_genes), quote = FALSE, file = "../utilities/high_brain_genes.txt", row.names = FALSE, col.names = FALSE)
+
+write.table(cbind.data.frame(low_brain_genes), quote = FALSE, file = "../utilities/low_brain_genes.txt", row.names = FALSE, col.names = FALSE)
+
+```
+
+### Non brain tissues 
+
+```{r}
+brain_set <- grep("Brain", U)
+nonbrain_corshrink_data <- corshrink_data[-brain_set, -brain_set, ]
+
+median_nonbrain_corshrink_data <- apply(nonbrain_corshrink_data, 3, function(x) return (median(x)))
+ordering_high <- order(median_nonbrain_corshrink_data, decreasing =  TRUE)[1:100]
+ordering_low <- order(median_nonbrain_corshrink_data, decreasing =  FALSE)[1:100]
+```
+
+
+```{r}
+top_gene <- gene_names_1[ordering_high[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_high[1]]),
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+```
+
+```{r}
+bottom_gene <- gene_names_1[ordering_low[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_low[1]]),
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+
+```
+
+
+```{r}
+high_nonbrain_genes <- gene_names_1[ordering_high]
+low_nonbrain_genes <- gene_names_1[ordering_low]
+
+write.table(cbind.data.frame(high_nonbrain_genes), quote = FALSE, file = "../utilities/high_nonbrain_genes.txt", row.names = FALSE, col.names = FALSE)
+
+write.table(cbind.data.frame(low_nonbrain_genes), quote = FALSE, file = "../utilities/low_nonbrain_genes.txt", row.names = FALSE, col.names = FALSE)
+```
+
+
+### Brain specific
+
+We look at the difference of median on brain and non brain now.
+
+```{r}
+brain_nonbrain_diff_corshrink_data <- median_brain_corshrink_data - median_nonbrain_corshrink_data
+ordering_high <- order(brain_nonbrain_diff_corshrink_data, decreasing =  TRUE)[1:100]
+ordering_low <- order(brain_nonbrain_diff_corshrink_data, decreasing =  FALSE)[1:100]
+
+```
+
+```{r}
+top_gene <- gene_names_1[ordering_high[100]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_high[100]]),
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+```
+
+```{r}
+bottom_gene <- gene_names_1[ordering_low[100]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_low[100]]),
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+
+```
+
+```{r}
+high_brain_nonbrain_diff_genes <- gene_names_1[ordering_high]
+low_brain_nonbrain_diff_genes <- gene_names_1[ordering_low]
+
+write.table(cbind.data.frame(high_brain_nonbrain_diff_genes), quote = FALSE, file = "../utilities/high_brain_nonbrain_diff_genes.txt", row.names = FALSE, col.names = FALSE)
+
+write.table(cbind.data.frame(low_brain_nonbrain_diff_genes), quote = FALSE, file = "../utilities/low_brain_nonbrain_diff_genes.txt", row.names = FALSE, col.names = FALSE)
+```
+
+Heart vs non heart tissue relations.
+
+### Heart specific 
+
+```{r}
+heart_set <- grep("Heart", U)
+heart_corshrink_data <- corshrink_data[heart_set, heart_set, ]
+nonheart_corshrink_data <- corshrink_data[-heart_set, -heart_set, ]
+
+median_heart_corshrink_data <- apply(heart_corshrink_data, 3, function(x) return (median(x)))
+median_nonheart_corshrink_data <- apply(nonheart_corshrink_data, 3, function(x) return (median(x)))
+
+heart_nonheart_diff_corshrink_data <- median_heart_corshrink_data - median_nonheart_corshrink_data
+ordering_high <- order(heart_nonheart_diff_corshrink_data, decreasing =  TRUE)[1:100]
+ordering_low <- order(heart_nonheart_diff_corshrink_data, decreasing =  FALSE)[1:100]
+
+```
+
+```{r}
+top_gene <- gene_names_1[ordering_high[100]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_high[100]]),
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+```
+
+```{r}
+bottom_gene <- gene_names_1[ordering_low[100]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_low[100]]),
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+
+```
+
+```{r}
+high_heart_nonheart_diff_genes <- gene_names_1[ordering_high]
+low_heart_nonheart_diff_genes <- gene_names_1[ordering_low]
+
+write.table(cbind.data.frame(high_heart_nonheart_diff_genes), quote = FALSE, file = "../utilities/high_heart_nonheart_diff_genes.txt", row.names = FALSE, col.names = FALSE)
+
+write.table(cbind.data.frame(low_heart_nonheart_diff_genes), quote = FALSE, file = "../utilities/low_heart_nonheart_diff_genes.txt", row.names = FALSE, col.names = FALSE)
+```
+
+
+
+### Skin and Non-skin
+
+```{r}
+skin_set <- grep("Skin", U)
+skin_corshrink_data <- corshrink_data[skin_set, skin_set, ]
+nonskin_corshrink_data <- corshrink_data[-skin_set, -skin_set, ]
+
+median_skin_corshrink_data <- apply(skin_corshrink_data, 3, function(x) return (median(x)))
+median_nonskin_corshrink_data <- apply(nonskin_corshrink_data, 3, function(x) return (median(x)))
+
+skin_nonskin_diff_corshrink_data <- median_skin_corshrink_data - median_nonskin_corshrink_data
+ordering_high <- order(skin_nonskin_diff_corshrink_data, decreasing =  TRUE)[1:100]
+ordering_low <- order(skin_nonskin_diff_corshrink_data, decreasing =  FALSE)[1:100]
+```
+
+```{r}
+top_gene <- gene_names_1[ordering_high[100]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_high[100]]),
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+```
+
+```{r}
+bottom_gene <- gene_names_1[ordering_low[100]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_low[100]]),
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+
+```
+
+```{r}
+high_skin_nonskin_diff_genes <- gene_names_1[ordering_high]
+low_skin_nonskin_diff_genes <- gene_names_1[ordering_low]
+
+write.table(cbind.data.frame(high_skin_nonskin_diff_genes), quote = FALSE, file = "../utilities/high_skin_nonskin_diff_genes.txt", row.names = FALSE, col.names = FALSE)
+
+write.table(cbind.data.frame(low_skin_nonskin_diff_genes), quote = FALSE, file = "../utilities/low_skin_nonskin_diff_genes.txt", row.names = FALSE, col.names = FALSE)
+```
+
+
+
+### Arteries
+
+```{r}
+artery_set <- grep("Artery", U)
+artery_corshrink_data <- corshrink_data[artery_set, artery_set, ]
+nonartery_corshrink_data <- corshrink_data[-artery_set, -artery_set, ]
+
+median_artery_corshrink_data <- apply(artery_corshrink_data, 3, function(x) {
+                                            y <- x[row(x) > col(x)]
+                                            return (median(y))})
+median_nonartery_corshrink_data <- apply(nonartery_corshrink_data, 3, function(x) {
+                                            y <- x[row(x) > col(x)]
+                                            return (median(y))})
+
+artery_nonartery_diff_corshrink_data <- median_artery_corshrink_data - median_nonartery_corshrink_data
+ordering_high <- order(artery_nonartery_diff_corshrink_data, decreasing =  TRUE)[1:100]
+ordering_low <- order(artery_nonartery_diff_corshrink_data, decreasing =  FALSE)[1:100]
+```
+
+```{r}
+top_gene <- gene_names_1[ordering_high[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_high[1]]),
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+```
+
+```{r}
+bottom_gene <- gene_names_1[ordering_low[100]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_low[100]]),
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+
+```
+
+```{r}
+high_artery_nonartery_diff_genes <- gene_names_1[ordering_high]
+low_artery_nonartery_diff_genes <- gene_names_1[ordering_low]
+
+write.table(cbind.data.frame(high_artery_nonartery_diff_genes), quote = FALSE, file = "../utilities/high_artery_nonartery_diff_genes.txt", row.names = FALSE, col.names = FALSE)
+
+write.table(cbind.data.frame(low_artery_nonartery_diff_genes), quote = FALSE, file = "../utilities/low_artery_nonartery_diff_genes.txt", row.names = FALSE, col.names = FALSE)
+```
+
+
+
+
+### Stomach, Pancreas
+
+```{r}
+stomach_pancreas_set <- match(c("Stomach", "Pancreas"), U)
+stomach_pancreas_corshrink_data <- corshrink_data[stomach_pancreas_set, stomach_pancreas_set, ]
+non_stomach_pancreas_corshrink_data <- corshrink_data[-stomach_pancreas_set, -stomach_pancreas_set, ]
+
+median_stomach_pancreas_corshrink_data <- apply(stomach_pancreas_corshrink_data, 3, function(x) {
+                                            y <- x[row(x) > col(x)]
+                                            return (median(y))})
+median_non_stomach_pancreas_corshrink_data <- apply(non_stomach_pancreas_corshrink_data, 3, function(x) {
+                                            y <- x[row(x) > col(x)]
+                                            return (median(y))})
+
+stomach_pancreas_non_stomach_pancreas_diff_corshrink_data <- median_stomach_pancreas_corshrink_data - median_non_stomach_pancreas_corshrink_data
+ordering_high <- order(stomach_pancreas_non_stomach_pancreas_diff_corshrink_data, decreasing =  TRUE)[1:100]
+ordering_low <- order(stomach_pancreas_non_stomach_pancreas_diff_corshrink_data, decreasing =  FALSE)[1:100]
+```
+
+```{r}
+top_gene <- gene_names_1[ordering_high[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_high[1]]),
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+```
+
+```{r}
+bottom_gene <- gene_names_1[ordering_low[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_low[1]]),
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+
+```
+
+```{r}
+high_stomach_pancreas_non_stomach_pancreas_diff_genes <- gene_names_1[ordering_high]
+low_stomach_pancreas_non_stomach_pancreas_diff_genes <- gene_names_1[ordering_low]
+
+write.table(cbind.data.frame(high_stomach_pancreas_non_stomach_pancreas_diff_genes), quote = FALSE, file = "../utilities/high_stomach_pancreas_non_stomach_pancreas_diff_genes.txt", row.names = FALSE, col.names = FALSE)
+
+write.table(cbind.data.frame(low_stomach_pancreas_non_stomach_pancreas_diff_genes), quote = FALSE, file = "../utilities/low_stomach_pancreas_non_stomach_pancreas_diff_genes.txt", row.names = FALSE, col.names = FALSE)
+```
+
+
+
+
+### Whole Blood and Spleen
+
+```{r}
+blood_spleen_set <- match(c("Whole Blood", "Spleen"), U)
+blood_spleen_corshrink_data <- corshrink_data[blood_spleen_set, blood_spleen_set, ]
+non_blood_spleen_corshrink_data <- corshrink_data[-blood_spleen_set, -blood_spleen_set, ]
+
+median_blood_spleen_corshrink_data <- apply(blood_spleen_corshrink_data, 3, function(x) {
+                                            y <- x[row(x) > col(x)]
+                                            return (median(y))})
+median_non_blood_spleen_corshrink_data <- apply(non_blood_spleen_corshrink_data, 3, function(x) {
+                                            y <- x[row(x) > col(x)]
+                                            return (median(y))})
+
+blood_spleen_non_blood_spleen_diff_corshrink_data <- median_blood_spleen_corshrink_data - median_non_blood_spleen_corshrink_data
+ordering_high <- order(blood_spleen_non_blood_spleen_diff_corshrink_data, decreasing =  TRUE)[1:100]
+ordering_low <- order(blood_spleen_non_blood_spleen_diff_corshrink_data, decreasing =  FALSE)[1:100]
+```
+
+```{r}
+top_gene <- gene_names_1[ordering_high[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_high[1]]),
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+```
+
+```{r}
+bottom_gene <- gene_names_1[ordering_low[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_low[1]]),
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+
+```
+
+```{r}
+high_blood_spleen_non_blood_spleen_diff_genes <- gene_names_1[ordering_high]
+low_blood_spleen_non_blood_spleen_diff_genes <- gene_names_1[ordering_low]
+
+write.table(cbind.data.frame(high_blood_spleen_non_blood_spleen_diff_genes), quote = FALSE, file = "../utilities/high_blood_spleen_non_blood_spleen_diff_genes.txt", row.names = FALSE, col.names = FALSE)
+
+write.table(cbind.data.frame(low_blood_spleen_non_blood_spleen_diff_genes), quote = FALSE, file = "../utilities/low_blood_spleen_non_blood_spleen_diff_genes.txt", row.names = FALSE, col.names = FALSE)
+```

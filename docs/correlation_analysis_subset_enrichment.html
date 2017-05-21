@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Kushal K Dey" />
+
+
+<title>Correlation subset specific enrichment analysis of genes</title>
+
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="cosmo.css" type="text/css" />
+
+</head>
+
+<body>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
+    <link href="../docs/cosmo.css" rel="stylesheet">
+    <link href="../docs/cosmo.min.css" rel="stylesheet">
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../docs/bootstrap/js/bootstrap.min.js"></script>
+
+<body>
+
+<div class = "nav" align = "middle">
+<div class= "p1"></div>
+<p>
+  <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "workflow.html">WORKFLOW</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "about.html">METHODS</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "license.html">LICENSE</a> 
+   &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
+ </p>
+</div>  
+<!-- <div class="nav">
+  <a href="index.html">Home page</a> &nbsp &nbsp
+  <a href="musings.html">Musings</a> &nbsp &nbsp
+  <a href="town.html">My town</a> &nbsp &nbsp
+  <a href="links.html">Links</a>
+</div> -->
+
+<!-- Main content -->
+</body>
+</html>
+
+
+<h1 class="title toc-ignore">Correlation subset specific enrichment analysis of genes</h1>
+<h4 class="author"><em>Kushal K Dey</em></h4>
+<h4 class="date"><em>5/20/2017</em></h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#brain-tissues">Brain tissues</a></li>
+<li><a href="#non-brain-tissues">Non brain tissues</a></li>
+<li><a href="#brain-specific">Brain specific</a></li>
+<li><a href="#heart-specific">Heart specific</a></li>
+<li><a href="#skin-and-non-skin">Skin and Non-skin</a></li>
+<li><a href="#arteries">Arteries</a></li>
+<li><a href="#stomach-pancreas">Stomach, Pancreas</a></li>
+<li><a href="#whole-blood-and-spleen">Whole Blood and Spleen</a></li>
+</ul>
+</div>
+
+<p>In this script, we look at which genes are enriched in terms of having higher correlations in specific subsets of tissues. The idea is to calculate the median correlation after CorShrink for the set of tissues of interest and then see which set of genes have the highest or lowest median correlations in that region.</p>
+<p>We start with the Brain tissues specific enrichment.</p>
+<pre class="r"><code>corshrink_data &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_normal_gtex_tissues.rda&quot;))
+cor_data &lt;- get(load(&quot;../output/cor_tissues_non_ash_voom_spearman.rda&quot;))</code></pre>
+<pre class="r"><code>common_samples &lt;- get(load(&quot;../output/common_samples.rda&quot;))
+tissue_labels &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;)[,3]
+
+#library(data.table)
+#data &lt;- data.frame(fread(&quot;../data/GTEX_V6/cis_gene_expression.txt&quot;))
+#matdata &lt;- t(data[,-c(1,2)])
+
+gene_names &lt;- as.character(read.table(file = &quot;../data/GTEX_V6/gene_names_GTEX_V6.txt&quot;)[,1])
+gene_names_1 &lt;- as.character(sapply(gene_names, function(x) return(strsplit(x, &quot;[.]&quot;)[[1]][1])))
+
+
+U &lt;- unique(tissue_labels)</code></pre>
+<div id="brain-tissues" class="section level3">
+<h3>Brain tissues</h3>
+<pre class="r"><code>brain_set &lt;- grep(&quot;Brain&quot;, U)
+brain_corshrink_data &lt;- corshrink_data[brain_set, brain_set, ]</code></pre>
+<pre class="r"><code>median_brain_corshrink_data &lt;- apply(brain_corshrink_data, 3, function(x) return (median(x)))
+ordering_high &lt;- order(median_brain_corshrink_data, decreasing =  TRUE)[1:100]
+ordering_low &lt;- order(median_brain_corshrink_data, decreasing =  FALSE)[1:100]</code></pre>
+<p>We do a validation check to see if we are doing things right by looking at the highest ordered gene and the lowest ordered gene (genes with highest and lowest median correlation over brain).</p>
+<pre class="r"><code>top_gene &lt;- gene_names_1[ordering_high[100]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_high[100]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="correlation_analysis_subset_enrichment_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<pre class="r"><code>bottom_gene &lt;- gene_names_1[ordering_low[100]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_low[100]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="correlation_analysis_subset_enrichment_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<pre class="r"><code>high_brain_genes &lt;- gene_names_1[ordering_high]
+low_brain_genes &lt;- gene_names_1[ordering_low]
+
+write.table(cbind.data.frame(high_brain_genes), quote = FALSE, file = &quot;../utilities/high_brain_genes.txt&quot;, row.names = FALSE, col.names = FALSE)
+
+write.table(cbind.data.frame(low_brain_genes), quote = FALSE, file = &quot;../utilities/low_brain_genes.txt&quot;, row.names = FALSE, col.names = FALSE)</code></pre>
+</div>
+<div id="non-brain-tissues" class="section level3">
+<h3>Non brain tissues</h3>
+<pre class="r"><code>brain_set &lt;- grep(&quot;Brain&quot;, U)
+nonbrain_corshrink_data &lt;- corshrink_data[-brain_set, -brain_set, ]
+
+median_nonbrain_corshrink_data &lt;- apply(nonbrain_corshrink_data, 3, function(x) return (median(x)))
+ordering_high &lt;- order(median_nonbrain_corshrink_data, decreasing =  TRUE)[1:100]
+ordering_low &lt;- order(median_nonbrain_corshrink_data, decreasing =  FALSE)[1:100]</code></pre>
+<pre class="r"><code>top_gene &lt;- gene_names_1[ordering_high[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_high[1]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="correlation_analysis_subset_enrichment_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<pre class="r"><code>bottom_gene &lt;- gene_names_1[ordering_low[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_low[1]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="correlation_analysis_subset_enrichment_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<pre class="r"><code>high_nonbrain_genes &lt;- gene_names_1[ordering_high]
+low_nonbrain_genes &lt;- gene_names_1[ordering_low]
+
+write.table(cbind.data.frame(high_nonbrain_genes), quote = FALSE, file = &quot;../utilities/high_nonbrain_genes.txt&quot;, row.names = FALSE, col.names = FALSE)
+
+write.table(cbind.data.frame(low_nonbrain_genes), quote = FALSE, file = &quot;../utilities/low_nonbrain_genes.txt&quot;, row.names = FALSE, col.names = FALSE)</code></pre>
+</div>
+<div id="brain-specific" class="section level3">
+<h3>Brain specific</h3>
+<p>We look at the difference of median on brain and non brain now.</p>
+<pre class="r"><code>brain_nonbrain_diff_corshrink_data &lt;- median_brain_corshrink_data - median_nonbrain_corshrink_data
+ordering_high &lt;- order(brain_nonbrain_diff_corshrink_data, decreasing =  TRUE)[1:100]
+ordering_low &lt;- order(brain_nonbrain_diff_corshrink_data, decreasing =  FALSE)[1:100]</code></pre>
+<pre class="r"><code>top_gene &lt;- gene_names_1[ordering_high[100]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_high[100]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="correlation_analysis_subset_enrichment_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<pre class="r"><code>bottom_gene &lt;- gene_names_1[ordering_low[100]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_low[100]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="correlation_analysis_subset_enrichment_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<pre class="r"><code>high_brain_nonbrain_diff_genes &lt;- gene_names_1[ordering_high]
+low_brain_nonbrain_diff_genes &lt;- gene_names_1[ordering_low]
+
+write.table(cbind.data.frame(high_brain_nonbrain_diff_genes), quote = FALSE, file = &quot;../utilities/high_brain_nonbrain_diff_genes.txt&quot;, row.names = FALSE, col.names = FALSE)
+
+write.table(cbind.data.frame(low_brain_nonbrain_diff_genes), quote = FALSE, file = &quot;../utilities/low_brain_nonbrain_diff_genes.txt&quot;, row.names = FALSE, col.names = FALSE)</code></pre>
+<p>Heart vs non heart tissue relations.</p>
+</div>
+<div id="heart-specific" class="section level3">
+<h3>Heart specific</h3>
+<pre class="r"><code>heart_set &lt;- grep(&quot;Heart&quot;, U)
+heart_corshrink_data &lt;- corshrink_data[heart_set, heart_set, ]
+nonheart_corshrink_data &lt;- corshrink_data[-heart_set, -heart_set, ]
+
+median_heart_corshrink_data &lt;- apply(heart_corshrink_data, 3, function(x) return (median(x)))
+median_nonheart_corshrink_data &lt;- apply(nonheart_corshrink_data, 3, function(x) return (median(x)))
+
+heart_nonheart_diff_corshrink_data &lt;- median_heart_corshrink_data - median_nonheart_corshrink_data
+ordering_high &lt;- order(heart_nonheart_diff_corshrink_data, decreasing =  TRUE)[1:100]
+ordering_low &lt;- order(heart_nonheart_diff_corshrink_data, decreasing =  FALSE)[1:100]</code></pre>
+<pre class="r"><code>top_gene &lt;- gene_names_1[ordering_high[100]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_high[100]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="correlation_analysis_subset_enrichment_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<pre class="r"><code>bottom_gene &lt;- gene_names_1[ordering_low[100]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_low[100]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="correlation_analysis_subset_enrichment_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+<pre class="r"><code>high_heart_nonheart_diff_genes &lt;- gene_names_1[ordering_high]
+low_heart_nonheart_diff_genes &lt;- gene_names_1[ordering_low]
+
+write.table(cbind.data.frame(high_heart_nonheart_diff_genes), quote = FALSE, file = &quot;../utilities/high_heart_nonheart_diff_genes.txt&quot;, row.names = FALSE, col.names = FALSE)
+
+write.table(cbind.data.frame(low_heart_nonheart_diff_genes), quote = FALSE, file = &quot;../utilities/low_heart_nonheart_diff_genes.txt&quot;, row.names = FALSE, col.names = FALSE)</code></pre>
+</div>
+<div id="skin-and-non-skin" class="section level3">
+<h3>Skin and Non-skin</h3>
+<pre class="r"><code>skin_set &lt;- grep(&quot;Skin&quot;, U)
+skin_corshrink_data &lt;- corshrink_data[skin_set, skin_set, ]
+nonskin_corshrink_data &lt;- corshrink_data[-skin_set, -skin_set, ]
+
+median_skin_corshrink_data &lt;- apply(skin_corshrink_data, 3, function(x) return (median(x)))
+median_nonskin_corshrink_data &lt;- apply(nonskin_corshrink_data, 3, function(x) return (median(x)))
+
+skin_nonskin_diff_corshrink_data &lt;- median_skin_corshrink_data - median_nonskin_corshrink_data
+ordering_high &lt;- order(skin_nonskin_diff_corshrink_data, decreasing =  TRUE)[1:100]
+ordering_low &lt;- order(skin_nonskin_diff_corshrink_data, decreasing =  FALSE)[1:100]</code></pre>
+<pre class="r"><code>top_gene &lt;- gene_names_1[ordering_high[100]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_high[100]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="correlation_analysis_subset_enrichment_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<pre class="r"><code>bottom_gene &lt;- gene_names_1[ordering_low[100]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_low[100]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="correlation_analysis_subset_enrichment_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
+<pre class="r"><code>high_skin_nonskin_diff_genes &lt;- gene_names_1[ordering_high]
+low_skin_nonskin_diff_genes &lt;- gene_names_1[ordering_low]
+
+write.table(cbind.data.frame(high_skin_nonskin_diff_genes), quote = FALSE, file = &quot;../utilities/high_skin_nonskin_diff_genes.txt&quot;, row.names = FALSE, col.names = FALSE)
+
+write.table(cbind.data.frame(low_skin_nonskin_diff_genes), quote = FALSE, file = &quot;../utilities/low_skin_nonskin_diff_genes.txt&quot;, row.names = FALSE, col.names = FALSE)</code></pre>
+</div>
+<div id="arteries" class="section level3">
+<h3>Arteries</h3>
+<pre class="r"><code>artery_set &lt;- grep(&quot;Artery&quot;, U)
+artery_corshrink_data &lt;- corshrink_data[artery_set, artery_set, ]
+nonartery_corshrink_data &lt;- corshrink_data[-artery_set, -artery_set, ]
+
+median_artery_corshrink_data &lt;- apply(artery_corshrink_data, 3, function(x) {
+                                            y &lt;- x[row(x) &gt; col(x)]
+                                            return (median(y))})
+median_nonartery_corshrink_data &lt;- apply(nonartery_corshrink_data, 3, function(x) {
+                                            y &lt;- x[row(x) &gt; col(x)]
+                                            return (median(y))})
+
+artery_nonartery_diff_corshrink_data &lt;- median_artery_corshrink_data - median_nonartery_corshrink_data
+ordering_high &lt;- order(artery_nonartery_diff_corshrink_data, decreasing =  TRUE)[1:100]
+ordering_low &lt;- order(artery_nonartery_diff_corshrink_data, decreasing =  FALSE)[1:100]</code></pre>
+<pre class="r"><code>top_gene &lt;- gene_names_1[ordering_high[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_high[1]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="correlation_analysis_subset_enrichment_files/figure-html/unnamed-chunk-26-1.png" width="672" /></p>
+<pre class="r"><code>bottom_gene &lt;- gene_names_1[ordering_low[100]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_low[100]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="correlation_analysis_subset_enrichment_files/figure-html/unnamed-chunk-27-1.png" width="672" /></p>
+<pre class="r"><code>high_artery_nonartery_diff_genes &lt;- gene_names_1[ordering_high]
+low_artery_nonartery_diff_genes &lt;- gene_names_1[ordering_low]
+
+write.table(cbind.data.frame(high_artery_nonartery_diff_genes), quote = FALSE, file = &quot;../utilities/high_artery_nonartery_diff_genes.txt&quot;, row.names = FALSE, col.names = FALSE)
+
+write.table(cbind.data.frame(low_artery_nonartery_diff_genes), quote = FALSE, file = &quot;../utilities/low_artery_nonartery_diff_genes.txt&quot;, row.names = FALSE, col.names = FALSE)</code></pre>
+</div>
+<div id="stomach-pancreas" class="section level3">
+<h3>Stomach, Pancreas</h3>
+<pre class="r"><code>stomach_pancreas_set &lt;- match(c(&quot;Stomach&quot;, &quot;Pancreas&quot;), U)
+stomach_pancreas_corshrink_data &lt;- corshrink_data[stomach_pancreas_set, stomach_pancreas_set, ]
+non_stomach_pancreas_corshrink_data &lt;- corshrink_data[-stomach_pancreas_set, -stomach_pancreas_set, ]
+
+median_stomach_pancreas_corshrink_data &lt;- apply(stomach_pancreas_corshrink_data, 3, function(x) {
+                                            y &lt;- x[row(x) &gt; col(x)]
+                                            return (median(y))})
+median_non_stomach_pancreas_corshrink_data &lt;- apply(non_stomach_pancreas_corshrink_data, 3, function(x) {
+                                            y &lt;- x[row(x) &gt; col(x)]
+                                            return (median(y))})
+
+stomach_pancreas_non_stomach_pancreas_diff_corshrink_data &lt;- median_stomach_pancreas_corshrink_data - median_non_stomach_pancreas_corshrink_data
+ordering_high &lt;- order(stomach_pancreas_non_stomach_pancreas_diff_corshrink_data, decreasing =  TRUE)[1:100]
+ordering_low &lt;- order(stomach_pancreas_non_stomach_pancreas_diff_corshrink_data, decreasing =  FALSE)[1:100]</code></pre>
+<pre class="r"><code>top_gene &lt;- gene_names_1[ordering_high[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_high[1]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="correlation_analysis_subset_enrichment_files/figure-html/unnamed-chunk-30-1.png" width="672" /></p>
+<pre class="r"><code>bottom_gene &lt;- gene_names_1[ordering_low[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_low[1]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="correlation_analysis_subset_enrichment_files/figure-html/unnamed-chunk-31-1.png" width="672" /></p>
+<pre class="r"><code>high_stomach_pancreas_non_stomach_pancreas_diff_genes &lt;- gene_names_1[ordering_high]
+low_stomach_pancreas_non_stomach_pancreas_diff_genes &lt;- gene_names_1[ordering_low]
+
+write.table(cbind.data.frame(high_stomach_pancreas_non_stomach_pancreas_diff_genes), quote = FALSE, file = &quot;../utilities/high_stomach_pancreas_non_stomach_pancreas_diff_genes.txt&quot;, row.names = FALSE, col.names = FALSE)
+
+write.table(cbind.data.frame(low_stomach_pancreas_non_stomach_pancreas_diff_genes), quote = FALSE, file = &quot;../utilities/low_stomach_pancreas_non_stomach_pancreas_diff_genes.txt&quot;, row.names = FALSE, col.names = FALSE)</code></pre>
+</div>
+<div id="whole-blood-and-spleen" class="section level3">
+<h3>Whole Blood and Spleen</h3>
+<pre class="r"><code>blood_spleen_set &lt;- match(c(&quot;Whole Blood&quot;, &quot;Spleen&quot;), U)
+blood_spleen_corshrink_data &lt;- corshrink_data[blood_spleen_set, blood_spleen_set, ]
+non_blood_spleen_corshrink_data &lt;- corshrink_data[-blood_spleen_set, -blood_spleen_set, ]
+
+median_blood_spleen_corshrink_data &lt;- apply(blood_spleen_corshrink_data, 3, function(x) {
+                                            y &lt;- x[row(x) &gt; col(x)]
+                                            return (median(y))})
+median_non_blood_spleen_corshrink_data &lt;- apply(non_blood_spleen_corshrink_data, 3, function(x) {
+                                            y &lt;- x[row(x) &gt; col(x)]
+                                            return (median(y))})
+
+blood_spleen_non_blood_spleen_diff_corshrink_data &lt;- median_blood_spleen_corshrink_data - median_non_blood_spleen_corshrink_data
+ordering_high &lt;- order(blood_spleen_non_blood_spleen_diff_corshrink_data, decreasing =  TRUE)[1:100]
+ordering_low &lt;- order(blood_spleen_non_blood_spleen_diff_corshrink_data, decreasing =  FALSE)[1:100]</code></pre>
+<pre class="r"><code>top_gene &lt;- gene_names_1[ordering_high[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_high[1]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="correlation_analysis_subset_enrichment_files/figure-html/unnamed-chunk-34-1.png" width="672" /></p>
+<pre class="r"><code>bottom_gene &lt;- gene_names_1[ordering_low[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_low[1]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="correlation_analysis_subset_enrichment_files/figure-html/unnamed-chunk-35-1.png" width="672" /></p>
+<pre class="r"><code>high_blood_spleen_non_blood_spleen_diff_genes &lt;- gene_names_1[ordering_high]
+low_blood_spleen_non_blood_spleen_diff_genes &lt;- gene_names_1[ordering_low]
+
+write.table(cbind.data.frame(high_blood_spleen_non_blood_spleen_diff_genes), quote = FALSE, file = &quot;../utilities/high_blood_spleen_non_blood_spleen_diff_genes.txt&quot;, row.names = FALSE, col.names = FALSE)
+
+write.table(cbind.data.frame(low_blood_spleen_non_blood_spleen_diff_genes), quote = FALSE, file = &quot;../utilities/low_blood_spleen_non_blood_spleen_diff_genes.txt&quot;, row.names = FALSE, col.names = FALSE)</code></pre>
+</div>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
