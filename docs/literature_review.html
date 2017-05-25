@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Kushal K Dey" />
+
+
+<title>Literature Review : Correlation Shrinkage</title>
+
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="cosmo.css" type="text/css" />
+
+</head>
+
+<body>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
+    <link href="../docs/cosmo.css" rel="stylesheet">
+    <link href="../docs/cosmo.min.css" rel="stylesheet">
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../docs/bootstrap/js/bootstrap.min.js"></script>
+
+<body>
+
+<div class = "nav" align = "middle">
+<div class= "p1"></div>
+<p>
+  <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "workflow.html">WORKFLOW</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "about.html">METHODS</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "license.html">LICENSE</a> 
+   &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
+ </p>
+</div>  
+<!-- <div class="nav">
+  <a href="index.html">Home page</a> &nbsp &nbsp
+  <a href="musings.html">Musings</a> &nbsp &nbsp
+  <a href="town.html">My town</a> &nbsp &nbsp
+  <a href="links.html">Links</a>
+</div> -->
+
+<!-- Main content -->
+</body>
+</html>
+
+
+<h1 class="title toc-ignore">Literature Review : Correlation Shrinkage</h1>
+<h4 class="author"><em>Kushal K Dey</em></h4>
+<h4 class="date"><em>5/24/2017</em></h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#corpcor-shafer-and-strimmer">corpcor: Shafer and Strimmer</a></li>
+<li><a href="#thresholding-estimators">THRESHOLDING ESTIMATORS</a></li>
+<li><a href="#lasso-type-sparse-estimation">LASSO TYPE SPARSE ESTIMATION</a></li>
+</ul>
+</div>
+
+<p>In this script, we review some of the methods for correlation shrinkage with or without missing data that may form the references for the CorShrink paper.</p>
+<div id="corpcor-shafer-and-strimmer" class="section level3">
+<h3>corpcor: Shafer and Strimmer</h3>
+</div>
+<div id="thresholding-estimators" class="section level3">
+<h3>THRESHOLDING ESTIMATORS</h3>
+<p>Bickel and Levina propose thresholded estimate of sample covariance matrix which is consistent in the operator norm as long as the true covariance matrix is sparse in a suitable sense, the variables are Gaussian orsub-Gaussian, and <span class="math inline">\((\log p)/n \rightarrow 0\)</span>. They also evaluate the rates of convergence of their thresholded estimate to <span class="math inline">\(\Sigma\)</span> under the above assumptions.</p>
+<p>Their claim - .</p>
+<p>There are various arguments to show that convergence in the operator norm implies convergence of eigenvalues and eigenvectors.</p>
+<p>We use the package <em>CVTuningCov</em> for applying hard and soft thresholding estimators on the tissue tissue correlation matrix and compare that with CorShrink. But, it seemed that these methods fail to really shrink the different correlations differently based on number of samples info, and use same threshold across the matrix which makes them perform poorly.</p>
+<p>We also used soft thresholding due to the <strong>PDSCE</strong> method. Although this method seemed to perform slightly better than above methods, CorShrink still outperformed it, especially in shrinking the negative correlations.</p>
+</div>
+<div id="lasso-type-sparse-estimation" class="section level3">
+<h3>LASSO TYPE SPARSE ESTIMATION</h3>
+<p>Bien and Tibshirani (2011) - Sparse Estimation of Covariance Matrix - paper looks into how a LASSO type shrinkage approach can be used for covariance shrinkage. Although GLASSO itself provides shrunk estimates for both correlation and covariance matrices, the authors here perform a more focused approach.</p>
+<p>Also, the authors have a <em>spcov</em> R package for performing this shrinkage of covariance matrix. Also it provides a scale <span class="math inline">\(P\)</span> to shrink each term of the correlation separately. We try various choices of <span class="math inline">\(P\)</span> - uniform scale for all off-diagonal elements, the sd scale for sample correlation under normal assumption, scale by <span class="math inline">\(1/(number of samples on which correlation is computed)\)</span>, scale by <span class="math inline">\(exp(1/(number of samples on which correlation is computed))\)</span>.</p>
+<p>We find that the performance is better than softimpute + GLASSO, or softimpute + Shafer Strimmer. But still there are scaling issues with this method. However this can be considered the closest competitor to CorShrink.</p>
+</div>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

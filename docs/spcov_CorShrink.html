@@ -1,0 +1,1942 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Kushal K Dey" />
+
+
+<title>Spcov vs CorShrink</title>
+
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="cosmo.css" type="text/css" />
+
+</head>
+
+<body>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
+    <link href="../docs/cosmo.css" rel="stylesheet">
+    <link href="../docs/cosmo.min.css" rel="stylesheet">
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../docs/bootstrap/js/bootstrap.min.js"></script>
+
+<body>
+
+<div class = "nav" align = "middle">
+<div class= "p1"></div>
+<p>
+  <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "workflow.html">WORKFLOW</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "about.html">METHODS</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "license.html">LICENSE</a> 
+   &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
+ </p>
+</div>  
+<!-- <div class="nav">
+  <a href="index.html">Home page</a> &nbsp &nbsp
+  <a href="musings.html">Musings</a> &nbsp &nbsp
+  <a href="town.html">My town</a> &nbsp &nbsp
+  <a href="links.html">Links</a>
+</div> -->
+
+<!-- Main content -->
+</body>
+</html>
+
+
+<h1 class="title toc-ignore">Spcov vs CorShrink</h1>
+<h4 class="author"><em>Kushal K Dey</em></h4>
+<h4 class="date"><em>5/24/2017</em></h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#data-preparation">Data preparation</a></li>
+<li><a href="#sample-correlation">Sample correlation</a></li>
+<li><a href="#corshrink-matrix">CorShrink matrix</a></li>
+<li><a href="#spcov-with-p-1-common_samples">spcov with P = 1/ (common_samples)</a></li>
+<li><a href="#spcov-with-p-exp1-common_samples">spcov with P = exp(1/ (common_samples))</a></li>
+<li><a href="#p-1abss_ij-zou-2006">P = 1/abs(S_{ij}) : Zou (2006)</a></li>
+<li><a href="#p-with-equal-off-diagonal-shrinkage">P with equal off-diagonal shrinkage</a></li>
+<li><a href="#p-being-scale-for-normal-distribution-sd-of-r">P being scale for normal distribution sd of r</a></li>
+</ul>
+</div>
+
+<p>In this script, we compare between the spcov method due to Bien and Tibshirani, under different proposals, with our CorShrink approach.</p>
+<div id="data-preparation" class="section level2">
+<h2>Data preparation</h2>
+<pre class="r"><code>library(spcov)</code></pre>
+<pre class="r"><code>gene &lt;- &quot;ENSG00000115138&quot; ## update and rerun to see the plots for your gene</code></pre>
+<p>The number of samples per tissue</p>
+<pre class="r"><code>common_samples &lt;- get(load(&quot;../output/common_samples.rda&quot;))</code></pre>
+<pre class="r"><code>gene_names &lt;- as.character(read.table(file = &quot;../data/GTEX_V6/gene_names_GTEX_V6.txt&quot;)[,1])
+gene_names_1 &lt;- as.character(sapply(gene_names, function(x) return(strsplit(x, &quot;[.]&quot;)[[1]][1])))
+ 
+person_label=read.table(&quot;../data/GTEX_V6/person_identifier_labels_with_numbers.txt&quot;);
+samples_id &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;)[,1]
+
+samples_person &lt;- sapply(samples_id, function(x) return(paste0(strsplit(as.character(x), &quot;-&quot;)[[1]][1:2], collapse =&quot;-&quot;)))
+tissue_labels &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;)[,3]
+
+unique_persons &lt;- unique(samples_person)
+unique_tissues &lt;- unique(tissue_labels)</code></pre>
+<p>We load the sample correlation matrix and the CorShrink matrix.</p>
+</div>
+<div id="sample-correlation" class="section level2">
+<h2>Sample correlation</h2>
+<pre class="r"><code>cor_result &lt;- get(load(&quot;../output/cor_tissues_non_ash_voom_pearson.rda&quot;))
+cor_result[is.na(cor_result)] = 0
+ash_cor_result &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_normal_gtex_tissues.rda&quot;))</code></pre>
+<pre class="r"><code>numg &lt;- match(gene, gene_names_1)
+cor_mat &lt;- diag(1, 53) + cor_result[,,numg]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(cor_mat[order_index, order_index],
+      col=col, main=paste0(&quot;sample corr: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="spcov_CorShrink_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+</div>
+<div id="corshrink-matrix" class="section level2">
+<h2>CorShrink matrix</h2>
+<pre class="r"><code>numg &lt;- match(gene, gene_names_1)
+ash_cor_mat &lt;- ash_cor_result[,,numg]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat)[order_index, order_index],
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="spcov_CorShrink_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p>We now apply the spcov method on the correlation matrix with P by inverse of the number of common samples.</p>
+<p>Now the <code>cor_mat</code> matrix is not a PD matrix, which you can check from below</p>
+<pre class="r"><code>eig &lt;- eigen(cor_mat)
+eig$values</code></pre>
+<pre><code>##  [1] 15.264942732  7.578568457  5.004894410  3.838812445  3.257373232
+##  [6]  3.095778749  2.710909869  2.557047760  2.267466353  2.105171387
+## [11]  1.958453844  1.873524737  1.734313246  1.605177107  1.393290358
+## [16]  1.333128316  1.272175601  1.221786554  1.188426463  1.109176033
+## [21]  1.043693773  0.988440263  0.903728405  0.810738004  0.765991730
+## [26]  0.692524861  0.617684238  0.602501923  0.511338768  0.346896576
+## [31]  0.314424241  0.289551291  0.233575473  0.142074618  0.041380797
+## [36]  0.017139850 -0.005790632 -0.098051400 -0.109891983 -0.188297781
+## [41] -0.227679377 -0.313330084 -0.463841085 -0.679648713 -0.684830781
+## [46] -0.765541722 -1.182494368 -1.468128047 -1.600749415 -1.717948975
+## [51] -2.017869844 -2.394558382 -3.773449875</code></pre>
+<p>Note that this is because the correlations in this matrix have not been calculated on the same set of observations.</p>
+<p>Can <strong>spcov</strong> still work despite it not being a valid covariance matrix?</p>
+<pre class="r"><code>cor_mat_pd &lt;- Matrix::nearPD(cor_mat, corr=TRUE)
+cor_mat_pd &lt;- as.matrix(cor_mat_pd$mat)</code></pre>
+</div>
+<div id="spcov-with-p-1-common_samples" class="section level2">
+<h2>spcov with P = 1/ (common_samples)</h2>
+<pre class="r"><code>P &lt;- 1/common_samples
+P[P==Inf] = 1
+diag(P) &lt;- 0
+P[1:5,1:5]</code></pre>
+<pre><code>##                              Adipose - Subcutaneous
+## Adipose - Subcutaneous                  0.000000000
+## Adipose - Visceral (Omentum)            0.006410256
+## Adrenal Gland                           0.009803922
+## Artery - Aorta                          0.006493506
+## Artery - Coronary                       0.011235955
+##                              Adipose - Visceral (Omentum) Adrenal Gland
+## Adipose - Subcutaneous                        0.006410256   0.009803922
+## Adipose - Visceral (Omentum)                  0.000000000   0.014705882
+## Adrenal Gland                                 0.014705882   0.000000000
+## Artery - Aorta                                0.009708738   0.011764706
+## Artery - Coronary                             0.015151515   0.015873016
+##                              Artery - Aorta Artery - Coronary
+## Adipose - Subcutaneous          0.006493506        0.01123596
+## Adipose - Visceral (Omentum)    0.009708738        0.01515152
+## Adrenal Gland                   0.011764706        0.01587302
+## Artery - Aorta                  0.000000000        0.01234568
+## Artery - Coronary               0.012345679        0.00000000</code></pre>
+<pre class="r"><code>lam &lt;- 0.06
+step.size &lt;- 100
+tol &lt;- 1e-4
+mm &lt;- spcov(Sigma=cor_mat_pd+0.1*diag(1,53), S=cor_mat_pd+0.1*diag(1,53), lambda=lam * P,step.size=step.size, n.inner.steps=200,
+thr.inner=0, tol.outer=tol, trace=1)</code></pre>
+<pre><code>## ---
+## using Nesterov, backtracking line search
+## ---
+## objective:  6.74828
+## step size given to GGDescent/Nesterov: 100
+## objective:  5.154792  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 20
+## step size given to GGDescent/Nesterov: 20
+## objective:  5.063667  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 4
+## step size given to GGDescent/Nesterov: 4
+## objective:  5.045221  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.8
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  5.042063  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.16
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  5.04156  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.032
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  5.041479  ( 200 iterations, max step size: 0.0064 )
+## MM converged in 6 steps!</code></pre>
+<pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(spcor_mat)[order_index, order_index],
+      col=col, main=paste0(&quot;spcov:&quot;, expression(lambda), &quot;=&quot;, lam), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="spcov_CorShrink_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<pre class="r"><code>lam &lt;- 0.1
+step.size &lt;- 100
+tol &lt;- 1e-4
+mm &lt;- spcov(Sigma=cor_mat_pd+0.1*diag(1,53), S=cor_mat_pd+0.1*diag(1,53), lambda=lam * P,step.size=step.size, n.inner.steps=200,
+thr.inner=0, tol.outer=tol, trace=1)</code></pre>
+<pre><code>## ---
+## using Nesterov, backtracking line search
+## ---
+## objective:  9.629329
+## step size given to GGDescent/Nesterov: 100
+## objective:  6.485171  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 20
+## step size given to GGDescent/Nesterov: 20
+## objective:  6.343457  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 4
+## step size given to GGDescent/Nesterov: 4
+## objective:  6.328573  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.8
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  6.326497  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.16
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  6.326079  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.032
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  6.325977  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  6.325949  ( 200 iterations, max step size: 0.0064 )
+## MM converged in 7 steps!</code></pre>
+<pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(spcor_mat)[order_index, order_index],
+      col=col, main=paste0(&quot;spcov:&quot;, expression(lambda), &quot;=&quot;, lam), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="spcov_CorShrink_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<pre class="r"><code>lam &lt;- 1
+step.size &lt;- 100
+tol &lt;- 1e-4
+mm &lt;- spcov(Sigma=cor_mat_pd+0.1*diag(1,53), S=cor_mat_pd+0.1*diag(1,53), lambda=lam * P,step.size=step.size, n.inner.steps=200,
+thr.inner=0, tol.outer=tol, trace=1)</code></pre>
+<pre><code>## ---
+## using Nesterov, backtracking line search
+## ---
+## objective:  74.45295
+## step size given to GGDescent/Nesterov: 100
+## objective:  23.07508  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 20
+## step size given to GGDescent/Nesterov: 20
+## objective:  21.22489  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 4
+## step size given to GGDescent/Nesterov: 4
+## objective:  21.07195  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.8
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  21.02404  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.16
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  21.00384  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.032
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.99208  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.98415  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.97815  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.97313  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.96851  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.96395  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.9591  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.95356  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.94749  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.94071  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.9325  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.92329  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.9133  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.9008  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.88549  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.86854  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.85245  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.83489  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.81375  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.78817  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.7636  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.73664  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.70764  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.6813  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.65348  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.63079  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.61592  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.60537  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.59714  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.59032  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.58419  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.57844  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.5747  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.57214  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.56988  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.56772  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.56553  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.56324  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.56174  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.56048  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.55944  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.55852  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.55771  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.55697  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.55629  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.55566  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.55505  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.55446  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.55387  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.55329  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.55268  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.55203  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.55147  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.55095  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.55046  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.54998  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.5495  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.54903  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.54855  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.54807  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.54759  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.54712  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.54667  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.54623  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.54581  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.54539  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.54498  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.54464  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.54438  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.54416  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.54398  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.54382  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.5437  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.54359  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  20.5435  ( 200 iterations, max step size: 0.032 )
+## MM converged in 80 steps!</code></pre>
+<pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(spcor_mat)[order_index, order_index],
+      col=col, main=paste0(&quot;spcov:&quot;, expression(lambda), &quot;=&quot;, lam), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="spcov_CorShrink_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<pre class="r"><code>lam &lt;- 10
+step.size &lt;- 100
+tol &lt;- 1e-4
+mm &lt;- spcov(Sigma=cor_mat_pd+0.1*diag(1,53), S=cor_mat_pd+0.1*diag(1,53), lambda=lam * P,step.size=step.size, n.inner.steps=200,
+thr.inner=0, tol.outer=tol, trace=1)</code></pre>
+<pre><code>## ---
+## using Nesterov, backtracking line search
+## ---
+## objective:  722.6891
+## step size given to GGDescent/Nesterov: 100
+## objective:  59.21597  ( 200 iterations, max step size: 0.00128 )
+## Reducing step size to 20
+## step size given to GGDescent/Nesterov: 20
+## objective:  50.72602  ( 200 iterations, max step size: 0.032 )
+## Reducing step size to 4
+## step size given to GGDescent/Nesterov: 4
+## objective:  47.80432  ( 200 iterations, max step size: 0.032 )
+## Reducing step size to 0.8
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  46.51893  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  45.82015  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  45.47393  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  45.28334  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  45.15621  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  45.05933  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.99288  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.95048  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.91864  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.89368  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.8734  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.85598  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.8403  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.82584  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.81238  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.79929  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.78793  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.78044  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.7754  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.77161  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.76882  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.76672  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.76514  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.764  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.76315  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.7625  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.76197  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.76154  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.76119  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.76091  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.76069  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.76052  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.76039  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.76027  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.76018  ( 200 iterations, max step size: 0.032 )
+## MM converged in 38 steps!</code></pre>
+<pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(spcor_mat)[order_index, order_index],
+      col=col, main=paste0(&quot;spcov:&quot;, expression(lambda), &quot;=&quot;, lam), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="spcov_CorShrink_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+<p>Problems with spcov</p>
+<ul>
+<li><p>You have to choose the <span class="math inline">\(\lambda\)</span> well. Here we choose the one from common samples. That automatically takes the separate scaling for separate variable pair corr into account. That seems like the best way to tackle the correlation issue.</p></li>
+<li><p>The shrinkage does not seem too strong for smaller values of <span class="math inline">\(\lambda\)</span> and also for high <span class="math inline">\(\lambda\)</span>, the shrinkage is strong throughout the correlation matrix.</p></li>
+<li><p>However, the feeling is CorShrink does a better job at separately shrinking the correlations. For instance, the negative correlation values still remain even after very strong shrinkage. Also it is not a good thing that for large <span class="math inline">\(\lambda\)</span>, there is strong shrinkage even in the brain tissues.</p></li>
+</ul>
+<p>We try to elevate the differential shrinkage by taking exponent of the <span class="math inline">\(P\)</span> taken above and repeating the experiment</p>
+</div>
+<div id="spcov-with-p-exp1-common_samples" class="section level2">
+<h2>spcov with P = exp(1/ (common_samples))</h2>
+<pre class="r"><code>P &lt;- exp(1/common_samples)
+P[P==Inf] = 5
+diag(P) &lt;- 0
+P[1:5,1:5]</code></pre>
+<pre><code>##                              Adipose - Subcutaneous
+## Adipose - Subcutaneous                     0.000000
+## Adipose - Visceral (Omentum)               1.006431
+## Adrenal Gland                              1.009852
+## Artery - Aorta                             1.006515
+## Artery - Coronary                          1.011299
+##                              Adipose - Visceral (Omentum) Adrenal Gland
+## Adipose - Subcutaneous                           1.006431      1.009852
+## Adipose - Visceral (Omentum)                     0.000000      1.014815
+## Adrenal Gland                                    1.014815      0.000000
+## Artery - Aorta                                   1.009756      1.011834
+## Artery - Coronary                                1.015267      1.016000
+##                              Artery - Aorta Artery - Coronary
+## Adipose - Subcutaneous             1.006515          1.011299
+## Adipose - Visceral (Omentum)       1.009756          1.015267
+## Adrenal Gland                      1.011834          1.016000
+## Artery - Aorta                     0.000000          1.012422
+## Artery - Coronary                  1.012422          0.000000</code></pre>
+<pre class="r"><code>lam &lt;- 0.1
+step.size &lt;- 100
+tol &lt;- 1e-4
+mm &lt;- spcov(Sigma=cor_mat_pd+0.1*diag(1,53), S=cor_mat_pd+0.1*diag(1,53), lambda=lam * P,step.size=step.size, n.inner.steps=200,
+thr.inner=0, tol.outer=tol, trace=1)</code></pre>
+<pre><code>## ---
+## using Nesterov, backtracking line search
+## ---
+## objective:  85.60866
+## step size given to GGDescent/Nesterov: 100
+## objective:  27.44997  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 20
+## step size given to GGDescent/Nesterov: 20
+## objective:  27.0145  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 4
+## step size given to GGDescent/Nesterov: 4
+## objective:  26.95998  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.8
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  26.94509  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.16
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  26.93948  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.032
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  26.93705  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  26.93592  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  26.93536  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  26.93508  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  26.93493  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  26.93485  ( 200 iterations, max step size: 0.0064 )
+## MM converged in 11 steps!</code></pre>
+<pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(spcor_mat)[order_index, order_index],
+      col=col, main=paste0(&quot;spcov:&quot;, expression(lambda), &quot;=&quot;, lam), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="spcov_CorShrink_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<pre class="r"><code>lam &lt;- 0.3
+step.size &lt;- 100
+tol &lt;- 1e-4
+mm &lt;- spcov(Sigma=cor_mat_pd+0.1*diag(1,53), S=cor_mat_pd+0.1*diag(1,53), lambda=lam * P,step.size=step.size, n.inner.steps=200,
+thr.inner=0, tol.outer=tol, trace=1)</code></pre>
+<pre><code>## ---
+## using Nesterov, backtracking line search
+## ---
+## objective:  251.9726
+## step size given to GGDescent/Nesterov: 100
+## objective:  51.48593  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 20
+## step size given to GGDescent/Nesterov: 20
+## objective:  50.22216  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 4
+## step size given to GGDescent/Nesterov: 4
+## objective:  49.87815  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.8
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  49.67767  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.16
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  49.53936  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.032
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.43651  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.3587  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.29414  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.24118  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.20205  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.17303  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.15021  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.13218  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.11864  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.10856  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.10111  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.09552  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.0913  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.0879  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.08506  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.08268  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.0808  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.07926  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.07796  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.07688  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.07596  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.07519  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.07453  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.07395  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.07345  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.07301  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.07265  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.07235  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.07209  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.07188  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.07169  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.07153  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.07138  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.07126  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.07116  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  49.07107  ( 200 iterations, max step size: 0.032 )
+## MM converged in 41 steps!</code></pre>
+<pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(spcor_mat)[order_index, order_index],
+      col=col, main=paste0(&quot;spcov:&quot;, expression(lambda), &quot;=&quot;, lam), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="spcov_CorShrink_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
+<pre class="r"><code>lam &lt;- 0.5
+step.size &lt;- 100
+tol &lt;- 1e-4
+mm &lt;- spcov(Sigma=cor_mat_pd+0.1*diag(1,53), S=cor_mat_pd+0.1*diag(1,53), lambda=lam * P,step.size=step.size, n.inner.steps=200,
+thr.inner=0, tol.outer=tol, trace=1)</code></pre>
+<pre><code>## ---
+## using Nesterov, backtracking line search
+## ---
+## objective:  418.3365
+## step size given to GGDescent/Nesterov: 100
+## objective:  66.90725  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 20
+## step size given to GGDescent/Nesterov: 20
+## objective:  64.45449  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 4
+## step size given to GGDescent/Nesterov: 4
+## objective:  62.91876  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.8
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  61.9178  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.16
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  61.17858  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  60.57034  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  60.02622  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  59.57769  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  59.19432  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  58.88695  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  58.62111  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  58.38295  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  58.167  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  57.97452  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  57.82002  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  57.68986  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  57.57988  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  57.48  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  57.37427  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  57.27077  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  57.1729  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  57.07671  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.98903  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.91763  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.87767  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.84102  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.80274  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.77041  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.74679  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.73116  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.71824  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.70996  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.70504  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.70244  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.70058  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.6991  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.69788  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.69682  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.69585  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.695  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.69452  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.69412  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.69379  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.69352  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.6933  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.69311  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.69294  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.69278  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.69267  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.69257  ( 200 iterations, max step size: 0.032 )
+## MM converged in 50 steps!</code></pre>
+<pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(spcor_mat)[order_index, order_index],
+      col=col, main=paste0(&quot;spcov:&quot;, expression(lambda), &quot;=&quot;, lam), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="spcov_CorShrink_files/figure-html/unnamed-chunk-26-1.png" width="672" /></p>
+<pre class="r"><code>lam &lt;- 1
+step.size &lt;- 100
+tol &lt;- 1e-4
+mm &lt;- spcov(Sigma=cor_mat_pd+0.1*diag(1,53), S=cor_mat_pd+0.1*diag(1,53), lambda=lam * P,step.size=step.size, n.inner.steps=200,
+thr.inner=0, tol.outer=tol, trace=1)</code></pre>
+<pre><code>## ---
+## using Nesterov, backtracking line search
+## ---
+## objective:  834.2462
+## step size given to GGDescent/Nesterov: 100
+## objective:  398.7267  ( 200 iterations, max step size: 0.16 )
+## Reducing step size to 20
+## step size given to GGDescent/Nesterov: 20
+## objective:  294.912  ( 200 iterations, max step size: 2.048e-06 )
+## Reducing step size to 4
+## step size given to GGDescent/Nesterov: 4
+## objective:  103.3351  ( 200 iterations, max step size: 5.12e-05 )
+## Reducing step size to 0.8
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  72.55577  ( 200 iterations, max step size: 0.00128 )
+## Reducing step size to 0.16
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  66.79654  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.032
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  63.47729  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  61.51416  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  60.23707  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  59.51732  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  58.86275  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  58.51267  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  58.32952  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  58.2673  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  58.22051  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  58.15859  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  58.14405  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  58.13943  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  58.13719  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  58.1354  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  58.13346  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  58.13095  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  58.12719  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  58.12041  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  58.1042  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  58.06393  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  58.0545  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  58.0522  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  58.05163  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  58.05149  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  58.05145  ( 200 iterations, max step size: 0.032 )
+## MM converged in 30 steps!</code></pre>
+<pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(spcor_mat)[order_index, order_index],
+      col=col, main=paste0(&quot;spcov:&quot;, expression(lambda), &quot;=&quot;, lam), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="spcov_CorShrink_files/figure-html/unnamed-chunk-28-1.png" width="672" /></p>
+</div>
+<div id="p-1abss_ij-zou-2006" class="section level2">
+<h2>P = 1/abs(S_{ij}) : Zou (2006)</h2>
+<pre class="r"><code>P &lt;- 1/abs(cor_mat_pd)
+P[P==Inf] = 1
+diag(P) &lt;- 0
+P[1:5,1:5]</code></pre>
+<pre><code>##          [,1]     [,2]      [,3]     [,4]      [,5]
+## [1,] 0.000000 4.217863  5.296885 3.182954  8.646735
+## [2,] 4.217863 0.000000  8.235140 3.670183  3.357258
+## [3,] 5.296885 8.235140  0.000000 3.013554 66.565037
+## [4,] 3.182954 3.670183  3.013554 0.000000  3.124869
+## [5,] 8.646735 3.357258 66.565037 3.124869  0.000000</code></pre>
+<pre class="r"><code>lam &lt;- 0.1
+step.size &lt;- 100
+tol &lt;- 1e-4
+mm &lt;- spcov(Sigma=cor_mat_pd+0.1*diag(1,53), S=cor_mat_pd+0.1*diag(1,53), lambda=lam * P,step.size=step.size, n.inner.steps=200,
+thr.inner=0, tol.outer=tol, trace=1)</code></pre>
+<pre><code>## ---
+## using Nesterov, backtracking line search
+## ---
+## objective:  278.0267
+## step size given to GGDescent/Nesterov: 100
+## objective:  49.22813  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 20
+## step size given to GGDescent/Nesterov: 20
+## objective:  46.06622  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 4
+## step size given to GGDescent/Nesterov: 4
+## objective:  44.87432  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.8
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  44.26773  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.16
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  43.9139  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.032
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.70514  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.5757  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.48749  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.42366  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.37766  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.34548  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.32165  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.30611  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.29617  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.28984  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.28525  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.28192  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.27942  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.27745  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.27581  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.27441  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.27318  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.27207  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.27105  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.27011  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.26921  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.26833  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.26746  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.26658  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.26568  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.26475  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.26375  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.26292  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.26216  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.26145  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.26102  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.26069  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.26045  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.26025  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.2601  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.25996  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.25985  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.25976  ( 200 iterations, max step size: 0.032 )
+## MM converged in 43 steps!</code></pre>
+<pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(spcor_mat)[order_index, order_index],
+      col=col, main=paste0(&quot;spcov:&quot;, expression(lambda), &quot;=&quot;, lam), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="spcov_CorShrink_files/figure-html/unnamed-chunk-31-1.png" width="672" /></p>
+<pre class="r"><code>lam &lt;- 0.3
+step.size &lt;- 100
+tol &lt;- 1e-4
+mm &lt;- spcov(Sigma=cor_mat_pd+0.1*diag(1,53), S=cor_mat_pd+0.1*diag(1,53), lambda=lam * P,step.size=step.size, n.inner.steps=200,
+thr.inner=0, tol.outer=tol, trace=1)</code></pre>
+<pre><code>## ---
+## using Nesterov, backtracking line search
+## ---
+## objective:  829.2267
+## step size given to GGDescent/Nesterov: 100
+## objective:  615.1181  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 20
+## step size given to GGDescent/Nesterov: 20
+## objective:  352.8478  ( 200 iterations, max step size: 0.032 )
+## Reducing step size to 4
+## step size given to GGDescent/Nesterov: 4
+## objective:  186.646  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 4
+## objective:  142.0638  ( 200 iterations, max step size: 1.024e-05 )
+## Reducing step size to 0.8
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  61.25741  ( 200 iterations, max step size: 0.000256 )
+## Reducing step size to 0.16
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  57.66911  ( 200 iterations, max step size: 0.00128 )
+## Reducing step size to 0.032
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  56.48052  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.94137  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.67025  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.50625  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.40116  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.32581  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.27263  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.23739  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.22295  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.21473  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.2088  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.20425  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.20046  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.19712  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.19407  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.19135  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.18948  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.18778  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.18648  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.18536  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.18468  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.18417  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.18374  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.18338  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.18307  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.18284  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.18265  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.18249  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.18235  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.18222  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.1821  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.18197  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.18183  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.18169  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.18153  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  55.18148  ( 200 iterations, max step size: 0.032 )
+## MM converged in 42 steps!</code></pre>
+<pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(spcor_mat)[order_index, order_index],
+      col=col, main=paste0(&quot;spcov:&quot;, expression(lambda), &quot;=&quot;, lam), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="spcov_CorShrink_files/figure-html/unnamed-chunk-33-1.png" width="672" /></p>
+<pre class="r"><code>lam &lt;- 0.5
+step.size &lt;- 100
+tol &lt;- 1e-4
+mm &lt;- spcov(Sigma=cor_mat_pd+0.1*diag(1,53), S=cor_mat_pd+0.1*diag(1,53), lambda=lam * P,step.size=step.size, n.inner.steps=200,
+thr.inner=0, tol.outer=tol, trace=1)</code></pre>
+<pre><code>## ---
+## using Nesterov, backtracking line search
+## ---
+## objective:  1380.427
+## step size given to GGDescent/Nesterov: 100
+## objective:  81.79823  ( 200 iterations, max step size: 0.00128 )
+## Reducing step size to 20
+## step size given to GGDescent/Nesterov: 20
+## objective:  69.25789  ( 200 iterations, max step size: 0.032 )
+## Reducing step size to 4
+## step size given to GGDescent/Nesterov: 4
+## objective:  63.09038  ( 200 iterations, max step size: 0.032 )
+## Reducing step size to 0.8
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  60.35097  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  59.02858  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  58.40347  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  58.09583  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.95117  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.88247  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.84172  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.80458  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.75978  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.72554  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.70612  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.68781  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.66917  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.64792  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.62846  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.61867  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.61107  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.60305  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.59662  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.59434  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.59273  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.59103  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.58873  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.58492  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.58267  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.58133  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.58012  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.57887  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.57746  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.57573  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.57344  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.57188  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.57058  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.57034  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  57.57027  ( 200 iterations, max step size: 0.16 )
+## MM converged in 38 steps!</code></pre>
+<pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(spcor_mat)[order_index, order_index],
+      col=col, main=paste0(&quot;spcov:&quot;, expression(lambda), &quot;=&quot;, lam), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="spcov_CorShrink_files/figure-html/unnamed-chunk-35-1.png" width="672" /></p>
+</div>
+<div id="p-with-equal-off-diagonal-shrinkage" class="section level2">
+<h2>P with equal off-diagonal shrinkage</h2>
+<p>Now we consider the equal off-diagonal shrinkage as proposed as default in Bien and Tibshirani.</p>
+<pre class="r"><code>P &lt;- matrix(1, 53, 53)
+P[P==Inf] = 1
+diag(P) &lt;- 0
+P[1:5,1:5]</code></pre>
+<pre><code>##      [,1] [,2] [,3] [,4] [,5]
+## [1,]    0    1    1    1    1
+## [2,]    1    0    1    1    1
+## [3,]    1    1    0    1    1
+## [4,]    1    1    1    0    1
+## [5,]    1    1    1    1    0</code></pre>
+<pre class="r"><code>lam &lt;- 0.1
+step.size &lt;- 100
+tol &lt;- 1e-4
+mm &lt;- spcov(Sigma=cor_mat_pd+0.1*diag(1,53), S=cor_mat_pd+0.1*diag(1,53), lambda=lam * P,step.size=step.size, n.inner.steps=200,
+thr.inner=0, tol.outer=tol, trace=1)</code></pre>
+<pre><code>## ---
+## using Nesterov, backtracking line search
+## ---
+## objective:  72.47691
+## step size given to GGDescent/Nesterov: 100
+## objective:  25.20679  ( 200 iterations, max step size: 0.032 )
+## Reducing step size to 20
+## step size given to GGDescent/Nesterov: 20
+## objective:  24.84815  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 4
+## step size given to GGDescent/Nesterov: 4
+## objective:  24.81399  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.8
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  24.80753  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.16
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  24.80572  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.032
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  24.80513  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  24.80492  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  24.80484  ( 200 iterations, max step size: 0.0064 )
+## MM converged in 8 steps!</code></pre>
+<pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(spcor_mat)[order_index, order_index],
+      col=col, main=paste0(&quot;spcov:&quot;, expression(lambda), &quot;=&quot;, lam), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="spcov_CorShrink_files/figure-html/unnamed-chunk-38-1.png" width="672" /></p>
+<pre class="r"><code>lam &lt;- 0.5
+step.size &lt;- 100
+tol &lt;- 1e-4
+mm &lt;- spcov(Sigma=cor_mat_pd+0.1*diag(1,53), S=cor_mat_pd+0.1*diag(1,53), lambda=lam * P,step.size=step.size, n.inner.steps=200,
+thr.inner=0, tol.outer=tol, trace=1)</code></pre>
+<pre><code>## ---
+## using Nesterov, backtracking line search
+## ---
+## objective:  352.6777
+## step size given to GGDescent/Nesterov: 100
+## objective:  63.6281  ( 200 iterations, max step size: 0.16 )
+## Reducing step size to 20
+## step size given to GGDescent/Nesterov: 20
+## objective:  61.55996  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 4
+## step size given to GGDescent/Nesterov: 4
+## objective:  60.21294  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.8
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  59.25571  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.16
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  58.59  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  58.07755  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  57.65358  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  57.30909  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  57.04506  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.84185  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.68615  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.55046  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.4366  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.3439  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.26656  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.20713  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.16693  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.13502  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.10619  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.07615  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.04586  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  56.01832  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.99142  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.96304  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.9322  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.90202  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.87765  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.85837  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.84583  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.83527  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.82603  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.81798  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.81009  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.80298  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.7967  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.79136  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.7867  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.78216  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.77782  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.77344  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.76925  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.76489  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.75994  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.75468  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.74871  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.7428  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.73718  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.73103  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.72459  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.71964  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.71621  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.71336  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.71089  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.70888  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.70746  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.70638  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.7055  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.70477  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.7041  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.70347  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.70285  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.70221  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.70153  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.70097  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.70045  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.69993  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.69942  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.69899  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.69855  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.69812  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.69764  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.69709  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.69642  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.69557  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.69444  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.69283  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.6907  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.68853  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.68599  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.68372  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.6814  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.67877  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.67572  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.67222  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.6688  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.66544  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.66384  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.66276  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.66195  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.66166  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.66148  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.66136  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  55.66127  ( 200 iterations, max step size: 0.032 )
+## MM converged in 93 steps!</code></pre>
+<pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(spcor_mat)[order_index, order_index],
+      col=col, main=paste0(&quot;spcov:&quot;, expression(lambda), &quot;=&quot;, lam), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="spcov_CorShrink_files/figure-html/unnamed-chunk-40-1.png" width="672" /></p>
+<pre class="r"><code>lam &lt;- 1
+step.size &lt;- 100
+tol &lt;- 1e-4
+mm &lt;- spcov(Sigma=cor_mat_pd+0.1*diag(1,53), S=cor_mat_pd+0.1*diag(1,53), lambda=lam * P,step.size=step.size, n.inner.steps=200,
+thr.inner=0, tol.outer=tol, trace=1)</code></pre>
+<pre><code>## ---
+## using Nesterov, backtracking line search
+## ---
+## objective:  702.9287
+## step size given to GGDescent/Nesterov: 100
+## objective:  85.6177  ( 200 iterations, max step size: 0.16 )
+## Reducing step size to 20
+## step size given to GGDescent/Nesterov: 20
+## objective:  76.57561  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 4
+## step size given to GGDescent/Nesterov: 4
+## objective:  70.50017  ( 200 iterations, max step size: 0.032 )
+## Reducing step size to 0.8
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  66.03355  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  63.00885  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  61.23358  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  60.10646  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  59.44701  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  58.97613  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  58.74134  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  58.58719  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  58.45454  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  58.39487  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  58.32221  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  58.28449  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  58.27441  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  58.26938  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  58.2654  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  58.26119  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  58.25586  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  58.2479  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  58.23293  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  58.19933  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  58.16462  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  58.11681  ( 200 iterations, max step size: 0.8 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  58.07113  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  58.05594  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  58.05255  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  58.05172  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  58.05151  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  58.05146  ( 200 iterations, max step size: 0.16 )
+## MM converged in 31 steps!</code></pre>
+<pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(spcor_mat)[order_index, order_index],
+      col=col, main=paste0(&quot;spcov:&quot;, expression(lambda), &quot;=&quot;, lam), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="spcov_CorShrink_files/figure-html/unnamed-chunk-42-1.png" width="672" /></p>
+</div>
+<div id="p-being-scale-for-normal-distribution-sd-of-r" class="section level2">
+<h2>P being scale for normal distribution sd of r</h2>
+<pre class="r"><code>P &lt;- sqrt((1 - cor_mat_pd^2)^2/common_samples)
+P[P==Inf] = 1.5
+diag(P) &lt;- 0
+P[1:5,1:5]</code></pre>
+<pre><code>##            [,1]       [,2]      [,3]       [,4]       [,5]
+## [1,] 0.00000000 0.07556366 0.0954857 0.07262842 0.10458203
+## [2,] 0.07556366 0.00000000 0.1194797 0.09121807 0.11217059
+## [3,] 0.09548570 0.11947966 0.0000000 0.09652170 0.12595972
+## [4,] 0.07262842 0.09121807 0.0965217 0.00000000 0.09973238
+## [5,] 0.10458203 0.11217059 0.1259597 0.09973238 0.00000000</code></pre>
+<pre class="r"><code>lam &lt;- 0.1
+step.size &lt;- 100
+tol &lt;- 1e-4
+mm &lt;- spcov(Sigma=cor_mat_pd+0.1*diag(1,53), S=cor_mat_pd+0.1*diag(1,53), lambda=lam * P,step.size=step.size, n.inner.steps=200,
+thr.inner=0, tol.outer=tol, trace=1)</code></pre>
+<pre><code>## ---
+## using Nesterov, backtracking line search
+## ---
+## objective:  17.35975
+## step size given to GGDescent/Nesterov: 100
+## objective:  9.883433  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 20
+## step size given to GGDescent/Nesterov: 20
+## objective:  9.727814  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 4
+## step size given to GGDescent/Nesterov: 4
+## objective:  9.712549  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.8
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  9.709943  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.16
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  9.709325  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.032
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  9.709143  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  9.709084  ( 200 iterations, max step size: 0.0064 )
+## MM converged in 7 steps!</code></pre>
+<pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(spcor_mat)[order_index, order_index],
+      col=col, main=paste0(&quot;spcov:&quot;, expression(lambda), &quot;=&quot;, lam), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="spcov_CorShrink_files/figure-html/unnamed-chunk-45-1.png" width="672" /></p>
+<pre class="r"><code>lam &lt;- 0.5
+step.size &lt;- 100
+tol &lt;- 1e-4
+mm &lt;- spcov(Sigma=cor_mat_pd+0.1*diag(1,53), S=cor_mat_pd+0.1*diag(1,53), lambda=lam * P,step.size=step.size, n.inner.steps=200,
+thr.inner=0, tol.outer=tol, trace=1)</code></pre>
+<pre><code>## ---
+## using Nesterov, backtracking line search
+## ---
+## objective:  77.09192
+## step size given to GGDescent/Nesterov: 100
+## objective:  25.4859  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 20
+## step size given to GGDescent/Nesterov: 20
+## objective:  24.64956  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 4
+## step size given to GGDescent/Nesterov: 4
+## objective:  24.54758  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.8
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  24.50972  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.16
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  24.49116  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.032
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  24.48076  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  24.47434  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  24.47024  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  24.46763  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  24.46605  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  24.46505  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  24.46443  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  24.46406  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  24.46383  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  24.46367  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  24.46357  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  24.4635  ( 200 iterations, max step size: 0.0064 )
+## MM converged in 17 steps!</code></pre>
+<pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(spcor_mat)[order_index, order_index],
+      col=col, main=paste0(&quot;spcov:&quot;, expression(lambda), &quot;=&quot;, lam), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="spcov_CorShrink_files/figure-html/unnamed-chunk-47-1.png" width="672" /></p>
+<pre class="r"><code>lam &lt;- 1
+step.size &lt;- 100
+tol &lt;- 1e-4
+mm &lt;- spcov(Sigma=cor_mat_pd+0.1*diag(1,53), S=cor_mat_pd+0.1*diag(1,53), lambda=lam * P,step.size=step.size, n.inner.steps=200,
+thr.inner=0, tol.outer=tol, trace=1)</code></pre>
+<pre><code>## ---
+## using Nesterov, backtracking line search
+## ---
+## objective:  151.7571
+## step size given to GGDescent/Nesterov: 100
+## objective:  37.83471  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 20
+## step size given to GGDescent/Nesterov: 20
+## objective:  36.35666  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 4
+## step size given to GGDescent/Nesterov: 4
+## objective:  36.13137  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.8
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  36.01246  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.16
+## step size given to GGDescent/Nesterov: 0.16
+## objective:  35.92325  ( 200 iterations, max step size: 0.0064 )
+## Reducing step size to 0.032
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.8491  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.78214  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.72223  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.66401  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.61441  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.57127  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.53643  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.50646  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.48272  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.46598  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.45452  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.44565  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.43807  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.43127  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.42637  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.42394  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.42221  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.42092  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.41995  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.41917  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.41853  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.41801  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.41757  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.41718  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.41681  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.41646  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.41613  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.41592  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.41574  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.41559  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.41546  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.41535  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  35.41525  ( 200 iterations, max step size: 0.032 )
+## MM converged in 38 steps!</code></pre>
+<pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(spcor_mat)[order_index, order_index],
+      col=col, main=paste0(&quot;spcov:&quot;, expression(lambda), &quot;=&quot;, lam), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="spcov_CorShrink_files/figure-html/unnamed-chunk-49-1.png" width="672" /></p>
+<pre class="r"><code>lam &lt;- 5
+step.size &lt;- 100
+tol &lt;- 1e-4
+mm &lt;- spcov(Sigma=cor_mat_pd+0.1*diag(1,53), S=cor_mat_pd+0.1*diag(1,53), lambda=lam * P,step.size=step.size, n.inner.steps=200,
+thr.inner=0, tol.outer=tol, trace=1)</code></pre>
+<pre><code>## ---
+## using Nesterov, backtracking line search
+## ---
+## objective:  749.0788
+## step size given to GGDescent/Nesterov: 100
+## objective:  78.84385  ( 200 iterations, max step size: 0.00128 )
+## Reducing step size to 20
+## step size given to GGDescent/Nesterov: 20
+## objective:  67.10727  ( 200 iterations, max step size: 0.032 )
+## Reducing step size to 4
+## step size given to GGDescent/Nesterov: 4
+## objective:  61.40588  ( 200 iterations, max step size: 0.032 )
+## Reducing step size to 0.8
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  58.5902  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  56.96137  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  56.04526  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  55.45269  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  55.09899  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  54.94326  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  54.86196  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  54.81824  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  54.78781  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  54.76303  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  54.74559  ( 200 iterations, max step size: 0.032 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  54.72899  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  54.70881  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  54.6718  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  54.64846  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  54.64273  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  54.64049  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  54.63931  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  54.63852  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  54.6379  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  54.63741  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  54.63706  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  54.6368  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  54.63669  ( 200 iterations, max step size: 0.16 )
+## step size given to GGDescent/Nesterov: 0.8
+## objective:  54.63662  ( 200 iterations, max step size: 0.16 )
+## MM converged in 28 steps!</code></pre>
+<pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(spcor_mat)[order_index, order_index],
+      col=col, main=paste0(&quot;spcov:&quot;, expression(lambda), &quot;=&quot;, lam), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="spcov_CorShrink_files/figure-html/unnamed-chunk-51-1.png" width="672" /></p>
+</div>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Kushal K Dey" />
+
+
+<title>Cross validation thresholding vs CorShrink</title>
+
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="cosmo.css" type="text/css" />
+
+</head>
+
+<body>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
+    <link href="../docs/cosmo.css" rel="stylesheet">
+    <link href="../docs/cosmo.min.css" rel="stylesheet">
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../docs/bootstrap/js/bootstrap.min.js"></script>
+
+<body>
+
+<div class = "nav" align = "middle">
+<div class= "p1"></div>
+<p>
+  <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "workflow.html">WORKFLOW</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "about.html">METHODS</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "license.html">LICENSE</a> 
+   &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
+ </p>
+</div>  
+<!-- <div class="nav">
+  <a href="index.html">Home page</a> &nbsp &nbsp
+  <a href="musings.html">Musings</a> &nbsp &nbsp
+  <a href="town.html">My town</a> &nbsp &nbsp
+  <a href="links.html">Links</a>
+</div> -->
+
+<!-- Main content -->
+</body>
+</html>
+
+
+<h1 class="title toc-ignore">Cross validation thresholding vs CorShrink</h1>
+<h4 class="author"><em>Kushal K Dey</em></h4>
+<h4 class="date"><em>5/25/2017</em></h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#data-preparation">Data preparation</a></li>
+<li><a href="#sample-correlation">Sample correlation</a></li>
+<li><a href="#corshrink-matrix">CorShrink matrix</a></li>
+<li><a href="#hard-thresholding">Hard thresholding</a></li>
+<li><a href="#soft-thresholding">Soft thresholding</a></li>
+<li><a href="#softimpute-random-cv">Softimpute + random CV</a></li>
+<li><a href="#conclusions">Conclusions</a></li>
+</ul>
+</div>
+
+<p>In this script, we compare CorShrink with positive definite sparse covariance matrix estimation due to Rothman et al. We use the <strong>PDSCE</strong> package for this purpose.</p>
+<div id="data-preparation" class="section level2">
+<h2>Data preparation</h2>
+<pre class="r"><code>library(CVTuningCov)</code></pre>
+<pre class="r"><code>gene &lt;- &quot;ENSG00000125414&quot; ## update and rerun to see the plots for your gene</code></pre>
+<p>The number of samples per tissue</p>
+<pre class="r"><code>common_samples &lt;- get(load(&quot;../output/common_samples.rda&quot;))</code></pre>
+<pre class="r"><code>gene_names &lt;- as.character(read.table(file = &quot;../data/GTEX_V6/gene_names_GTEX_V6.txt&quot;)[,1])
+gene_names_1 &lt;- as.character(sapply(gene_names, function(x) return(strsplit(x, &quot;[.]&quot;)[[1]][1])))
+ 
+person_label=read.table(&quot;../data/GTEX_V6/person_identifier_labels_with_numbers.txt&quot;);
+samples_id &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;)[,1]
+
+samples_person &lt;- sapply(samples_id, function(x) return(paste0(strsplit(as.character(x), &quot;-&quot;)[[1]][1:2], collapse =&quot;-&quot;)))
+tissue_labels &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;)[,3]
+
+unique_persons &lt;- unique(samples_person)
+unique_tissues &lt;- unique(tissue_labels)</code></pre>
+<p>We load the sample correlation matrix and the CorShrink matrix.</p>
+</div>
+<div id="sample-correlation" class="section level2">
+<h2>Sample correlation</h2>
+<pre class="r"><code>cor_result &lt;- get(load(&quot;../output/cor_tissues_non_ash_voom_pearson.rda&quot;))
+cor_result[is.na(cor_result)] = 0
+ash_cor_result &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_normal_gtex_tissues.rda&quot;))</code></pre>
+<pre class="r"><code>numg &lt;- match(gene, gene_names_1)
+cor_mat &lt;- diag(1, 53) + cor_result[,,numg]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(cor_mat[order_index, order_index],
+      col=col, main=paste0(&quot;sample corr: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="thresholding_Corshrink_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+</div>
+<div id="corshrink-matrix" class="section level2">
+<h2>CorShrink matrix</h2>
+<pre class="r"><code>numg &lt;- match(gene, gene_names_1)
+ash_cor_mat &lt;- ash_cor_result[,,numg]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat)[order_index, order_index],
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="thresholding_Corshrink_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<pre class="r"><code>cor_mat_pd &lt;- Matrix::nearPD(cor_mat, corr=TRUE)
+cor_mat_pd &lt;- as.matrix(cor_mat_pd$mat)</code></pre>
+</div>
+<div id="hard-thresholding" class="section level2">
+<h2>Hard thresholding</h2>
+<pre class="r"><code>sigma &lt;- hard.thresholding(Sigma = cor_mat_pd, c = 0.2)</code></pre>
+<pre class="r"><code>numg &lt;- match(gene, gene_names_1)
+ash_cor_mat &lt;- ash_cor_result[,,numg]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(sigma)[order_index, order_index],
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="thresholding_Corshrink_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<pre class="r"><code>sigma &lt;- hard.thresholding(Sigma = cor_mat_pd, c = 0.3)</code></pre>
+<pre class="r"><code>numg &lt;- match(gene, gene_names_1)
+ash_cor_mat &lt;- ash_cor_result[,,numg]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(sigma)[order_index, order_index],
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="thresholding_Corshrink_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<pre class="r"><code>sigma &lt;- hard.thresholding(Sigma = cor_mat_pd, c = 0.5)</code></pre>
+<pre class="r"><code>numg &lt;- match(gene, gene_names_1)
+ash_cor_mat &lt;- ash_cor_result[,,numg]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(sigma)[order_index, order_index],
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="thresholding_Corshrink_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+</div>
+<div id="soft-thresholding" class="section level2">
+<h2>Soft thresholding</h2>
+<pre class="r"><code>sigma &lt;- soft.thresholding(Sigma = cor_mat_pd, c = 0.2)</code></pre>
+<pre class="r"><code>numg &lt;- match(gene, gene_names_1)
+ash_cor_mat &lt;- ash_cor_result[,,numg]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(sigma)[order_index, order_index],
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="thresholding_Corshrink_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<pre class="r"><code>sigma &lt;- soft.thresholding(Sigma = cor_mat_pd, c = 0.3)</code></pre>
+<pre class="r"><code>numg &lt;- match(gene, gene_names_1)
+ash_cor_mat &lt;- ash_cor_result[,,numg]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(sigma)[order_index, order_index],
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="thresholding_Corshrink_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+<pre class="r"><code>sigma &lt;- soft.thresholding(Sigma = cor_mat_pd, c = 0.5)</code></pre>
+<pre class="r"><code>numg &lt;- match(gene, gene_names_1)
+ash_cor_mat &lt;- ash_cor_result[,,numg]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(sigma)[order_index, order_index],
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="thresholding_Corshrink_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
+</div>
+<div id="softimpute-random-cv" class="section level2">
+<h2>Softimpute + random CV</h2>
+<pre class="r"><code>library(softImpute)
+impute_method &lt;- &quot;svd&quot; ## other option tested is &quot;als&quot;</code></pre>
+<pre class="r"><code>person_tissue_genes &lt;- get(load(&quot;../output/person_tissue_genes_voom.rda&quot;))</code></pre>
+<pre class="r"><code>numg &lt;- grep(gene, gene_names_1)
+mat &lt;- person_tissue_genes[,,numg]
+matc=biScale(mat,col.scale=FALSE,row.scale=FALSE,trace=TRUE)</code></pre>
+<pre><code>## Iter 1 Total Changes 789.0558 
+## Iter 2 Total Changes 1.244273 
+## Iter 3 Total Changes 0.03444363 
+## Iter 4 Total Changes 0.003300654 
+## Iter 5 Total Changes 0.0005117754 
+## Iter 6 Total Changes 8.766135e-05 
+## Iter 7 Total Changes 1.528621e-05 
+## Iter 8 Total Changes 2.676274e-06 
+## Iter 9 Total Changes 4.690897e-07 
+## Iter 10 Total Changes 8.225103e-08 
+## Iter 11 Total Changes 1.442384e-08 
+## Iter 12 Total Changes 2.529525e-09 
+## Iter 13 Total Changes 4.436122e-10</code></pre>
+<pre class="r"><code>fits3=softImpute(matc,rank.max=25,lambda=1,type=impute_method)
+fitted_mat &lt;- complete(mat,fits3,unscale=TRUE)</code></pre>
+<pre class="r"><code>dim(fitted_mat)</code></pre>
+<pre><code>## [1] 544  53</code></pre>
+<pre class="r"><code>cv_val &lt;- regular.CV(fitted_mat, method = &quot;SoftThresholding&quot;)</code></pre>
+<p>This did not quite work as it would return <code>k.grid</code> input parameter. But most likely this is because none of these thresholding estimators are good fit.</p>
+</div>
+<div id="conclusions" class="section level2">
+<h2>Conclusions</h2>
+<p>Both hard and soft thresholding estimators look for the same threshold for all correlation values and is not flexible in taking into consideration the standard error difference in correlations due to different number of samples. So, they are not ideal comparisons to CorShrink.</p>
+</div>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
