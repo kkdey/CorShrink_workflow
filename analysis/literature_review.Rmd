@@ -1,0 +1,53 @@
+---
+title: 'Literature Review : Correlation Shrinkage'
+author: "Kushal K Dey"
+date: "5/24/2017"
+output: html_document
+---
+
+In this script, we review some of the methods for correlation shrinkage with or 
+without missing data that may form the references for the CorShrink paper.
+
+### corpcor: Shafer and Strimmer 
+
+
+### THRESHOLDING ESTIMATORS
+
+Bickel and Levina propose thresholded estimate of sample covariance matrix which is consistent in the operator norm as long as the true covariance matrix is sparse in a suitable sense, the variables are Gaussian orsub-Gaussian, and $(\log p)/n \rightarrow 0$. They also evaluate the rates of convergence of their thresholded estimate to $\Sigma$ under the above assumptions.
+
+Their claim - \textit{Usual shrinkage estimators shrink the overdispersed sample covariance eigenvalues, but they do not change the eigenvectors, which are also inconsistent and do not result in sparse estimators}. 
+
+There are various arguments to show that convergence in the operator norm implies convergence of eigenvalues and eigenvectors.
+
+We use the package *CVTuningCov* for applying hard and soft thresholding estimators
+on the tissue tissue correlation matrix and compare that with CorShrink. But, 
+it seemed that these methods fail to really shrink the different correlations
+differently based on number of samples info, and use same threshold across 
+the matrix which makes them perform poorly.
+
+We also used soft thresholding due to the **PDSCE** method. Although this method
+seemed to perform slightly better than above methods, CorShrink still outperformed
+it, especially in shrinking the negative correlations.
+
+### LASSO TYPE SPARSE ESTIMATION
+
+Bien and Tibshirani (2011)  - Sparse Estimation of Covariance Matrix - paper looks
+into how a LASSO type shrinkage approach can be used for covariance shrinkage.
+Although GLASSO itself provides shrunk estimates for both correlation and 
+covariance matrices, the authors here perform a more focused approach.
+
+Also, the authors have a *spcov* R package for performing this shrinkage of 
+covariance matrix. Also it provides a scale $P$ to shrink each term of the 
+correlation separately. We try various choices of $P$ - uniform scale for 
+all off-diagonal elements, the sd scale for sample correlation under normal
+assumption, scale by $1/(number of samples on which correlation is computed)$,
+scale by $exp(1/(number of samples on which correlation is computed))$.
+
+We find that the performance is better than softimpute + GLASSO, or 
+softimpute + Shafer Strimmer. But still there are scaling issues with this method.
+However this can be considered the closest competitor to CorShrink.
+
+
+
+
+
