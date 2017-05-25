@@ -20,14 +20,18 @@ Okay, so lets get started !!
 
 ## Detailed workflow 
 
-### Comaprison of CorShrink with corpcor and GLASSO
+### Comaprison of CorShrink with other shrinkage methods
 
 In this section, we perform simulation experiments to compare out `CorShrink` approach with that
 of the more popular approaches to correlation shrinkage - namely `corpcor` and `GLASSO`. We focus on two simulation designs with missing data. We consider two approaches to imputing the missing data. Approach 1 is an ad-hoc way of replacing the missing values by resampling from each tissue distribution over the non-NA samples for each gene. Approach 2 was to use SoftImpute that uses 
 a low dimensional structure representation to impute the values.
 
+- [Literature Review](literature_review.html)
 - [CorShrink vs corpcor vs GLASSO : Approach 1](corshrink_corpcor_glasso.html)
 - [CorShrink vs corpcor vs GLASSO : Approach 2](CorShrink_softimpute.html)
+- [CorShrink vs thresholding estimators](thresholding_Corshrink.html)
+- [CorShrink vs PDSCE](PDSCE_vs_CorShrink.html)
+- [CorShrink vs Sparse Cov Estimation (SPCOV)](spcov_CorShrink.html)
 
 ### CorShrink and CountClust clusters on GTEx data
 
