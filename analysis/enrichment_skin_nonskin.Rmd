@@ -117,20 +117,20 @@ write.table(cbind.data.frame(low_skin_nonskin_genes), quote = FALSE, file = "../
 
 ```{r}
 tab <- read.delim("../utilities/skin_nonskin/pathway_high.tab")
-head(cbind.data.frame(tab$pathway, tab$q.value), 10)
+head(cbind.data.frame(tab$pathway, tab$q.value), 100)
 ```
 
 ```{r}
 tab <- read.delim("../utilities/skin_nonskin/GO_high.tab")
-head(cbind.data.frame(tab$term_name, tab$q.value), 10)
+head(cbind.data.frame(tab$term_name, tab$q.value), 100)
 ```
 
 ```{r}
 tab <- read.delim("../utilities/skin_nonskin/pathway_low.tab")
-head(cbind.data.frame(tab$pathway, tab$q.value), 10)
+head(cbind.data.frame(tab$pathway, tab$q.value), 100)
 ```
 
 ```{r}
 tab <- read.delim("../utilities/skin_nonskin/GO_low.tab")
-head(cbind.data.frame(tab$term_name, tab$q.value), 10)
+head(cbind.data.frame(tab$term_name, tab$q.value), 100)
 ```

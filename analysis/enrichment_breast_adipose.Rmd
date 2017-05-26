@@ -119,20 +119,20 @@ write.table(cbind.data.frame(low_breast_adipose_genes), quote = FALSE, file = ".
 
 ```{r}
 tab <- read.delim("../utilities/breast_adipose/pathway_high.tab")
-head(cbind.data.frame(tab$pathway, tab$q.value), 10)
+head(cbind.data.frame(tab$pathway, tab$q.value), 100)
 ```
 
 ```{r}
 tab <- read.delim("../utilities/breast_adipose/GO_high.tab")
-head(cbind.data.frame(tab$term_name, tab$q.value), 10)
+head(cbind.data.frame(tab$term_name, tab$q.value), 100)
 ```
 
 ```{r}
 tab <- read.delim("../utilities/breast_adipose/pathway_low.tab")
-head(cbind.data.frame(tab$pathway, tab$q.value), 10)
+head(cbind.data.frame(tab$pathway, tab$q.value), 100)
 ```
 
 ```{r}
 tab <- read.delim("../utilities/breast_adipose/GO_low.tab")
-head(cbind.data.frame(tab$term_name, tab$q.value), 10)
+head(cbind.data.frame(tab$term_name, tab$q.value), 100)
 ```
