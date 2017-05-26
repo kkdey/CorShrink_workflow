@@ -81,13 +81,13 @@ order_index <- c(order_index, grep("Bladder", U))
 ```{r}
 tab <- array(0, dim(corshrink_data)[3])
 for(m in 1:dim(corshrink_data)[3]){
-  temp <- corshrink_data[order_index[1:13], order_index[-(1:13)],m]
-  temp1 <- corshrink_data[order_index[-(1:13)], order_index[-(1:13)],m]
-  tab[m] <-  median(temp[row(temp) > col(temp)]) - median(temp1[row(temp1) > col(temp1)])
+  temp <- corshrink_data[order_index[1:13], order_index[(1:13)],m]
+  temp1 <- corshrink_data[order_index[(1:13)], order_index[-(1:13)],m]
+  tab[m] <-  (quantile(temp[row(temp) > col(temp)], 0.6)) - (quantile(temp1, 0.6))
 }
 
-ordering_high <- order(tab, decreasing =  TRUE)[1:100]
-ordering_low <- order(tab, decreasing =  FALSE)[1:100]
+ordering_high <- order(tab, decreasing =  TRUE)[1:1000]
+ordering_low <- order(tab, decreasing =  FALSE)[1:1000]
 ```
 
 ```{r}
@@ -126,25 +126,25 @@ write.table(cbind.data.frame(low_brain_other_tissues_genes), quote = FALSE, file
 Pathway analysis
 
 ```{r}
-tab <- read.delim("../utilities/brain_other_tissues/pathway1_high.tab")
-head(cbind.data.frame(tab$pathway, tab$q.value), 10)
+tab <- read.delim("../utilities/brain_other_tissues/pathway_high.tab")
+head(cbind.data.frame(tab$pathway, tab$q.value), 100)
 ```
 
 GO analysis
 
 ```{r}
-tab <- read.delim("../utilities/brain_other_tissues/GO1_high.tab")
-head(cbind.data.frame(tab$term_name, tab$q.value), 10)
+tab <- read.delim("../utilities/brain_other_tissues/GO_high.tab")
+head(cbind.data.frame(tab$term_name, tab$q.value), 100)
 ```
 
 ```{r}
-tab <- read.delim("../utilities/brain_other_tissues/pathway1_low.tab")
-head(cbind.data.frame(tab$pathway, tab$q.value), 10)
+tab <- read.delim("../utilities/brain_other_tissues/pathway_low.tab")
+head(cbind.data.frame(tab$pathway, tab$q.value), 100)
 ```
 
 ```{r}
-tab <- read.delim("../utilities/brain_other_tissues/GO1_low.tab")
-head(cbind.data.frame(tab$term_name, tab$q.value), 10)
+tab <- read.delim("../utilities/brain_other_tissues/GO_low.tab")
+head(cbind.data.frame(tab$term_name, tab$q.value), 100)
 ```
 
 
@@ -154,11 +154,11 @@ head(cbind.data.frame(tab$term_name, tab$q.value), 10)
 tab <- array(0, dim(corshrink_data)[3])
 for(m in 1:dim(corshrink_data)[3]){
   temp <- corshrink_data[order_index[1:13], order_index[-(1:13)],m]
-  tab[m] <-  median(temp[row(temp) > col(temp)])
+  tab[m] <-  median(temp)
 }
 
-ordering_high <- order(tab, decreasing =  TRUE)[1:100]
-ordering_low <- order(tab, decreasing =  FALSE)[1:100]
+ordering_high <- order(tab, decreasing =  TRUE)[1:1000]
+ordering_low <- order(tab, decreasing =  FALSE)[1:1000]
 ```
 
 ```{r}
