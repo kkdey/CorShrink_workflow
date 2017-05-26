@@ -13,7 +13,7 @@
 <meta name="author" content="Kushal K Dey" />
 
 
-<title>GSEA : CorShrink and CountClust</title>
+<title>GSEA Brain : CorShrink and CountClust</title>
 
 <link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-1.1/highlight.js"></script>
@@ -80,13 +80,29 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 </html>
 
 
-<h1 class="title toc-ignore">GSEA : CorShrink and CountClust</h1>
+<h1 class="title toc-ignore">GSEA Brain : CorShrink and CountClust</h1>
 <h4 class="author"><em>Kushal K Dey</em></h4>
 <h4 class="date"><em>5/12/2017</em></h4>
 
 
 <div id="TOC">
 <ul>
+<li><a href="#median-comparison-gsea-clusters-brain">Median comparison GSEA clusters Brain</a><ul>
+<li><a href="#cluster-1">cluster 1</a></li>
+<li><a href="#cluster-3">cluster 3</a></li>
+<li><a href="#cluster-4">cluster 4</a></li>
+<li><a href="#cluster-5">cluster 5</a></li>
+<li><a href="#cluster-6">cluster 6</a></li>
+<li><a href="#cluster-7">cluster 7</a></li>
+</ul></li>
+<li><a href="#quantile-0.8-gsea-brain-clusters">Quantile 0.8 GSEA Brain clusters</a><ul>
+<li><a href="#cluster-1-1">cluster 1</a></li>
+<li><a href="#cluster-3-1">cluster 3</a></li>
+<li><a href="#cluster-4-1">cluster 4</a></li>
+<li><a href="#cluster-5-1">cluster 5</a></li>
+<li><a href="#cluster-6-1">cluster 6</a></li>
+<li><a href="#cluster-7-1">cluster 7</a></li>
+</ul></li>
 <li><a href="#session-information">Session information</a></li>
 </ul>
 </div>
@@ -98,9 +114,9 @@ shared across the workflowr files. -->
 <p><strong>Last updated:</strong> 2017-05-25</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 6a9ba6d</p>
+<p><strong>Code version:</strong> b35b652</p>
 <p>In this script, we try to perform some gene set enrichment analysis of the CountClust clusters with respect to the CorShrink patterns observed.</p>
-<pre class="r"><code>cor_result &lt;- get(load(&quot;../output/ash_cor_only_gtex_tissues.rda&quot;))
+<pre class="r"><code>ash_cor_result &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_normal_gtex_tissues.rda&quot;))
 common_samples &lt;- get(load(&quot;../output/common_samples.rda&quot;))
 tissue_labels &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;)[,3]
 
@@ -111,105 +127,21 @@ tissue_labels &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;
 gene_names &lt;- as.character(read.table(file = &quot;../data/GTEX_V6/gene_names_GTEX_V6.txt&quot;)[,1])
 gene_names_1 &lt;- as.character(sapply(gene_names, function(x) return(strsplit(x, &quot;[.]&quot;)[[1]][1])))
 
-
 U &lt;- unique(tissue_labels)</code></pre>
-<pre class="r"><code>tab &lt;- array(0, dim(cor_result)[3])
-for(m in 1:dim(cor_result)[3]){
-  z &lt;- as.matrix(cor_result[order_index[1:13],order_index[1:13],m])
+<div id="median-comparison-gsea-clusters-brain" class="section level2">
+<h2>Median comparison GSEA clusters Brain</h2>
+<pre class="r"><code>tab &lt;- array(0, dim(ash_cor_result)[3])
+for(m in 1:dim(ash_cor_result)[3]){
+  z &lt;- as.matrix(ash_cor_result[order_index[1:13],order_index[1:13],m])
   vec_z &lt;- z[row(z) &gt; col(z)]
-  tab[m] &lt;- length(which(vec_z &gt; 0.3))
-}
-
-col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
-      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
-image(as.matrix(cor_result[order_index[1:13],order_index[1:13],which.max(tab)]),
-      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
-      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
-axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 0.5)
-axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 0.5)</code></pre>
-<p><img src="figure/gsea_corshrink_corpcor.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
-      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
-image(as.matrix(cor_result[order_index[1:13],order_index[1:13],which.min(tab)]),
-      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
-      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
-axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 0.5)
-axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 0.5)</code></pre>
-<p><img src="figure/gsea_corshrink_corpcor.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+  tab[m] &lt;- quantile(vec_z, 0.8)
+}</code></pre>
 <pre class="r"><code>tval &lt;- (tab - mean(tab))/sd(tab)
 names(tval) &lt;- gene_names_1
 
 cluster_list &lt;- vector(mode = &quot;list&quot;, length = 6)
 for(l in 1:6){
-  cluster_list[[l]] &lt;- as.character(read.table(paste0(&quot;../utilities/gene_names_brain_clus_&quot;, l, &quot;.txt&quot;))[,1])
-}
-
-library(fgsea)
-out &lt;- fgsea(pathways = cluster_list,
-             stats = tval,
-             nperm = 100000)
-out</code></pre>
-<pre><code>           pval         padj         ES       NES nMoreExtreme size
-1: 1.367166e-05 4.105596e-05  0.6534141  2.570010            0  101
-2: 4.723559e-02 7.085339e-02  0.3456568  1.359539         3454  101
-3: 1.743875e-01 1.743875e-01  0.2990933  1.184524        12832  106
-4: 5.944822e-02 7.133786e-02 -0.2815261 -1.273630         1600  100
-5: 3.713193e-05 7.426386e-05 -0.7138533 -3.229487            0  100
-6: 1.368532e-05 4.105596e-05  0.5400921  2.121237            0  100
-                                                                                        leadingEdge
-1: ENSG00000106211,ENSG00000099860,ENSG00000124762,ENSG00000125148,ENSG00000132002,ENSG00000134531,
-2: ENSG00000143153,ENSG00000125814,ENSG00000165943,ENSG00000177432,ENSG00000084731,ENSG00000096384,
-3: ENSG00000215908,ENSG00000183889,ENSG00000183889,ENSG00000134986,ENSG00000246859,ENSG00000175265,
-4: ENSG00000242265,ENSG00000272678,ENSG00000050165,ENSG00000059758,ENSG00000072110,ENSG00000127585,
-5: ENSG00000099194,ENSG00000140450,ENSG00000151552,ENSG00000164402,ENSG00000196187,ENSG00000012171,
-6: ENSG00000140181,ENSG00000225972,ENSG00000047457,ENSG00000225630,ENSG00000237973,ENSG00000249119,</code></pre>
-<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
-      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
-image(as.matrix(cor_result[order_index[1:13],order_index[1:13], grep(&quot;ENSG00000106211&quot;, gene_names_1)]),
-      col=col, main=paste0(&quot;corshrink: ENSG00000106211&quot;), cex.main=2,
-      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
-axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1.5)
-axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1.5)</code></pre>
-<p><img src="figure/gsea_corshrink_corpcor.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
-      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
-image(as.matrix(cor_result[order_index[1:13],order_index[1:13], grep(&quot;ENSG00000099194&quot;, gene_names_1)]),
-      col=col, main=paste0(&quot;corshrink: ENSG00000099194&quot;), cex.main=2,
-      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
-axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1.5)
-axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1.5)</code></pre>
-<p><img src="figure/gsea_corshrink_corpcor.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>tab &lt;- array(0, dim(cor_result)[3])
-for(m in 1:dim(cor_result)[3]){
-  z &lt;- as.matrix(cor_result[order_index[1:13],order_index[1:13],m])
-  vec_z &lt;- z[row(z) &gt; col(z)]
-  tab[m] &lt;- quantile(vec_z, 0.4)
-}
-
-tval &lt;- (tab - mean(tab))/sd(tab)
-names(tval) &lt;- gene_names_1
-
-out &lt;- fgsea(pathways = cluster_list,
-             stats = tval,
-             nperm = 100000)
-out</code></pre>
-<pre><code>           pval         padj         ES        NES nMoreExtreme size
-1: 1.307497e-05 3.927473e-05  0.6815598  2.5411222            0  101
-2: 9.645668e-01 9.645668e-01  0.1825037  0.6804452        73771  101
-3: 7.606304e-01 9.127565e-01  0.2237805  0.8398969        58636  106
-4: 4.234238e-05 6.351357e-05 -0.5228272 -2.3329259            0  100
-5: 4.234238e-05 6.351357e-05 -0.6237657 -2.7833275            0  100
-6: 1.309158e-05 3.927473e-05  0.5514387  2.0530576            0  100
-                                                                                        leadingEdge
-1: ENSG00000184557,ENSG00000124762,ENSG00000149257,ENSG00000099860,ENSG00000167772,ENSG00000173110,
-2: ENSG00000143153,ENSG00000125814,ENSG00000096384,ENSG00000177432,ENSG00000165943,ENSG00000087152,
-3: ENSG00000215908,ENSG00000183889,ENSG00000183889,ENSG00000134986,ENSG00000246859,ENSG00000175265,
-4: ENSG00000062282,ENSG00000072110,ENSG00000103316,ENSG00000242265,ENSG00000088832,ENSG00000102780,
-5: ENSG00000078269,ENSG00000104419,ENSG00000138593,ENSG00000099194,ENSG00000164124,ENSG00000118271,
-6: ENSG00000047457,ENSG00000225972,ENSG00000173369,ENSG00000249119,ENSG00000090920,ENSG00000159189,</code></pre>
-<pre class="r"><code>cluster_list &lt;- vector(mode = &quot;list&quot;, length = 6)
-for(l in 1:6){
-  cluster_list[[l]] &lt;- as.character(read.table(paste0(&quot;../utilities/gene_names_brain_clus_&quot;, l, &quot;.txt&quot;))[,1])
+  cluster_list[[l]] &lt;- as.character(read.table(paste0(&quot;../utilities/gene_names_brain_clus_&quot;, l, &quot;.txt&quot;))[,1])[1:100]
 }
 
 brain_related_genes &lt;- c();
@@ -222,64 +154,322 @@ other_genes &lt;- setdiff(gene_names_1, brain_related_genes)
 
 cluster_list[[7]] &lt;- sample(other_genes, 100, replace = FALSE)
 
-pval_others &lt;- array(0, 30)
 
-for(num in 1:30){
-  out &lt;- fgsea(pathways = cluster_list,
-               stats = tval,
-               nperm = 10000)
-  pval_others[num] &lt;- out$padj[7]
-  cat(&quot;We are at iteration: &quot;, num, &quot;\n&quot;)
-}</code></pre>
-<pre><code>We are at iteration:  1 
-We are at iteration:  2 
-We are at iteration:  3 
-We are at iteration:  4 
-We are at iteration:  5 
-We are at iteration:  6 
-We are at iteration:  7 
-We are at iteration:  8 
-We are at iteration:  9 
-We are at iteration:  10 
-We are at iteration:  11 
-We are at iteration:  12 
-We are at iteration:  13 
-We are at iteration:  14 
-We are at iteration:  15 
-We are at iteration:  16 
-We are at iteration:  17 
-We are at iteration:  18 
-We are at iteration:  19 
-We are at iteration:  20 
-We are at iteration:  21 
-We are at iteration:  22 
-We are at iteration:  23 
-We are at iteration:  24 
-We are at iteration:  25 
-We are at iteration:  26 
-We are at iteration:  27 
-We are at iteration:  28 
-We are at iteration:  29 
-We are at iteration:  30 </code></pre>
-<pre class="r"><code>out</code></pre>
+library(fgsea)</code></pre>
+<pre><code>Loading required package: Rcpp</code></pre>
+<pre class="r"><code>out &lt;- fgsea(pathways = cluster_list,
+             stats = tval,
+             nperm = 100000)
+out</code></pre>
 <pre><code>           pval         padj         ES        NES nMoreExtreme size
-1: 0.0001299207 0.0004553734  0.6815598  2.5428369            0  101
-2: 0.9658308432 0.9658308432  0.1825037  0.6809044         7433  101
-3: 0.7562201882 0.8822568863  0.2237805  0.8401216         5865  106
-4: 0.0004317789 0.0007556131 -0.5228272 -2.3267054            0  100
-5: 0.0004317789 0.0007556131 -0.6237657 -2.7759061            0  100
-6: 0.0001301067 0.0004553734  0.5514387  2.0535472            0  100
-7: 0.7495446266 0.8822568863  0.2261485  0.8421727         5760  100
+1: 2.039484e-05 4.758797e-05  0.7000420  3.0337749            0  100
+2: 1.107710e-01 1.550795e-01 -0.2840353 -1.2285560         5645  100
+3: 2.501864e-01 2.918841e-01 -0.2562051 -1.1081801        12751  100
+4: 1.961938e-05 4.758797e-05 -0.5457240 -2.3604546            0  100
+5: 1.961938e-05 4.758797e-05 -0.6638557 -2.8714174            0  100
+6: 1.019742e-04 1.784549e-04  0.4240753  1.8378172            4  100
+7: 9.178340e-01 9.178340e-01 -0.1800248 -0.7786729        46781  100
                                                                                         leadingEdge
-1: ENSG00000184557,ENSG00000124762,ENSG00000149257,ENSG00000099860,ENSG00000167772,ENSG00000173110,
-2: ENSG00000143153,ENSG00000125814,ENSG00000096384,ENSG00000177432,ENSG00000165943,ENSG00000087152,
-3: ENSG00000215908,ENSG00000183889,ENSG00000183889,ENSG00000134986,ENSG00000246859,ENSG00000175265,
-4: ENSG00000062282,ENSG00000072110,ENSG00000103316,ENSG00000242265,ENSG00000088832,ENSG00000102780,
-5: ENSG00000078269,ENSG00000104419,ENSG00000138593,ENSG00000099194,ENSG00000164124,ENSG00000118271,
-6: ENSG00000047457,ENSG00000225972,ENSG00000173369,ENSG00000249119,ENSG00000090920,ENSG00000159189,
-7: ENSG00000001617,ENSG00000172785,ENSG00000116701,ENSG00000261069,ENSG00000271780,ENSG00000116791,</code></pre>
-<pre class="r"><code>plot(density(pval_others))</code></pre>
+1: ENSG00000184557,ENSG00000132002,ENSG00000106211,ENSG00000149257,ENSG00000173110,ENSG00000144381,
+2: ENSG00000171992,ENSG00000128656,ENSG00000117632,ENSG00000221890,ENSG00000186907,ENSG00000254528,
+3: ENSG00000112139,ENSG00000169758,ENSG00000167371,ENSG00000172794,ENSG00000074964,ENSG00000142765,
+4: ENSG00000204681,ENSG00000053438,ENSG00000100030,ENSG00000068831,ENSG00000126351,ENSG00000128578,
+5: ENSG00000136237,ENSG00000136938,ENSG00000189058,ENSG00000105290,ENSG00000167123,ENSG00000152689,
+6: ENSG00000225972,ENSG00000271043,ENSG00000255823,ENSG00000229344,ENSG00000225630,ENSG00000249119,
+7: ENSG00000270094,ENSG00000269956,ENSG00000271347,ENSG00000214357,ENSG00000034971,ENSG00000255322,</code></pre>
+<p>The number of leadingEdge genes</p>
+<pre class="r"><code>unlist(lapply(out$leadingEdge, function(x) return(length(x))))</code></pre>
+<pre><code>[1] 60 23 28 55 83 25  9</code></pre>
+<div id="cluster-1" class="section level3">
+<h3>cluster 1</h3>
+<pre class="r"><code>genes_clus &lt;- cluster_list[[1]][1:9]
+#genes_clus &lt;- out$leadingEdge[[1]][1:9]
+
+matched_indices &lt;- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0(&quot;corshrink:&quot;, genes_clus[m]), cex.main=2,
+          xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}</code></pre>
+<p><img src="figure/gsea_corshrink_corpcor.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /> ### cluster 2</p>
+<pre class="r"><code>genes_clus &lt;- cluster_list[[2]][1:9]
+#genes_clus &lt;- out$leadingEdge[[2]][1:9]
+
+matched_indices &lt;- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0(&quot;corshrink:&quot;, genes_clus[m]), cex.main=2,
+          xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}</code></pre>
+<p><img src="figure/gsea_corshrink_corpcor.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cluster-3" class="section level3">
+<h3>cluster 3</h3>
+<pre class="r"><code>genes_clus &lt;- cluster_list[[3]][1:9]
+#genes_clus &lt;- out$leadingEdge[[3]][1:9]
+
+matched_indices &lt;- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0(&quot;corshrink:&quot;, genes_clus[m]), cex.main=2,
+          xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}</code></pre>
+<p><img src="figure/gsea_corshrink_corpcor.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cluster-4" class="section level3">
+<h3>cluster 4</h3>
+<pre class="r"><code>genes_clus &lt;- cluster_list[[4]][1:9]
+#genes_clus &lt;- out$leadingEdge[[4]][1:9]
+
+matched_indices &lt;- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0(&quot;corshrink:&quot;, genes_clus[m]), cex.main=2,
+          xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}</code></pre>
+<p><img src="figure/gsea_corshrink_corpcor.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cluster-5" class="section level3">
+<h3>cluster 5</h3>
+<pre class="r"><code>genes_clus &lt;- cluster_list[[5]][1:9]
+#genes_clus &lt;- out$leadingEdge[[5]][1:9]
+
+matched_indices &lt;- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0(&quot;corshrink:&quot;, genes_clus[m]), cex.main=2,
+          xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}</code></pre>
 <p><img src="figure/gsea_corshrink_corpcor.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cluster-6" class="section level3">
+<h3>cluster 6</h3>
+<pre class="r"><code>genes_clus &lt;- cluster_list[[6]][1:9]
+#genes_clus &lt;- out$leadingEdge[[6]][1:9]
+matched_indices &lt;- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0(&quot;corshrink:&quot;, genes_clus[m]), cex.main=2,
+          xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}</code></pre>
+<p><img src="figure/gsea_corshrink_corpcor.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cluster-7" class="section level3">
+<h3>cluster 7</h3>
+<pre class="r"><code>genes_clus &lt;- cluster_list[[7]][1:9]
+#genes_clus &lt;- out$leadingEdge[[7]][1:9]
+matched_indices &lt;- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0(&quot;corshrink:&quot;, genes_clus[m]), cex.main=2,
+          xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}</code></pre>
+<p><img src="figure/gsea_corshrink_corpcor.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="quantile-0.8-gsea-brain-clusters" class="section level2">
+<h2>Quantile 0.8 GSEA Brain clusters</h2>
+<pre class="r"><code>tab &lt;- array(0, dim(ash_cor_result)[3])
+for(m in 1:dim(ash_cor_result)[3]){
+  z &lt;- as.matrix(ash_cor_result[order_index[1:13],order_index[1:13],m])
+  vec_z &lt;- z[row(z) &gt; col(z)]
+  tab[m] &lt;- quantile(vec_z, 0.8)
+}</code></pre>
+<pre class="r"><code>tval &lt;- (tab - mean(tab))/sd(tab)
+names(tval) &lt;- gene_names_1
+
+cluster_list &lt;- vector(mode = &quot;list&quot;, length = 6)
+for(l in 1:6){
+  cluster_list[[l]] &lt;- as.character(read.table(paste0(&quot;../utilities/gene_names_brain_clus_&quot;, l, &quot;.txt&quot;))[,1])[1:100]
+}
+
+brain_related_genes &lt;- c();
+for(l in 1:length(cluster_list)){
+  brain_related_genes &lt;- c(brain_related_genes, cluster_list[[l]]);
+}
+brain_related_genes &lt;- unique(brain_related_genes)
+
+other_genes &lt;- setdiff(gene_names_1, brain_related_genes)
+
+cluster_list[[7]] &lt;- sample(other_genes, 100, replace = FALSE)
+
+
+library(fgsea)
+out &lt;- fgsea(pathways = cluster_list,
+             stats = tval,
+             nperm = 100000)
+out</code></pre>
+<pre><code>           pval         padj         ES        NES nMoreExtreme size
+1: 2.044530e-05 0.0000477057  0.7000420  3.0376261            0  100
+2: 1.087080e-01 0.1521911883 -0.2840353 -1.2285636         5553  100
+3: 2.479497e-01 0.2892746929 -0.2562051 -1.1081870        12667  100
+4: 1.957292e-05 0.0000477057 -0.5457240 -2.3604691            0  100
+5: 1.957292e-05 0.0000477057 -0.6638557 -2.8714351            0  100
+6: 6.133590e-05 0.0001073378  0.4240753  1.8401502            2  100
+7: 8.352547e-01 0.8352547415 -0.1924389 -0.8323732        42673  100
+                                                                                        leadingEdge
+1: ENSG00000184557,ENSG00000132002,ENSG00000106211,ENSG00000149257,ENSG00000173110,ENSG00000144381,
+2: ENSG00000171992,ENSG00000128656,ENSG00000117632,ENSG00000221890,ENSG00000186907,ENSG00000254528,
+3: ENSG00000112139,ENSG00000169758,ENSG00000167371,ENSG00000172794,ENSG00000074964,ENSG00000142765,
+4: ENSG00000204681,ENSG00000053438,ENSG00000100030,ENSG00000068831,ENSG00000126351,ENSG00000128578,
+5: ENSG00000136237,ENSG00000136938,ENSG00000189058,ENSG00000105290,ENSG00000167123,ENSG00000152689,
+6: ENSG00000225972,ENSG00000271043,ENSG00000255823,ENSG00000229344,ENSG00000225630,ENSG00000249119,
+7: ENSG00000070731,ENSG00000065833,ENSG00000066855,ENSG00000246477,ENSG00000116652,ENSG00000239653,</code></pre>
+<p>The number of leadingEdge genes</p>
+<pre class="r"><code>unlist(lapply(out$leadingEdge, function(x) return(length(x))))</code></pre>
+<pre><code>[1] 60 23 28 55 83 25 12</code></pre>
+<div id="cluster-1-1" class="section level3">
+<h3>cluster 1</h3>
+<pre class="r"><code>genes_clus &lt;- cluster_list[[1]][1:9]
+#genes_clus &lt;- out$leadingEdge[[7]][1:9]
+matched_indices &lt;- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0(&quot;corshrink:&quot;, genes_clus[m]), cex.main=2,
+          xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}</code></pre>
+<p><img src="figure/gsea_corshrink_corpcor.Rmd/unnamed-chunk-16-1.png" width="672" style="display: block; margin: auto;" /> ### cluster 2</p>
+<pre class="r"><code>genes_clus &lt;- cluster_list[[2]][1:9]
+#genes_clus &lt;- out$leadingEdge[[2]][1:9]
+matched_indices &lt;- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0(&quot;corshrink:&quot;, genes_clus[m]), cex.main=2,
+          xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}</code></pre>
+<p><img src="figure/gsea_corshrink_corpcor.Rmd/unnamed-chunk-17-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cluster-3-1" class="section level3">
+<h3>cluster 3</h3>
+<pre class="r"><code>genes_clus &lt;- cluster_list[[3]][1:9]
+#genes_clus &lt;- out$leadingEdge[[3]][1:9]
+matched_indices &lt;- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0(&quot;corshrink:&quot;, genes_clus[m]), cex.main=2,
+          xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}</code></pre>
+<p><img src="figure/gsea_corshrink_corpcor.Rmd/unnamed-chunk-18-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cluster-4-1" class="section level3">
+<h3>cluster 4</h3>
+<pre class="r"><code>genes_clus &lt;- cluster_list[[4]][1:9]
+#genes_clus &lt;- out$leadingEdge[[4]][1:9]
+matched_indices &lt;- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0(&quot;corshrink:&quot;, genes_clus[m]), cex.main=2,
+          xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}</code></pre>
+<p><img src="figure/gsea_corshrink_corpcor.Rmd/unnamed-chunk-19-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cluster-5-1" class="section level3">
+<h3>cluster 5</h3>
+<pre class="r"><code>genes_clus &lt;- cluster_list[[5]][1:9]
+#genes_clus &lt;- out$leadingEdge[[5]][1:9]
+matched_indices &lt;- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0(&quot;corshrink:&quot;, genes_clus[m]), cex.main=2,
+          xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}</code></pre>
+<p><img src="figure/gsea_corshrink_corpcor.Rmd/unnamed-chunk-20-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cluster-6-1" class="section level3">
+<h3>cluster 6</h3>
+<pre class="r"><code>genes_clus &lt;- cluster_list[[6]][1:9]
+#genes_clus &lt;- out$leadingEdge[[6]][1:9]
+matched_indices &lt;- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0(&quot;corshrink:&quot;, genes_clus[m]), cex.main=2,
+          xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}</code></pre>
+<p><img src="figure/gsea_corshrink_corpcor.Rmd/unnamed-chunk-21-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cluster-7-1" class="section level3">
+<h3>cluster 7</h3>
+<pre class="r"><code>genes_clus &lt;- cluster_list[[7]][1:9]
+#genes_clus &lt;- out$leadingEdge[[7]][1:9]
+matched_indices &lt;- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0(&quot;corshrink:&quot;, genes_clus[m]), cex.main=2,
+          xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}</code></pre>
+<p><img src="figure/gsea_corshrink_corpcor.Rmd/unnamed-chunk-22-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
 <!-- Insert the session information into the document -->
@@ -295,56 +485,19 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
- [1] fgsea_1.1.2      Rcpp_0.12.10     knitr_1.15.1     CorShrink_0.99.0
- [5] workflowr_0.4.0  rmarkdown_1.5    softImpute_1.4   Matrix_1.2-8    
- [9] CVTuningCov_1.0  PDSCE_1.2        spcov_1.01      
+[1] fgsea_1.1.2  Rcpp_0.12.10
 
 loaded via a namespace (and not attached):
- [1] Biobase_2.34.0             httr_1.2.1                
- [3] jsonlite_1.4               splines_3.3.3             
- [5] foreach_1.4.3              gsubfn_0.6-6              
- [7] Formula_1.2-1              expm_0.999-2              
- [9] highr_0.6                  stats4_3.3.3              
-[11] latticeExtra_0.6-28        Rsamtools_1.26.1          
-[13] yaml_2.1.14                RSQLite_1.1-2             
-[15] backports_1.0.5            lattice_0.20-35           
-[17] chron_2.3-50               digest_0.6.12             
-[19] GenomicRanges_1.26.1       RColorBrewer_1.1-2        
-[21] XVector_0.14.0             checkmate_1.8.2           
-[23] colorspace_1.3-2           htmltools_0.3.6           
-[25] plyr_1.8.4                 XML_3.98-1.6              
-[27] biomaRt_2.30.0             zlibbioc_1.20.0           
-[29] corpcor_1.6.9              scales_0.4.1              
-[31] glasso_1.8                 BiocParallel_1.8.2        
-[33] git2r_0.18.0               htmlTable_1.9             
-[35] tibble_1.3.1               sqldf_0.4-10              
-[37] IRanges_2.8.1              ggplot2_2.2.1             
-[39] SummarizedExperiment_1.4.0 GenomicFeatures_1.26.0    
-[41] ashr_2.0.5                 nnet_7.3-12               
-[43] BiocGenerics_0.20.0        lazyeval_0.2.0            
-[45] proto_1.0.0                survival_2.41-3           
-[47] magrittr_1.5               memoise_1.1.0             
-[49] evaluate_0.10              doParallel_1.0.10         
-[51] MASS_7.3-45                foreign_0.8-67            
-[53] truncnorm_1.0-7            rsconnect_0.7             
-[55] tools_3.3.3                data.table_1.10.4         
-[57] REBayes_0.73               stringr_1.2.0             
-[59] S4Vectors_0.12.0           munsell_0.4.3             
-[61] cluster_2.0.6              AnnotationDbi_1.36.0      
-[63] Biostrings_2.42.0          GenomeInfoDb_1.10.1       
-[65] rlang_0.1.1.9000           grid_3.3.3                
-[67] RCurl_1.95-4.8             iterators_1.0.8           
-[69] htmlwidgets_0.8            bitops_1.0-6              
-[71] base64enc_0.1-3            gtable_0.2.0              
-[73] codetools_0.2-15           curl_2.6                  
-[75] DBI_0.6-1                  mygene_1.10.0             
-[77] reshape2_1.4.2.9000        R6_2.2.1                  
-[79] GenomicAlignments_1.10.1   gridExtra_2.2.1           
-[81] rtracklayer_1.34.1         fastmatch_1.1-0           
-[83] Hmisc_4.0-2                rprojroot_1.2             
-[85] stringi_1.1.5              pscl_1.4.9                
-[87] parallel_3.3.3             SQUAREM_2016.8-2          
-[89] rpart_4.1-10               acepack_1.4.1             </code></pre>
+ [1] knitr_1.15.1       magrittr_1.5       munsell_0.4.3     
+ [4] BiocParallel_1.8.2 colorspace_1.3-2   rlang_0.1.1.9000  
+ [7] fastmatch_1.1-0    stringr_1.2.0      plyr_1.8.4        
+[10] tools_3.3.3        parallel_3.3.3     grid_3.3.3        
+[13] data.table_1.10.4  gtable_0.2.0       git2r_0.18.0      
+[16] htmltools_0.3.6    yaml_2.1.14        lazyeval_0.2.0    
+[19] rprojroot_1.2      digest_0.6.12      tibble_1.3.1      
+[22] gridExtra_2.2.1    ggplot2_2.2.1      evaluate_0.10     
+[25] rmarkdown_1.5      stringi_1.1.5      scales_0.4.1      
+[28] backports_1.0.5   </code></pre>
 </div>
 
 <hr>

@@ -8,44 +8,46 @@ output: html_document
 In this script, we review some of the methods for correlation shrinkage with or 
 without missing data that may form the references for the CorShrink paper.
 
-### corpcor: Shafer and Strimmer 
 
+## THRESHOLDING ESTIMATORS
 
-### THRESHOLDING ESTIMATORS
+[Bickel and Levina](https://projecteuclid.org/euclid.aos/1231165180) [Bickel and Levina](https://projecteuclid.org/euclid.aos/1201877299) propose hard thresholded and [Rothman et al 2010](https://academic.oup.com/biomet/article/97/3/539/243532/A-new-approach-to-Cholesky-based-covariance) propose soft thresholding estimators of sample covariance matrix. 
 
-Bickel and Levina propose thresholded estimate of sample covariance matrix which is consistent in the operator norm as long as the true covariance matrix is sparse in a suitable sense, the variables are Gaussian orsub-Gaussian, and $(\log p)/n \rightarrow 0$. They also evaluate the rates of convergence of their thresholded estimate to $\Sigma$ under the above assumptions.
+Bickel and Levina show that their estimator consistent in the operator norm as long as the true covariance matrix is sparse in a suitable sense, the variables are Gaussian or sub-Gaussian, and $(\log p)/n \rightarrow 0$. They also evaluate the rates of convergence of their thresholded estimate to $\Sigma$ under the above assumptions.
 
-Their claim - \textit{Usual shrinkage estimators shrink the overdispersed sample covariance eigenvalues, but they do not change the eigenvectors, which are also inconsistent and do not result in sparse estimators}. 
-
-There are various arguments to show that convergence in the operator norm implies convergence of eigenvalues and eigenvectors.
+Their claim - \textit{Usual shrinkage estimators shrink the overdispersed sample covariance eigenvalues, but they do not change the eigenvectors, which are also inconsistent and do not result in sparse estimators}. They provide various arguments to show that convergence in the operator norm implies convergence of eigenvalues and eigenvectors.
 
 We use the package *CVTuningCov* for applying hard and soft thresholding estimators
-on the tissue tissue correlation matrix and compare that with CorShrink. But, 
-it seemed that these methods fail to really shrink the different correlations
-differently based on number of samples info, and use same threshold across 
-the matrix which makes them perform poorly.
+on the tissue tissue correlation matrix and compare that with CorShrink. Expectedly, the same thresholding for all correlation cells does not work in this case because of the underlying variation in the number of samples on which the correlation is calculated. 
 
-We also used soft thresholding due to the **PDSCE** method. Although this method
-seemed to perform slightly better than above methods, CorShrink still outperformed
-it, especially in shrinking the negative correlations.
 
-### LASSO TYPE SPARSE ESTIMATION
+Rothman has his own package for performing the soft thresholding above 
+called  **PDSCE**. This implementation is more flexible compared to the *CVTuningCov* one but it still has problems with shrinkage, especially in shrinking the negative correlations.
 
-Bien and Tibshirani (2011)  - Sparse Estimation of Covariance Matrix - paper looks
-into how a LASSO type shrinkage approach can be used for covariance shrinkage.
-Although GLASSO itself provides shrunk estimates for both correlation and 
-covariance matrices, the authors here perform a more focused approach.
+## LASSO TYPE SPARSE ESTIMATION
 
-Also, the authors have a *spcov* R package for performing this shrinkage of 
-covariance matrix. Also it provides a scale $P$ to shrink each term of the 
-correlation separately. We try various choices of $P$ - uniform scale for 
-all off-diagonal elements, the sd scale for sample correlation under normal
+GLASSO has been used for precision matrix estimation mainly, but GLASSO also provides
+an estimator for the covariance matrix. However, GLASSO is more specific to finding
+sparse precision structure.
+
+[Bien and Tibshirani (2010)](http://faculty.bscb.cornell.edu/~bien/papers/biometrika2011spcov.pdf) looks into how a LASSO type shrinkage approach can be used for covariance shrinkage. It is more like having a focused GLASSO type optimization scheme for generating sparse covariance matrices.
+
+The authors have a *spcov* R package for performing this shrinkage of 
+covariance matrix. The good thing is the package provides a matrix scale $P$ to shrink each term of the correlation separately. We try various choices of $P$ - uniform scale for all off-diagonal elements, the sd scale for sample correlation under normal
 assumption, scale by $1/(number of samples on which correlation is computed)$,
 scale by $exp(1/(number of samples on which correlation is computed))$.
 
 We find that the performance is better than softimpute + GLASSO, or 
 softimpute + Shafer Strimmer. But still there are scaling issues with this method.
-However this can be considered the closest competitor to CorShrink.
+However this can be considered the closest competitor to CorShrink. Also it is slower than CorShrink in estimation.
+
+## Donoho - Optimal Shrinkage of Eigenvalues
+
+Another way of dealing with correlation shrinkage is to do something like a Factor Analysis. We tried FLASH (Wei and Stephens) and PCA. [Donoho and Gavish](https://arxiv.org/abs/1405.7511) proposed an optimal shrinkage of the singular values using three types of norms, that would reduce the dimensionality of the data but not be a hard thresholding redution. These are all methods to build a lower rank factorization of the patterns. However, from applying FLASH and PCA, we have realized that there are very subtle details in many genes, that are not captured by the 15-20 factors we fit. 
+
+
+
+
 
 
 
