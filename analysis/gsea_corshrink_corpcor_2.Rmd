@@ -1,5 +1,5 @@
 ---
-title: "GSEA CorShrink vs CountClust part 2"
+title: "GSEA All tissues :: CorShrink vs CountClust"
 author: "Kushal K Dey"
 date: "5/12/2017"
 output: html_document
@@ -25,7 +25,7 @@ knitr::read_chunk("chunks.R")
 ```
 
 ```{r}
-cor_result <- get(load("../output/ash_cor_only_gtex_tissues.rda"))
+ash_cor_result <- get(load("../output/ash_cor_only_voom_pearson_normal_gtex_tissues.rda"))
 common_samples <- get(load("../output/common_samples.rda"))
 tissue_labels <- read.table(file = "../data/GTEX_V6/samples_id.txt")[,3]
 
@@ -85,21 +85,81 @@ order_index <- c(order_index, grep("Uterus", U))
 order_index <- c(order_index, grep("Bladder", U))
 ```
 
+## Brain related 
+
+```{r}
+#####################  Brain high  ############################
+
+tab <- array(0, dim(ash_cor_result)[3])
+for(m in 1:dim(ash_cor_result)[3]){
+  temp <- ash_cor_result[order_index[1:13], order_index[(1:13)],m]
+  tab[m] <-  median(temp[row(temp) > col(temp)])
+}
+
+tval <- (tab - mean(tab))/sd(tab)
+names(tval) <- gene_names_1
+```
+
 ```{r}
 cluster_list <- vector(mode = "list", length = 20)
 for(l in 1:20){
   cluster_list[[l]] <- as.character(read.table(paste0("../utilities/gene_names_clus_", l, ".txt"))[,1])
 }
 
-tab <- array(0, dim(cor_result)[3])
-for(m in 1:dim(cor_result)[3]){
-  z <- as.matrix(cor_result[order_index[1:13],order_index[1:13],m])
-  vec_z <- z[row(z) > col(z)]
-  tab[m] <- length(which(vec_z > 0.2))
+related_genes <- c();
+for(l in 1:length(cluster_list)){
+  related_genes <- c(related_genes, cluster_list[[l]]);
+}
+related_genes <- unique(related_genes)
+
+other_genes <- setdiff(gene_names_1, related_genes)
+
+cluster_list[[7]] <- sample(other_genes, 100, replace = FALSE)
+
+
+library(fgsea)
+out <- fgsea(pathways = cluster_list,
+             stats = tval,
+             nperm = 10000)
+
+out
+```
+It is dominated by the Clusters 17 and 19 which are blood related tissues in terms of positive effects. We need to
+carry out more focussed analysis.
+
+
+## High intra corr in Brain, low intra corr in others
+
+```{r}
+#####################  Brain high, others low  ############################
+
+tab <- array(0, dim(ash_cor_result)[3])
+for(m in 1:dim(ash_cor_result)[3]){
+  temp <- ash_cor_result[order_index[1:13], order_index[(1:13)],m]
+  temp1 <- ash_cor_result[order_index[-(1:13)], order_index[-(1:13)],m]
+  tab[m] <- median(temp[row(temp) > col(temp)]) - median(temp1[row(temp1) > col(temp1)])
 }
 
 tval <- (tab - mean(tab))/sd(tab)
 names(tval) <- gene_names_1
+```
+
+```{r}
+cluster_list <- vector(mode = "list", length = 20)
+for(l in 1:20){
+  cluster_list[[l]] <- as.character(read.table(paste0("../utilities/gene_names_clus_", l, ".txt"))[,1])
+}
+
+related_genes <- c();
+for(l in 1:length(cluster_list)){
+  related_genes <- c(related_genes, cluster_list[[l]]);
+}
+related_genes <- unique(related_genes)
+
+other_genes <- setdiff(gene_names_1, related_genes)
+
+cluster_list[[7]] <- sample(other_genes, 100, replace = FALSE)
+
 
 library(fgsea)
 out <- fgsea(pathways = cluster_list,
@@ -109,177 +169,332 @@ out <- fgsea(pathways = cluster_list,
 out
 ```
 
+
 ```{r}
-tab <- array(0, dim(cor_result)[3])
-for(m in 1:dim(cor_result)[3]){
-  z <- as.matrix(cor_result[order_index[1:13],order_index[1:13],m])
-  vec_z <- z[row(z) > col(z)]
-  tab[m] <- quantile(vec_z, 0.4)
+unlist(lapply(out$leadingEdge, function(x) return(length(x))))
+```
+
+### cluster 3
+
+```{r fig.height = 8}
+genes_clus <- cluster_list[[3]][1:9]
+#genes_clus <- out$leadingEdge[[1]][1:9]
+
+matched_indices <- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index,order_index, matched_indices[m]]),
+          col=col, main=paste0("corshrink:", genes_clus[m]), cex.main=2,
+          xaxt = "n", yaxt = "n", zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 53), labels = U, las=2, cex.axis = 0.5)
+    axis(2, at = seq(0, 1, length.out = 53), labels = U, las=2, cex.axis = 0.5)
+}
+```
+
+### cluster 9
+
+```{r fig.height = 8}
+genes_clus <- cluster_list[[9]][1:9]
+#genes_clus <- out$leadingEdge[[1]][1:9]
+
+matched_indices <- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index,order_index, matched_indices[m]]),
+          col=col, main=paste0("corshrink:", genes_clus[m]), cex.main=2,
+          xaxt = "n", yaxt = "n", zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 53), labels = U, las=2, cex.axis = 0.5)
+    axis(2, at = seq(0, 1, length.out = 53), labels = U, las=2, cex.axis = 0.5)
+}
+```
+
+
+### cluster 15
+
+```{r fig.height = 8}
+genes_clus <- cluster_list[[15]][1:9]
+#genes_clus <- out$leadingEdge[[1]][1:9]
+
+matched_indices <- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index,order_index, matched_indices[m]]),
+          col=col, main=paste0("corshrink:", genes_clus[m]), cex.main=2,
+          xaxt = "n", yaxt = "n", zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 53), labels = U, las=2, cex.axis = 0.5)
+    axis(2, at = seq(0, 1, length.out = 53), labels = U, las=2, cex.axis = 0.5)
+}
+```
+
+
+### cluster 16
+
+```{r fig.height = 8}
+genes_clus <- cluster_list[[16]][1:9]
+#genes_clus <- out$leadingEdge[[1]][1:9]
+
+matched_indices <- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index,order_index, matched_indices[m]]),
+          col=col, main=paste0("corshrink:", genes_clus[m]), cex.main=2,
+          xaxt = "n", yaxt = "n", zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 53), labels = U, las=2, cex.axis = 0.5)
+    axis(2, at = seq(0, 1, length.out = 53), labels = U, las=2, cex.axis = 0.5)
+}
+```
+
+
+### cluster 17
+
+```{r fig.height = 8}
+genes_clus <- cluster_list[[17]][1:9]
+#genes_clus <- out$leadingEdge[[1]][1:9]
+
+matched_indices <- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index,order_index, matched_indices[m]]),
+          col=col, main=paste0("corshrink:", genes_clus[m]), cex.main=2,
+          xaxt = "n", yaxt = "n", zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 53), labels = U, las=2, cex.axis = 0.5)
+    axis(2, at = seq(0, 1, length.out = 53), labels = U, las=2, cex.axis = 0.5)
+}
+```
+
+Which tissues do these clusters corrsspond to?
+
+clusters 15, 16 mainly correspond to Esophagus Mucosa and Lung. Cluster 3 corresponds to Breast and Adipose - the 
+fatty issues. Cluster 9, which is one of the rare clusters with strong negative effect in gsea corresponds to the
+Brain-spinal cord genes, which we know have less correlation among the brain tissues.
+
+## High Brain vs other tissues 
+
+```{r}
+tab <- array(0, dim(ash_cor_result)[3])
+for(m in 1:dim(ash_cor_result)[3]){
+  temp <- ash_cor_result[order_index[1:13], order_index[-(1:13)],m]
+  tab[m] <- median(temp[row(temp) > col(temp)])
 }
 
 tval <- (tab - mean(tab))/sd(tab)
 names(tval) <- gene_names_1
-
-out <- fgsea(pathways = cluster_list,
-             stats = tval,
-             nperm = 10000)
-out
 ```
 
 ```{r}
-
-######################    all tissue -tissue  enrichment    #################################
-
-tab <- array(0, dim(cor_result)[3])
-for(m in 1:dim(cor_result)[3]){
-  z <- as.matrix(cor_result[order_index,order_index,m])
-  vec_z <- z[row(z) > col(z)]
-  tab[m] <- quantile(vec_z, 0.8)
-}
-
 cluster_list <- vector(mode = "list", length = 20)
 for(l in 1:20){
   cluster_list[[l]] <- as.character(read.table(paste0("../utilities/gene_names_clus_", l, ".txt"))[,1])
 }
 
-tval <- (tab - mean(tab))/sd(tab)
-names(tval) <- gene_names_1
+related_genes <- c();
+for(l in 1:length(cluster_list)){
+  related_genes <- c(related_genes, cluster_list[[l]]);
+}
+related_genes <- unique(related_genes)
 
+other_genes <- setdiff(gene_names_1, related_genes)
+
+cluster_list[[7]] <- sample(other_genes, 100, replace = FALSE)
+
+
+library(fgsea)
 out <- fgsea(pathways = cluster_list,
              stats = tval,
-             nperm = 100000)
+             nperm = 10000)
 
 out
+```
+The ones with high positive effects are Clusters 17 and 19, which are both shared by blood. 
+There are several clusters with high negative effects such as Cluster 14 (Heart), clusters 2 and 9 (Brain
+specific), Cluster 4 (Colon, Cervix etc), Cluster 5 (Artery) and Cluster 6 (Skin), which is a wide raneg of
+tissue specific genes. Blood seems to be the exception, which sort of makes sense, because blood may be contaminated
+with brain tissues.
 
-col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
-      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
-image(as.matrix(cor_result[order_index,order_index, grep("ENSG00000109846", gene_names_1)]),
-      col=col, main=paste0("corshrink: "), cex.main=2,
-      xaxt = "n", yaxt = "n", zlim=c(-1,1))
-axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 1)
-axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 1)
 
+### cluster 17
+
+```{r fig.height = 8}
+genes_clus <- cluster_list[[17]][1:9]
+#genes_clus <- out$leadingEdge[[1]][1:9]
+
+matched_indices <- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index,order_index, matched_indices[m]]),
+          col=col, main=paste0("corshrink:", genes_clus[m]), cex.main=2,
+          xaxt = "n", yaxt = "n", zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 53), labels = U, las=2, cex.axis = 0.5)
+    axis(2, at = seq(0, 1, length.out = 53), labels = U, las=2, cex.axis = 0.5)
+}
 ```
 
-```{r}
-###################  number of tissues with corr  > thresh  ###########################
+### cluster 19
 
-tab <- array(0, dim(cor_result)[3])
-for(m in 1:dim(cor_result)[3]){
-  z <- as.matrix(cor_result[order_index,order_index,m])
-  vec_z <- z[row(z) > col(z)]
-  tab[m] <- length(which(vec_z > 0.5))
+```{r fig.height = 8}
+genes_clus <- cluster_list[[19]][1:9]
+#genes_clus <- out$leadingEdge[[1]][1:9]
+
+matched_indices <- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index,order_index, matched_indices[m]]),
+          col=col, main=paste0("corshrink:", genes_clus[m]), cex.main=2,
+          xaxt = "n", yaxt = "n", zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 53), labels = U, las=2, cex.axis = 0.5)
+    axis(2, at = seq(0, 1, length.out = 53), labels = U, las=2, cex.axis = 0.5)
+}
+```
+
+
+### cluster 4
+
+```{r fig.height = 8}
+genes_clus <- cluster_list[[4]][1:9]
+#genes_clus <- out$leadingEdge[[1]][1:9]
+
+matched_indices <- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index,order_index, matched_indices[m]]),
+          col=col, main=paste0("corshrink:", genes_clus[m]), cex.main=2,
+          xaxt = "n", yaxt = "n", zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 53), labels = U, las=2, cex.axis = 0.5)
+    axis(2, at = seq(0, 1, length.out = 53), labels = U, las=2, cex.axis = 0.5)
+}
+```
+
+
+## Heart related
+
+
+```{r}
+tab <- array(0, dim(ash_cor_result)[3])
+for(m in 1:dim(ash_cor_result)[3]){
+  tab[m] <- ash_cor_result[32, 33 ,m]
 }
 
 tval <- (tab - mean(tab))/sd(tab)
 names(tval) <- gene_names_1
-
-out <- fgsea(pathways = cluster_list,
-             stats = tval,
-             nperm = 100000)
-
-out 
-
-col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
-      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
-image(as.matrix(cor_result[order_index,order_index, grep("ENSG00000109846", gene_names_1)]),
-      col=col, main=paste0("corshrink: "), cex.main=2,
-      xaxt = "n", yaxt = "n", zlim=c(-1,1))
-axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 1)
-axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 1)
-
 ```
 
 ```{r}
-#####################   Heart compare (Ventricle vs Appendage) ###########################
+cluster_list <- vector(mode = "list", length = 20)
+for(l in 1:20){
+  cluster_list[[l]] <- as.character(read.table(paste0("../utilities/gene_names_clus_", l, ".txt"))[,1])
+}
 
-tab <- array(0, dim(cor_result)[3])
-for(m in 1:dim(cor_result)[3]){
-  tab[m] <- cor_result[order_index[26],order_index[27],m]
+related_genes <- c();
+for(l in 1:length(cluster_list)){
+  related_genes <- c(related_genes, cluster_list[[l]]);
+}
+related_genes <- unique(related_genes)
+
+other_genes <- setdiff(gene_names_1, related_genes)
+
+cluster_list[[7]] <- sample(other_genes, 100, replace = FALSE)
+
+
+library(fgsea)
+out <- fgsea(pathways = cluster_list,
+             stats = tval,
+             nperm = 10000)
+
+out
+```
+
+
+### cluster 1
+
+```{r fig.height = 8}
+genes_clus <- cluster_list[[1]][1:9]
+#genes_clus <- out$leadingEdge[[1]][1:9]
+
+matched_indices <- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index,order_index, matched_indices[m]]),
+          col=col, main=paste0("corshrink:", genes_clus[m]), cex.main=2,
+          xaxt = "n", yaxt = "n", zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 53), labels = U, las=2, cex.axis = 0.5)
+    axis(2, at = seq(0, 1, length.out = 53), labels = U, las=2, cex.axis = 0.5)
+}
+```
+
+### cluster 14
+
+```{r fig.height = 8}
+genes_clus <- cluster_list[[2]][1:9]
+#genes_clus <- out$leadingEdge[[1]][1:9]
+
+matched_indices <- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index,order_index, matched_indices[m]]),
+          col=col, main=paste0("corshrink:", genes_clus[m]), cex.main=2,
+          xaxt = "n", yaxt = "n", zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 53), labels = U, las=2, cex.axis = 0.5)
+    axis(2, at = seq(0, 1, length.out = 53), labels = U, las=2, cex.axis = 0.5)
+}
+```
+
+## Skin related
+
+```{r}
+tab <- array(0, dim(ash_cor_result)[3])
+for(m in 1:dim(ash_cor_result)[3]){
+  tab[m] <- ash_cor_result[44, 45, m]
 }
 
 tval <- (tab - mean(tab))/sd(tab)
 names(tval) <- gene_names_1
-
-out <- fgsea(pathways = cluster_list,
-             stats = tval,
-             nperm = 100000)
-out
-```
-```{r}
-###################    Brain vs non brain compare  ################################
-
-tab <- array(0, dim(cor_result)[3])
-for(m in 1:dim(cor_result)[3]){
-  tab[m] <- median(cor_result[order_index[1:13], order_index[-(1:13)],m])
-}
-
-tval <- (tab - mean(tab))/sd(tab)
-names(tval) <- gene_names_1
-
-out <- fgsea(pathways = cluster_list,
-             stats = tval,
-             nperm = 100000)
-out
 ```
 
 ```{r}
-
-#####################  Brain high, others low  ############################
-
-tab <- array(0, dim(cor_result)[3])
-for(m in 1:dim(cor_result)[3]){
-  tab[m] <- median(cor_result[order_index[1:13], order_index[(1:13)],m])/median(cor_result[order_index[-(1:13)], order_index[-(1:13)],m])
+cluster_list <- vector(mode = "list", length = 20)
+for(l in 1:20){
+  cluster_list[[l]] <- as.character(read.table(paste0("../utilities/gene_names_clus_", l, ".txt"))[,1])
 }
 
-tval <- (tab - mean(tab))/sd(tab)
-names(tval) <- gene_names_1
+related_genes <- c();
+for(l in 1:length(cluster_list)){
+  related_genes <- c(related_genes, cluster_list[[l]]);
+}
+related_genes <- unique(related_genes)
 
+other_genes <- setdiff(gene_names_1, related_genes)
+
+cluster_list[[7]] <- sample(other_genes, 100, replace = FALSE)
+
+
+library(fgsea)
 out <- fgsea(pathways = cluster_list,
              stats = tval,
-             nperm = 100000)
+             nperm = 10000)
+
 out
 ```
 
-```{r}
-
-###########################  without brain  ###############################
-
-tab <- array(0, dim(cor_result)[3])
-for(m in 1:dim(cor_result)[3]){
-  tab[m] <- median(cor_result[order_index[-(1:13)], order_index[-(1:13)],m])
-}
-
-tval <- (tab - mean(tab))/sd(tab)
-names(tval) <- gene_names_1
-
-out <- fgsea(pathways = cluster_list,
-             stats = tval,
-             nperm = 100000)
-
-out
-
-```
-
-```{r}
-
-###########################  within brain  ###############################
-
-tab <- array(0, dim(cor_result)[3])
-for(m in 1:dim(cor_result)[3]){
-  tab[m] <- median(cor_result[order_index[(1:13)], order_index[(1:13)],m])
-}
-
-tval <- (tab - mean(tab))/sd(tab)
-names(tval) <- gene_names_1
-
-out <- fgsea(pathways = cluster_list,
-             stats = tval,
-             nperm = 100000)
-
-out
-
-```
 
 ## Session information
 

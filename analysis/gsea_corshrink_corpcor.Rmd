@@ -1,5 +1,5 @@
 ---
-title: 'GSEA : CorShrink and CountClust'
+title: 'GSEA Brain : CorShrink and CountClust'
 author: "Kushal K Dey"
 date: "5/12/2017"
 output: html_document
@@ -28,7 +28,7 @@ In this script, we try to perform some gene set enrichment analysis of the Count
 clusters with respect to the CorShrink patterns observed.
 
 ```{r}
-cor_result <- get(load("../output/ash_cor_only_gtex_tissues.rda"))
+ash_cor_result <- get(load("../output/ash_cor_only_voom_pearson_normal_gtex_tissues.rda"))
 common_samples <- get(load("../output/common_samples.rda"))
 tissue_labels <- read.table(file = "../data/GTEX_V6/samples_id.txt")[,3]
 
@@ -38,7 +38,6 @@ tissue_labels <- read.table(file = "../data/GTEX_V6/samples_id.txt")[,3]
 
 gene_names <- as.character(read.table(file = "../data/GTEX_V6/gene_names_GTEX_V6.txt")[,1])
 gene_names_1 <- as.character(sapply(gene_names, function(x) return(strsplit(x, "[.]")[[1]][1])))
-
 
 U <- unique(tissue_labels)
 ```
@@ -88,31 +87,15 @@ order_index <- c(order_index, grep("Uterus", U))
 order_index <- c(order_index, grep("Bladder", U))
 ```
 
+## Median comparison GSEA clusters Brain
+
 ```{r}
-tab <- array(0, dim(cor_result)[3])
-for(m in 1:dim(cor_result)[3]){
-  z <- as.matrix(cor_result[order_index[1:13],order_index[1:13],m])
+tab <- array(0, dim(ash_cor_result)[3])
+for(m in 1:dim(ash_cor_result)[3]){
+  z <- as.matrix(ash_cor_result[order_index[1:13],order_index[1:13],m])
   vec_z <- z[row(z) > col(z)]
-  tab[m] <- length(which(vec_z > 0.3))
+  tab[m] <- quantile(vec_z, 0.8)
 }
-
-col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
-      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
-image(as.matrix(cor_result[order_index[1:13],order_index[1:13],which.max(tab)]),
-      col=col, main=paste0("corshrink: "), cex.main=2,
-      xaxt = "n", yaxt = "n", zlim=c(-1,1))
-axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 0.5)
-axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 0.5)
-```
-
-```{r}
-col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
-      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
-image(as.matrix(cor_result[order_index[1:13],order_index[1:13],which.min(tab)]),
-      col=col, main=paste0("corshrink: "), cex.main=2,
-      xaxt = "n", yaxt = "n", zlim=c(-1,1))
-axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 0.5)
-axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 0.5)
 ```
 
 ```{r}
@@ -121,59 +104,7 @@ names(tval) <- gene_names_1
 
 cluster_list <- vector(mode = "list", length = 6)
 for(l in 1:6){
-  cluster_list[[l]] <- as.character(read.table(paste0("../utilities/gene_names_brain_clus_", l, ".txt"))[,1])
-}
-
-library(fgsea)
-out <- fgsea(pathways = cluster_list,
-             stats = tval,
-             nperm = 100000)
-out
-```
-
-```{r}
-col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
-      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
-image(as.matrix(cor_result[order_index[1:13],order_index[1:13], grep("ENSG00000106211", gene_names_1)]),
-      col=col, main=paste0("corshrink: ENSG00000106211"), cex.main=2,
-      xaxt = "n", yaxt = "n", zlim=c(-1,1))
-axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1.5)
-axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1.5)
-```
-
-```{r}
-col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
-      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
-image(as.matrix(cor_result[order_index[1:13],order_index[1:13], grep("ENSG00000099194", gene_names_1)]),
-      col=col, main=paste0("corshrink: ENSG00000099194"), cex.main=2,
-      xaxt = "n", yaxt = "n", zlim=c(-1,1))
-axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1.5)
-axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1.5)
-
-```
-
-```{r}
-tab <- array(0, dim(cor_result)[3])
-for(m in 1:dim(cor_result)[3]){
-  z <- as.matrix(cor_result[order_index[1:13],order_index[1:13],m])
-  vec_z <- z[row(z) > col(z)]
-  tab[m] <- quantile(vec_z, 0.4)
-}
-
-tval <- (tab - mean(tab))/sd(tab)
-names(tval) <- gene_names_1
-
-out <- fgsea(pathways = cluster_list,
-             stats = tval,
-             nperm = 100000)
-out
-```
-
-```{r}
-
-cluster_list <- vector(mode = "list", length = 6)
-for(l in 1:6){
-  cluster_list[[l]] <- as.character(read.table(paste0("../utilities/gene_names_brain_clus_", l, ".txt"))[,1])
+  cluster_list[[l]] <- as.character(read.table(paste0("../utilities/gene_names_brain_clus_", l, ".txt"))[,1])[1:100]
 }
 
 brain_related_genes <- c();
@@ -186,22 +117,318 @@ other_genes <- setdiff(gene_names_1, brain_related_genes)
 
 cluster_list[[7]] <- sample(other_genes, 100, replace = FALSE)
 
-pval_others <- array(0, 30)
 
-for(num in 1:30){
-  out <- fgsea(pathways = cluster_list,
-               stats = tval,
-               nperm = 10000)
-  pval_others[num] <- out$padj[7]
-  cat("We are at iteration: ", num, "\n")
-}
-
+library(fgsea)
+out <- fgsea(pathways = cluster_list,
+             stats = tval,
+             nperm = 100000)
 out
 ```
 
+The number of leadingEdge genes 
 
 ```{r}
-plot(density(pval_others))
+unlist(lapply(out$leadingEdge, function(x) return(length(x))))
+```
+
+### cluster 1
+
+```{r fig.height = 8}
+genes_clus <- cluster_list[[1]][1:9]
+#genes_clus <- out$leadingEdge[[1]][1:9]
+
+matched_indices <- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0("corshrink:", genes_clus[m]), cex.main=2,
+          xaxt = "n", yaxt = "n", zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}
+```
+### cluster 2
+
+```{r fig.height = 8}
+genes_clus <- cluster_list[[2]][1:9]
+#genes_clus <- out$leadingEdge[[2]][1:9]
+
+matched_indices <- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0("corshrink:", genes_clus[m]), cex.main=2,
+          xaxt = "n", yaxt = "n", zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}
+```
+
+### cluster 3
+
+```{r fig.height = 8}
+genes_clus <- cluster_list[[3]][1:9]
+#genes_clus <- out$leadingEdge[[3]][1:9]
+
+matched_indices <- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0("corshrink:", genes_clus[m]), cex.main=2,
+          xaxt = "n", yaxt = "n", zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}
+```
+
+### cluster 4
+
+```{r fig.height = 8}
+genes_clus <- cluster_list[[4]][1:9]
+#genes_clus <- out$leadingEdge[[4]][1:9]
+
+matched_indices <- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0("corshrink:", genes_clus[m]), cex.main=2,
+          xaxt = "n", yaxt = "n", zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}
+```
+
+### cluster 5
+
+```{r fig.height = 8}
+genes_clus <- cluster_list[[5]][1:9]
+#genes_clus <- out$leadingEdge[[5]][1:9]
+
+matched_indices <- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0("corshrink:", genes_clus[m]), cex.main=2,
+          xaxt = "n", yaxt = "n", zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}
+```
+
+### cluster 6
+
+```{r fig.height = 8}
+genes_clus <- cluster_list[[6]][1:9]
+#genes_clus <- out$leadingEdge[[6]][1:9]
+matched_indices <- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0("corshrink:", genes_clus[m]), cex.main=2,
+          xaxt = "n", yaxt = "n", zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}
+```
+
+### cluster 7
+
+```{r fig.height = 8}
+genes_clus <- cluster_list[[7]][1:9]
+#genes_clus <- out$leadingEdge[[7]][1:9]
+matched_indices <- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0("corshrink:", genes_clus[m]), cex.main=2,
+          xaxt = "n", yaxt = "n", zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}
+```
+
+
+## Quantile 0.8 GSEA Brain clusters 
+
+```{r}
+tab <- array(0, dim(ash_cor_result)[3])
+for(m in 1:dim(ash_cor_result)[3]){
+  z <- as.matrix(ash_cor_result[order_index[1:13],order_index[1:13],m])
+  vec_z <- z[row(z) > col(z)]
+  tab[m] <- quantile(vec_z, 0.8)
+}
+```
+
+```{r}
+tval <- (tab - mean(tab))/sd(tab)
+names(tval) <- gene_names_1
+
+cluster_list <- vector(mode = "list", length = 6)
+for(l in 1:6){
+  cluster_list[[l]] <- as.character(read.table(paste0("../utilities/gene_names_brain_clus_", l, ".txt"))[,1])[1:100]
+}
+
+brain_related_genes <- c();
+for(l in 1:length(cluster_list)){
+  brain_related_genes <- c(brain_related_genes, cluster_list[[l]]);
+}
+brain_related_genes <- unique(brain_related_genes)
+
+other_genes <- setdiff(gene_names_1, brain_related_genes)
+
+cluster_list[[7]] <- sample(other_genes, 100, replace = FALSE)
+
+
+library(fgsea)
+out <- fgsea(pathways = cluster_list,
+             stats = tval,
+             nperm = 100000)
+out
+```
+
+The number of leadingEdge genes 
+
+```{r}
+unlist(lapply(out$leadingEdge, function(x) return(length(x))))
+```
+
+### cluster 1
+
+```{r fig.height = 8}
+genes_clus <- cluster_list[[1]][1:9]
+#genes_clus <- out$leadingEdge[[7]][1:9]
+matched_indices <- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0("corshrink:", genes_clus[m]), cex.main=2,
+          xaxt = "n", yaxt = "n", zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}
+```
+### cluster 2
+
+```{r fig.height = 8}
+genes_clus <- cluster_list[[2]][1:9]
+#genes_clus <- out$leadingEdge[[2]][1:9]
+matched_indices <- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0("corshrink:", genes_clus[m]), cex.main=2,
+          xaxt = "n", yaxt = "n", zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}
+```
+
+### cluster 3
+
+```{r fig.height = 8}
+genes_clus <- cluster_list[[3]][1:9]
+#genes_clus <- out$leadingEdge[[3]][1:9]
+matched_indices <- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0("corshrink:", genes_clus[m]), cex.main=2,
+          xaxt = "n", yaxt = "n", zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}
+```
+
+### cluster 4
+
+```{r fig.height = 8}
+genes_clus <- cluster_list[[4]][1:9]
+#genes_clus <- out$leadingEdge[[4]][1:9]
+matched_indices <- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0("corshrink:", genes_clus[m]), cex.main=2,
+          xaxt = "n", yaxt = "n", zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}
+```
+
+### cluster 5
+
+```{r fig.height = 8}
+genes_clus <- cluster_list[[5]][1:9]
+#genes_clus <- out$leadingEdge[[5]][1:9]
+matched_indices <- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0("corshrink:", genes_clus[m]), cex.main=2,
+          xaxt = "n", yaxt = "n", zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}
+```
+
+### cluster 6
+
+```{r fig.height = 8}
+genes_clus <- cluster_list[[6]][1:9]
+#genes_clus <- out$leadingEdge[[6]][1:9]
+matched_indices <- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0("corshrink:", genes_clus[m]), cex.main=2,
+          xaxt = "n", yaxt = "n", zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}
+```
+
+### cluster 7
+
+```{r fig.height = 8}
+genes_clus <- cluster_list[[7]][1:9]
+#genes_clus <- out$leadingEdge[[7]][1:9]
+matched_indices <- match(genes_clus, gene_names_1)
+par(mfrow = c(3,3))
+for(m in 1:length(matched_indices)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+    image(as.matrix(ash_cor_result[order_index[1:13],order_index[1:13], matched_indices[m]]),
+          col=col, main=paste0("corshrink:", genes_clus[m]), cex.main=2,
+          xaxt = "n", yaxt = "n", zlim=c(-1,1))
+    axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+    axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+}
 ```
 
 
