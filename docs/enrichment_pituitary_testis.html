@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Kushal K Dey" />
+
+
+<title>Pituitary and Testis</title>
+
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="cosmo.css" type="text/css" />
+
+</head>
+
+<body>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
+    <link href="../docs/cosmo.css" rel="stylesheet">
+    <link href="../docs/cosmo.min.css" rel="stylesheet">
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../docs/bootstrap/js/bootstrap.min.js"></script>
+
+<body>
+
+<div class = "nav" align = "middle">
+<div class= "p1"></div>
+<p>
+  <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "workflow.html">WORKFLOW</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "about.html">METHODS</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "license.html">LICENSE</a> 
+   &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
+ </p>
+</div>  
+<!-- <div class="nav">
+  <a href="index.html">Home page</a> &nbsp &nbsp
+  <a href="musings.html">Musings</a> &nbsp &nbsp
+  <a href="town.html">My town</a> &nbsp &nbsp
+  <a href="links.html">Links</a>
+</div> -->
+
+<!-- Main content -->
+</body>
+</html>
+
+
+<h1 class="title toc-ignore">Pituitary and Testis</h1>
+<h4 class="author"><em>Kushal K Dey</em></h4>
+<h4 class="date"><em>5/26/2017</em></h4>
+
+
+
+<pre class="r"><code>rm(list=ls())
+corshrink_data &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_normal_gtex_tissues.rda&quot;))
+cor_data &lt;- get(load(&quot;../output/cor_tissues_non_ash_voom_pearson.rda&quot;))</code></pre>
+<pre class="r"><code>common_samples &lt;- get(load(&quot;../output/common_samples.rda&quot;))
+tissue_labels &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;)[,3]
+
+#library(data.table)
+#data &lt;- data.frame(fread(&quot;../data/GTEX_V6/cis_gene_expression.txt&quot;))
+#matdata &lt;- t(data[,-c(1,2)])
+
+gene_names &lt;- as.character(read.table(file = &quot;../data/GTEX_V6/gene_names_GTEX_V6.txt&quot;)[,1])
+gene_names_1 &lt;- as.character(sapply(gene_names, function(x) return(strsplit(x, &quot;[.]&quot;)[[1]][1])))
+
+
+U &lt;- unique(tissue_labels)</code></pre>
+<pre class="r"><code>tab &lt;- array(0, dim(corshrink_data)[3])
+pituitary_testis_set &lt;- match(c(&quot;Pituitary&quot;, &quot;Testis&quot;), U)
+for(m in 1:dim(corshrink_data)[3]){
+  temp &lt;- corshrink_data[pituitary_testis_set, pituitary_testis_set, m]
+  temp1 &lt;-  corshrink_data[order_index[-(1:13)], order_index[-(1:13)],m]
+  tab[m] &lt;-  median(temp[row(temp) &gt; col(temp)]) - median(temp1[row(temp1) &gt; col(temp1)])
+}
+
+ordering_high &lt;- order(tab, decreasing =  TRUE)[1:100]
+ordering_low &lt;- order(tab, decreasing =  FALSE)[1:100]</code></pre>
+<pre class="r"><code>top_gene &lt;- gene_names_1[ordering_high[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_high[1]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="enrichment_pituitary_testis_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<pre class="r"><code>bottom_gene &lt;- gene_names_1[ordering_low[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_low[1]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="enrichment_pituitary_testis_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<pre class="r"><code>high_pituitary_testis_genes &lt;- gene_names_1[ordering_high]
+low_pituitary_testis_genes &lt;- gene_names_1[ordering_low]
+
+write.table(cbind.data.frame(high_pituitary_testis_genes), quote = FALSE, file = &quot;../utilities/pituitary_testis/high_pituitary_testis.txt&quot;, row.names = FALSE, col.names = FALSE)
+
+write.table(cbind.data.frame(low_pituitary_testis_genes), quote = FALSE, file = &quot;../utilities/pituitary_testis/low_pituitary_testis.txt&quot;, row.names = FALSE, col.names = FALSE)</code></pre>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/pituitary_testis/pathway_high.tab&quot;)
+head(cbind.data.frame(tab$pathway, tab$q.value), 10)</code></pre>
+<pre><code>##                                      tab$pathway  tab$q.value
+## 1                   Metallothioneins bind metals 0.0000573474
+## 2                         Response to metal ions 0.0000573474
+## 3                                   Adipogenesis 0.0004408492
+## 4  FoxO signaling pathway - Homo sapiens (human) 0.0004408492
+## 5                         Vitamin B12 Metabolism 0.0004408492
+## 6      Mineral absorption - Homo sapiens (human) 0.0004408492
+## 7                 Interleukin-6 family signaling 0.0005458221
+## 8                                  Lung fibrosis 0.0007900114
+## 9                 Oncostatin M Signaling Pathway 0.0007900114
+## 10                             Folate Metabolism 0.0007900114</code></pre>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/pituitary_testis/GO_high.tab&quot;)
+head(cbind.data.frame(tab$term_name, tab$q.value), 10)</code></pre>
+<pre><code>##                               tab$term_name  tab$q.value
+## 1                 animal organ regeneration 2.364786e-05
+## 2                        response to stress 2.160825e-05
+## 3         negative regulation of cell death 2.515459e-04
+## 4                      response to cytokine 1.414960e-04
+## 5            response to lipopolysaccharide 1.414960e-04
+## 6  response to molecule of bacterial origin 1.549393e-04
+## 7                  regulation of cell death 2.227001e-04
+## 8        response to extracellular stimulus 2.772592e-04
+## 9                regulation of angiogenesis 2.829313e-04
+## 10                     response to zinc ion 2.829313e-04</code></pre>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/pituitary_testis/pathway_low.tab&quot;)
+head(cbind.data.frame(tab$pathway, tab$q.value), 10)</code></pre>
+<pre><code>##                                                             tab$pathway
+## 1                                        RORA activates gene expression
+## 2                                                       Circadian Clock
+## 3  Gamma carboxylation, hypusine formation and arylsulfatase activation
+## 4                                        RORA activates gene expression
+## 5                                 Exercise-induced Circadian Regulation
+## 6                 BMAL1:CLOCK,NPAS2 activates circadian gene expression
+## 7                                   glutathione-mediated detoxification
+## 8                                                     Attenuation phase
+## 9                                                       HSF1 activation
+## 10                               Rev-mediated nuclear export of HIV RNA
+##    tab$q.value
+## 1  0.009024777
+## 2  0.009024777
+## 3  0.009024777
+## 4  0.010024532
+## 5  0.010024532
+## 6  0.023741186
+## 7  0.036221343
+## 8  0.045722063
+## 9  0.045722063
+## 10 0.045722063</code></pre>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/pituitary_testis/GO_low.tab&quot;)
+head(cbind.data.frame(tab$term_name, tab$q.value), 10)</code></pre>
+<pre><code>##                                         tab$term_name tab$q.value
+## 1        cellular detoxification of nitrogen compound 0.004507956
+## 2                      nitrobenzene metabolic process 0.004507956
+## 3                 detoxification of nitrogen compound 0.006166222
+## 4                          heat shock protein binding 0.008878955
+## 5                        xenobiotic catabolic process 0.087144735
+## 6                                 glutathione binding 0.009839686
+## 7                          cellular catabolic process 0.031698556
+## 8                                oligopeptide binding 0.017278571
+## 9                                    chromosomal part 0.035303169
+## 10 regulation of skeletal muscle cell differentiation 0.124872508</code></pre>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

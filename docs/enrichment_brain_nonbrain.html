@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Kushal K Dey" />
+
+
+<title>Brain and Non Brain Enrichment</title>
+
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="cosmo.css" type="text/css" />
+
+</head>
+
+<body>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
+    <link href="../docs/cosmo.css" rel="stylesheet">
+    <link href="../docs/cosmo.min.css" rel="stylesheet">
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../docs/bootstrap/js/bootstrap.min.js"></script>
+
+<body>
+
+<div class = "nav" align = "middle">
+<div class= "p1"></div>
+<p>
+  <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "workflow.html">WORKFLOW</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "about.html">METHODS</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "license.html">LICENSE</a> 
+   &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
+ </p>
+</div>  
+<!-- <div class="nav">
+  <a href="index.html">Home page</a> &nbsp &nbsp
+  <a href="musings.html">Musings</a> &nbsp &nbsp
+  <a href="town.html">My town</a> &nbsp &nbsp
+  <a href="links.html">Links</a>
+</div> -->
+
+<!-- Main content -->
+</body>
+</html>
+
+
+<h1 class="title toc-ignore">Brain and Non Brain Enrichment</h1>
+<h4 class="author"><em>Kushal K Dey</em></h4>
+<h4 class="date"><em>5/25/2017</em></h4>
+
+
+
+<pre class="r"><code>corshrink_data &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_normal_gtex_tissues.rda&quot;))
+cor_data &lt;- get(load(&quot;../output/cor_tissues_non_ash_voom_pearson.rda&quot;))</code></pre>
+<pre class="r"><code>common_samples &lt;- get(load(&quot;../output/common_samples.rda&quot;))
+tissue_labels &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;)[,3]
+
+#library(data.table)
+#data &lt;- data.frame(fread(&quot;../data/GTEX_V6/cis_gene_expression.txt&quot;))
+#matdata &lt;- t(data[,-c(1,2)])
+
+gene_names &lt;- as.character(read.table(file = &quot;../data/GTEX_V6/gene_names_GTEX_V6.txt&quot;)[,1])
+gene_names_1 &lt;- as.character(sapply(gene_names, function(x) return(strsplit(x, &quot;[.]&quot;)[[1]][1])))
+
+
+U &lt;- unique(tissue_labels)</code></pre>
+<pre class="r"><code>tab &lt;- array(0, dim(corshrink_data)[3])
+for(m in 1:dim(corshrink_data)[3]){
+  temp &lt;- corshrink_data[order_index[1:13], order_index[(1:13)],m]
+  temp1 &lt;- corshrink_data[order_index[-(1:13)], order_index[-(1:13)],m]
+  tab[m] &lt;-  median(temp[row(temp) &gt; col(temp)]) - median(temp1[row(temp1) &gt; col(temp1)])
+}
+
+ordering_high &lt;- order(tab, decreasing =  TRUE)[1:100]
+ordering_low &lt;- order(tab, decreasing =  FALSE)[1:100]</code></pre>
+<pre class="r"><code>top_gene &lt;- gene_names_1[ordering_high[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_high[1]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="enrichment_brain_nonbrain_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<pre class="r"><code>bottom_gene &lt;- gene_names_1[ordering_low[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_low[1]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="enrichment_brain_nonbrain_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<pre class="r"><code>high_brain_nonbrain_genes &lt;- gene_names_1[ordering_high]
+low_brain_nonbrain_genes &lt;- gene_names_1[ordering_low]
+
+write.table(cbind.data.frame(high_brain_nonbrain_genes), quote = FALSE, file = &quot;../utilities/brain_nonbrain/high_brain_nonbrain.txt&quot;, row.names = FALSE, col.names = FALSE)
+
+write.table(cbind.data.frame(low_brain_nonbrain_genes), quote = FALSE, file = &quot;../utilities/brain_nonbrain/low_brain_nonbrain.txt&quot;, row.names = FALSE, col.names = FALSE)</code></pre>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/brain_nonbrain/pathway_high.tab&quot;)
+head(cbind.data.frame(tab$pathway, tab$q.value), 10)</code></pre>
+<pre><code>##                                                              tab$pathway
+## 1                           TNF signaling pathway - Homo sapiens (human)
+## 2  Validated transcriptional targets of AP1 family members Fra1 and Fra2
+## 3          Cytokine-cytokine receptor interaction - Homo sapiens (human)
+## 4                                             Vitamin D Receptor Pathway
+## 5                                       Apoptosis - Homo sapiens (human)
+## 6                                         Nuclear Receptors Meta-Pathway
+## 7                                                       Oxidative Damage
+## 8                                          IL6-mediated signaling events
+## 9                  Photodynamic therapy-induced AP-1 survival signaling.
+## 10                                    Apoptosis Modulation and Signaling
+##     tab$q.value
+## 1  6.037289e-06
+## 2  1.497919e-05
+## 3  5.218447e-05
+## 4  1.185548e-04
+## 5  1.228863e-04
+## 6  1.474055e-04
+## 7  1.777445e-04
+## 8  3.507673e-04
+## 9  4.246073e-04
+## 10 4.977479e-04</code></pre>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/brain_nonbrain/GO_high.tab&quot;)
+head(cbind.data.frame(tab$term_name, tab$q.value), 10)</code></pre>
+<pre><code>##                                  tab$term_name  tab$q.value
+## 1                                   cell death 2.899646e-11
+## 2                  apoptotic signaling pathway 8.036141e-11
+## 3                     regulation of cell death 7.961747e-10
+## 4                        programmed cell death 7.961747e-10
+## 5          regulation of programmed cell death 7.120519e-09
+## 6                            apoptotic process 1.211702e-08
+## 7  positive regulation of response to stimulus 2.670793e-08
+## 8            positive regulation of cell death 1.280554e-07
+## 9        extrinsic apoptotic signaling pathway 1.434293e-07
+## 10   regulation of apoptotic signaling pathway 3.441032e-07</code></pre>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/brain_nonbrain/pathway_low.tab&quot;)
+head(cbind.data.frame(tab$pathway, tab$q.value), 10)</code></pre>
+<pre><code>##                                                           tab$pathway
+## 1                                          Hedgehog Signaling Pathway
+## 2                                    Melatonin metabolism and effects
+## 3                                       Metapathway biotransformation
+## 4                                               Biological oxidations
+## 5 Metabolism of xenobiotics by cytochrome P450 - Homo sapiens (human)
+## 6                      Chemical carcinogenesis - Homo sapiens (human)
+##   tab$q.value
+## 1 0.006097243
+## 2 0.010165839
+## 3 0.021285320
+## 4 0.025061818
+## 5 0.025061818
+## 6 0.026129420</code></pre>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/brain_nonbrain/GO_low.tab&quot;)
+head(cbind.data.frame(tab$term_name, tab$q.value), 10)</code></pre>
+<pre><code>##                                    tab$term_name tab$q.value
+## 1                   xenobiotic catabolic process  0.02096971
+## 2       maternal process involved in parturition  0.02212614
+## 3                       organic cation transport  0.06444999
+## 4                                    parturition  0.05011614
+## 5  regulation of epithelial cell differentiation  0.07752083
+## 6 nucleobase-containing compound kinase activity  0.04137380
+## 7                   microtubule bundle formation  0.24922369
+## 8                    response to toxic substance  0.29356402</code></pre>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

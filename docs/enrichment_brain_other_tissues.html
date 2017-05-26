@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Kushal K Dey" />
+
+
+<title>Brain vs other tissues Enrichment</title>
+
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="cosmo.css" type="text/css" />
+
+</head>
+
+<body>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
+    <link href="../docs/cosmo.css" rel="stylesheet">
+    <link href="../docs/cosmo.min.css" rel="stylesheet">
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../docs/bootstrap/js/bootstrap.min.js"></script>
+
+<body>
+
+<div class = "nav" align = "middle">
+<div class= "p1"></div>
+<p>
+  <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "workflow.html">WORKFLOW</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "about.html">METHODS</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "license.html">LICENSE</a> 
+   &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
+ </p>
+</div>  
+<!-- <div class="nav">
+  <a href="index.html">Home page</a> &nbsp &nbsp
+  <a href="musings.html">Musings</a> &nbsp &nbsp
+  <a href="town.html">My town</a> &nbsp &nbsp
+  <a href="links.html">Links</a>
+</div> -->
+
+<!-- Main content -->
+</body>
+</html>
+
+
+<h1 class="title toc-ignore">Brain vs other tissues Enrichment</h1>
+<h4 class="author"><em>Kushal K Dey</em></h4>
+<h4 class="date"><em>5/25/2017</em></h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#median-corr-brainnon-brain-vs-non-brainnon-brain">Median corr brain/non brain vs non-brain/non-brain</a></li>
+<li><a href="#median-corr-brainnon-brain">Median corr brain/non brain</a></li>
+</ul>
+</div>
+
+<p>From the GSEA analysis of the <em>CountClust</em> clusters, it appeared that the genes driving the Blood cluster tend to show high correlation between the Brain tissues and the non Brain tissues in terms of expression patterns.</p>
+<p>We check here if the top genes showing highest Brain versus non Brain correlation indeed show strong GO annotations for Whole Blood or not.</p>
+<pre class="r"><code>corshrink_data &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_normal_gtex_tissues.rda&quot;))
+cor_data &lt;- get(load(&quot;../output/cor_tissues_non_ash_voom_pearson.rda&quot;))</code></pre>
+<pre class="r"><code>common_samples &lt;- get(load(&quot;../output/common_samples.rda&quot;))
+tissue_labels &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;)[,3]
+
+#library(data.table)
+#data &lt;- data.frame(fread(&quot;../data/GTEX_V6/cis_gene_expression.txt&quot;))
+#matdata &lt;- t(data[,-c(1,2)])
+
+gene_names &lt;- as.character(read.table(file = &quot;../data/GTEX_V6/gene_names_GTEX_V6.txt&quot;)[,1])
+gene_names_1 &lt;- as.character(sapply(gene_names, function(x) return(strsplit(x, &quot;[.]&quot;)[[1]][1])))
+
+
+U &lt;- unique(tissue_labels)</code></pre>
+<div id="median-corr-brainnon-brain-vs-non-brainnon-brain" class="section level2">
+<h2>Median corr brain/non brain vs non-brain/non-brain</h2>
+<pre class="r"><code>tab &lt;- array(0, dim(corshrink_data)[3])
+for(m in 1:dim(corshrink_data)[3]){
+  temp &lt;- corshrink_data[order_index[1:13], order_index[-(1:13)],m]
+  temp1 &lt;- corshrink_data[order_index[-(1:13)], order_index[-(1:13)],m]
+  tab[m] &lt;-  median(temp[row(temp) &gt; col(temp)]) - median(temp1[row(temp1) &gt; col(temp1)])
+}
+
+ordering_high &lt;- order(tab, decreasing =  TRUE)[1:100]
+ordering_low &lt;- order(tab, decreasing =  FALSE)[1:100]</code></pre>
+<pre class="r"><code>top_gene &lt;- gene_names_1[ordering_high[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_high[1]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="enrichment_brain_other_tissues_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<pre class="r"><code>bottom_gene &lt;- gene_names_1[ordering_low[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_low[1]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="enrichment_brain_other_tissues_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<pre class="r"><code>high_brain_other_tissues_genes &lt;- gene_names_1[ordering_high]
+low_brain_other_tissues_genes &lt;- gene_names_1[ordering_low]
+
+write.table(cbind.data.frame(high_brain_other_tissues_genes), quote = FALSE, file = &quot;../utilities/brain_other_tissues/high_brain_other_tissues.txt&quot;, row.names = FALSE, col.names = FALSE)
+
+write.table(cbind.data.frame(low_brain_other_tissues_genes), quote = FALSE, file = &quot;../utilities/brain_other_tissues/low_brain_other_tissues.txt&quot;, row.names = FALSE, col.names = FALSE)</code></pre>
+<p>Pathway analysis</p>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/brain_other_tissues/pathway1_high.tab&quot;)
+head(cbind.data.frame(tab$pathway, tab$q.value), 10)</code></pre>
+<pre><code>##                                                             tab$pathway
+## 1                                                        Keratinization
+## 2                           GPCR GroupI metabotropic glutamate receptor
+## 3                                   Formation of the cornified envelope
+## 4  sumoylation as a mechanism to modulate ctbp-dependent gene responses
+## 5                               Apoptotic cleavage of cellular proteins
+## 6                         Apoptotic cleavage of cell adhesion  proteins
+## 7                                            Apoptotic execution  phase
+## 8            sumoylation by ranbp2 regulates transcriptional repression
+## 9                        Platelet activation, signaling and aggregation
+## 10          Role of Calcineurin-dependent NFAT signaling in lymphocytes
+##    tab$q.value
+## 1   0.01614735
+## 2   0.01614735
+## 3   0.01614735
+## 4   0.02234891
+## 5   0.02234891
+## 6   0.02918762
+## 7   0.03349352
+## 8   0.03349352
+## 9   0.03349352
+## 10  0.03637837</code></pre>
+<p>GO analysis</p>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/brain_other_tissues/GO1_high.tab&quot;)
+head(cbind.data.frame(tab$term_name, tab$q.value), 10)</code></pre>
+<pre><code>##                                   tab$term_name  tab$q.value
+## 1                                        Z disc 0.0002484761
+## 2                  actin filament-based process 0.0014559433
+## 3                                    sarcolemma 0.0002484761
+## 4                                        I band 0.0002484761
+## 5  cellular response to organonitrogen compound 0.0064052511
+## 6                            cell-cell junction 0.0011885143
+## 7                  cytoskeletal protein binding 0.0011019769
+## 8             actomyosin structure organization 0.0063365876
+## 9             supramolecular fiber organization 0.0040439780
+## 10              actin cytoskeleton organization 0.0064052511</code></pre>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/brain_other_tissues/pathway1_low.tab&quot;)
+head(cbind.data.frame(tab$pathway, tab$q.value), 10)</code></pre>
+<pre><code>##                                              tab$pathway  tab$q.value
+## 1  BMAL1:CLOCK,NPAS2 activates circadian gene expression 1.453490e-05
+## 2                                        Circadian Clock 8.927588e-05
+## 3                                        Circadian Clock 8.927588e-05
+## 4                               Circadian rhythm pathway 2.142932e-04
+## 5                         RORA activates gene expression 6.679154e-04
+## 6                                      Attenuation phase 6.679154e-04
+## 7                       Melatonin metabolism and effects 6.679154e-04
+## 8                Circadian rhythm - Homo sapiens (human) 6.679154e-04
+## 9                                        HSF1 activation 6.679154e-04
+## 10       Regulation of HSF1-mediated heat shock response 6.679154e-04</code></pre>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/brain_other_tissues/GO1_low.tab&quot;)
+head(cbind.data.frame(tab$term_name, tab$q.value), 10)</code></pre>
+<pre><code>##                                    tab$term_name tab$q.value
+## 1       maternal process involved in parturition 0.060646355
+## 2                              response to lipid 0.106774305
+## 3        circadian regulation of gene expression 0.060646355
+## 4                  heterocyclic compound binding 0.008433897
+## 5                                 nucleolar part 0.027587627
+## 6  cellular response to steroid hormone stimulus 0.079084529
+## 7                organic cyclic compound binding 0.008433897
+## 8   cellular response to organic cyclic compound 0.079084529
+## 9                    response to steroid hormone 0.106774305
+## 10     small nucleolar ribonucleoprotein complex 0.027587627</code></pre>
+</div>
+<div id="median-corr-brainnon-brain" class="section level2">
+<h2>Median corr brain/non brain</h2>
+<pre class="r"><code>tab &lt;- array(0, dim(corshrink_data)[3])
+for(m in 1:dim(corshrink_data)[3]){
+  temp &lt;- corshrink_data[order_index[1:13], order_index[-(1:13)],m]
+  tab[m] &lt;-  median(temp[row(temp) &gt; col(temp)])
+}
+
+ordering_high &lt;- order(tab, decreasing =  TRUE)[1:100]
+ordering_low &lt;- order(tab, decreasing =  FALSE)[1:100]</code></pre>
+<pre class="r"><code>top_gene &lt;- gene_names_1[ordering_high[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_high[1]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="enrichment_brain_other_tissues_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<pre class="r"><code>bottom_gene &lt;- gene_names_1[ordering_low[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_low[1]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="enrichment_brain_other_tissues_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<pre class="r"><code>high_brain_other_tissues_genes &lt;- gene_names_1[ordering_high]
+low_brain_other_tissues_genes &lt;- gene_names_1[ordering_low]
+
+write.table(cbind.data.frame(high_brain_other_tissues_genes), quote = FALSE, file = &quot;../utilities/brain_other_tissues/high_brain_other_tissues_2.txt&quot;, row.names = FALSE, col.names = FALSE)
+
+write.table(cbind.data.frame(low_brain_other_tissues_genes), quote = FALSE, file = &quot;../utilities/brain_other_tissues/low_brain_other_tissues_2.txt&quot;, row.names = FALSE, col.names = FALSE)</code></pre>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/brain_other_tissues/pathway2_low.tab&quot;)
+head(cbind.data.frame(tab$pathway, tab$q.value), 10)</code></pre>
+<pre><code>##                                                                      tab$pathway
+## 1                                                                 Keratinization
+## 2                                                                          EGFR1
+## 3  Arrhythmogenic right ventricular cardiomyopathy (ARVC) - Homo sapiens (human)
+## 4                                Arrhythmogenic Right Ventricular Cardiomyopathy
+## 5                                                          Developmental Biology
+## 6                                   Signaling mediated by p38-alpha and p38-beta
+## 7   Posttranslational regulation of adherens junction stability and dissassembly
+## 8                                                    TGF-beta Receptor Signaling
+## 9                                                      Endochondral Ossification
+## 10                                        Signaling by TGF-beta Receptor Complex
+##     tab$q.value
+## 1  0.0001232673
+## 2  0.0028254050
+## 3  0.0028254050
+## 4  0.0028254050
+## 5  0.0028254050
+## 6  0.0112934238
+## 7  0.0206299278
+## 8  0.0206299278
+## 9  0.0219797193
+## 10 0.0219797193</code></pre>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/brain_other_tissues/GO2_low.tab&quot;)
+head(cbind.data.frame(tab$term_name, tab$q.value), 10)</code></pre>
+<pre><code>##                             tab$term_name  tab$q.value
+## 1                         fascia adherens 1.601923e-05
+## 2             cell-cell adherens junction 8.019538e-05
+## 3                      cell-cell junction 9.604157e-05
+## 4            Sertoli cell differentiation 7.599560e-04
+## 5                   intermediate filament 1.947651e-04
+## 6        regulation of cell proliferation 2.083509e-03
+## 7  structural constituent of cytoskeleton 3.232347e-04
+## 8              keratinocyte proliferation 2.083509e-03
+## 9                                  Z disc 4.911086e-04
+## 10           muscle structure development 1.255100e-03</code></pre>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/brain_other_tissues/pathway2_high.tab&quot;)
+head(cbind.data.frame(tab$pathway, tab$q.value), 10)</code></pre>
+<pre><code>##                                                                   tab$pathway
+## 1                                  Allograft rejection - Homo sapiens (human)
+## 2                            Graft-versus-host disease - Homo sapiens (human)
+## 3                             Type I diabetes mellitus - Homo sapiens (human)
+## 4                                                  Endosomal/Vacuolar pathway
+## 5                           Autoimmune thyroid disease - Homo sapiens (human)
+## 6                                    Viral myocarditis - Homo sapiens (human)
+## 7                                                      Proteasome Degradation
+## 8                  Antigen processing and presentation - Homo sapiens (human)
+## 9                                                         Allograft Rejection
+## 10 Antigen Presentation: Folding, assembly and peptide loading of class I MHC
+##     tab$q.value
+## 1  1.213829e-05
+## 2  1.213829e-05
+## 3  1.213829e-05
+## 4  1.583926e-05
+## 5  1.583926e-05
+## 6  2.056675e-05
+## 7  2.624854e-05
+## 8  3.900576e-05
+## 9  4.755511e-05
+## 10 4.755511e-05</code></pre>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/brain_other_tissues/GO2_high.tab&quot;)
+head(cbind.data.frame(tab$term_name, tab$q.value), 10)</code></pre>
+<pre><code>##                                                           tab$term_name
+## 1                                                   MHC protein complex
+## 2                        lumenal side of endoplasmic reticulum membrane
+## 3  integral component of lumenal side of endoplasmic reticulum membrane
+## 4                                               peptide antigen binding
+## 5                                ER to Golgi transport vesicle membrane
+## 6                                                       peptide binding
+## 7                           interferon-gamma-mediated signaling pathway
+## 8                                                         amide binding
+## 9                antigen processing and presentation of peptide antigen
+## 10                                          MHC class I protein complex
+##     tab$q.value
+## 1  2.282876e-08
+## 2  3.469741e-08
+## 3  1.555401e-08
+## 4  1.878534e-08
+## 5  5.216098e-07
+## 6  8.766997e-07
+## 7  1.421373e-05
+## 8  3.863407e-06
+## 9  4.460830e-05
+## 10 4.780472e-06</code></pre>
+</div>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

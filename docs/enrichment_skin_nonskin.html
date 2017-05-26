@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Kushal K Dey" />
+
+
+<title>Skin and Non skin enrichment</title>
+
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="cosmo.css" type="text/css" />
+
+</head>
+
+<body>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
+    <link href="../docs/cosmo.css" rel="stylesheet">
+    <link href="../docs/cosmo.min.css" rel="stylesheet">
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../docs/bootstrap/js/bootstrap.min.js"></script>
+
+<body>
+
+<div class = "nav" align = "middle">
+<div class= "p1"></div>
+<p>
+  <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "workflow.html">WORKFLOW</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "about.html">METHODS</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "license.html">LICENSE</a> 
+   &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
+ </p>
+</div>  
+<!-- <div class="nav">
+  <a href="index.html">Home page</a> &nbsp &nbsp
+  <a href="musings.html">Musings</a> &nbsp &nbsp
+  <a href="town.html">My town</a> &nbsp &nbsp
+  <a href="links.html">Links</a>
+</div> -->
+
+<!-- Main content -->
+</body>
+</html>
+
+
+<h1 class="title toc-ignore">Skin and Non skin enrichment</h1>
+<h4 class="author"><em>Kushal K Dey</em></h4>
+<h4 class="date"><em>5/25/2017</em></h4>
+
+
+
+<pre class="r"><code>rm(list=ls())
+corshrink_data &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_normal_gtex_tissues.rda&quot;))
+cor_data &lt;- get(load(&quot;../output/cor_tissues_non_ash_voom_pearson.rda&quot;))</code></pre>
+<pre class="r"><code>common_samples &lt;- get(load(&quot;../output/common_samples.rda&quot;))
+tissue_labels &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;)[,3]
+
+#library(data.table)
+#data &lt;- data.frame(fread(&quot;../data/GTEX_V6/cis_gene_expression.txt&quot;))
+#matdata &lt;- t(data[,-c(1,2)])
+
+gene_names &lt;- as.character(read.table(file = &quot;../data/GTEX_V6/gene_names_GTEX_V6.txt&quot;)[,1])
+gene_names_1 &lt;- as.character(sapply(gene_names, function(x) return(strsplit(x, &quot;[.]&quot;)[[1]][1])))
+
+
+U &lt;- unique(tissue_labels)</code></pre>
+<pre class="r"><code>tab &lt;- array(0, dim(corshrink_data)[3])
+skin_set &lt;- grep(&quot;Skin&quot;, U)
+for(m in 1:dim(corshrink_data)[3]){
+  temp &lt;- corshrink_data[skin_set, skin_set,m]
+  temp1 &lt;-  corshrink_data[order_index[-(1:13)], order_index[-(1:13)],m]
+  tab[m] &lt;-  median(temp[row(temp) &gt; col(temp)]) - median(temp1[row(temp1) &gt; col(temp1)])
+}
+
+ordering_high &lt;- order(tab, decreasing =  TRUE)[1:100]
+ordering_low &lt;- order(tab, decreasing =  FALSE)[1:100]</code></pre>
+<pre class="r"><code>top_gene &lt;- gene_names_1[ordering_high[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_high[1]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="enrichment_skin_nonskin_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<pre class="r"><code>bottom_gene &lt;- gene_names_1[ordering_low[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_low[1]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="enrichment_skin_nonskin_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<pre class="r"><code>high_skin_nonskin_genes &lt;- gene_names_1[ordering_high]
+low_skin_nonskin_genes &lt;- gene_names_1[ordering_low]
+
+write.table(cbind.data.frame(high_skin_nonskin_genes), quote = FALSE, file = &quot;../utilities/skin_nonskin/high_skin_nonskin.txt&quot;, row.names = FALSE, col.names = FALSE)
+
+write.table(cbind.data.frame(low_skin_nonskin_genes), quote = FALSE, file = &quot;../utilities/skin_nonskin/low_skin_nonskin.txt&quot;, row.names = FALSE, col.names = FALSE)</code></pre>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/skin_nonskin/pathway_high.tab&quot;)
+head(cbind.data.frame(tab$pathway, tab$q.value), 10)</code></pre>
+<pre><code>##                                                                             tab$pathway
+## 1                                          Wnt signaling pathway - Homo sapiens (human)
+## 2                                       Transcription factor regulation in adipogenesis
+## 3                                                Wnt Signaling Pathway and Pluripotency
+## 4                                                                 wnt signaling pathway
+## 5                                              DNA Damage Response (only ATM dependent)
+## 6                                                      E2F transcription factor network
+## 7  inactivation of gsk3 by akt causes accumulation of b-catenin in alveolar macrophages
+## 8                                                                        Focal Adhesion
+## 9                                                 Focal adhesion - Homo sapiens (human)
+## 10                                                                             IGF-Core
+##    tab$q.value
+## 1  0.000621500
+## 2  0.001247037
+## 3  0.002574783
+## 4  0.002574783
+## 5  0.003073360
+## 6  0.004525731
+## 7  0.004525731
+## 8  0.005363814
+## 9  0.006547410
+## 10 0.009092318</code></pre>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/skin_nonskin/GO_high.tab&quot;)
+head(cbind.data.frame(tab$term_name, tab$q.value), 10)</code></pre>
+<pre><code>##                              tab$term_name  tab$q.value
+## 1         single-organism cellular process 3.524908e-07
+## 2  cellular response to fluid shear stress 7.424163e-04
+## 3                  regulation of signaling 6.685692e-04
+## 4         regulation of cell communication 9.482819e-04
+## 5              response to nutrient levels 9.482819e-04
+## 6                       tissue development 6.879586e-04
+## 7                    response to hyperoxia 6.879586e-04
+## 8      response to increased oxygen levels 9.482819e-04
+## 9     single-organism biosynthetic process 6.879586e-04
+## 10      response to extracellular stimulus 6.879586e-04</code></pre>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/skin_nonskin/pathway_low.tab&quot;)</code></pre>
+<pre><code>## Warning in read.table(file = file, header = header, sep = sep, quote =
+## quote, : incomplete final line found by readTableHeader on &#39;../utilities/
+## skin_nonskin/pathway_low.tab&#39;</code></pre>
+<pre class="r"><code>head(cbind.data.frame(tab$pathway, tab$q.value), 10)</code></pre>
+<pre><code>##                                              tab$pathway tab$q.value
+## 1 SUMOylation of DNA damage response and repair proteins   0.0771933
+## 2              SUMO E3 ligases SUMOylate target proteins   0.0771933</code></pre>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/skin_nonskin/GO_low.tab&quot;)
+head(cbind.data.frame(tab$term_name, tab$q.value), 10)</code></pre>
+<pre><code>##                             tab$term_name tab$q.value
+## 1                      hemoglobin complex 0.002244557
+## 2             oxygen transporter activity 0.002316795
+## 3                           gas transport 0.029251096
+## 4  regulation of receptor internalization 0.050056592
+## 5              interferon-beta production 0.050056592
+## 6                          oxygen binding 0.032683841
+## 7            transition metal ion binding 0.015048933
+## 8                receptor internalization 0.520078140
+## 9            condensed nuclear chromosome 0.021771646
+## 10                              meiosis I 0.304157130</code></pre>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

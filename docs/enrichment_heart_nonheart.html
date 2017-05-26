@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Kushal K Dey" />
+
+
+<title>Heart and Non heart enrichment</title>
+
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="cosmo.css" type="text/css" />
+
+</head>
+
+<body>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
+    <link href="../docs/cosmo.css" rel="stylesheet">
+    <link href="../docs/cosmo.min.css" rel="stylesheet">
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../docs/bootstrap/js/bootstrap.min.js"></script>
+
+<body>
+
+<div class = "nav" align = "middle">
+<div class= "p1"></div>
+<p>
+  <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "workflow.html">WORKFLOW</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "about.html">METHODS</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "license.html">LICENSE</a> 
+   &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
+ </p>
+</div>  
+<!-- <div class="nav">
+  <a href="index.html">Home page</a> &nbsp &nbsp
+  <a href="musings.html">Musings</a> &nbsp &nbsp
+  <a href="town.html">My town</a> &nbsp &nbsp
+  <a href="links.html">Links</a>
+</div> -->
+
+<!-- Main content -->
+</body>
+</html>
+
+
+<h1 class="title toc-ignore">Heart and Non heart enrichment</h1>
+<h4 class="author"><em>Kushal K Dey</em></h4>
+<h4 class="date"><em>5/25/2017</em></h4>
+
+
+
+<pre class="r"><code>rm(list=ls())
+corshrink_data &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_normal_gtex_tissues.rda&quot;))
+cor_data &lt;- get(load(&quot;../output/cor_tissues_non_ash_voom_pearson.rda&quot;))</code></pre>
+<pre class="r"><code>common_samples &lt;- get(load(&quot;../output/common_samples.rda&quot;))
+tissue_labels &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;)[,3]
+
+#library(data.table)
+#data &lt;- data.frame(fread(&quot;../data/GTEX_V6/cis_gene_expression.txt&quot;))
+#matdata &lt;- t(data[,-c(1,2)])
+
+gene_names &lt;- as.character(read.table(file = &quot;../data/GTEX_V6/gene_names_GTEX_V6.txt&quot;)[,1])
+gene_names_1 &lt;- as.character(sapply(gene_names, function(x) return(strsplit(x, &quot;[.]&quot;)[[1]][1])))
+
+
+U &lt;- unique(tissue_labels)</code></pre>
+<pre class="r"><code>tab &lt;- array(0, dim(corshrink_data)[3])
+heart_set &lt;- grep(&quot;Heart&quot;, U)
+for(m in 1:dim(corshrink_data)[3]){
+  temp &lt;- corshrink_data[heart_set, heart_set, m]
+  temp1 &lt;-  corshrink_data[order_index[-(1:13)], order_index[-(1:13)],m]
+  tab[m] &lt;-  median(temp[row(temp) &gt; col(temp)]) - median(temp1[row(temp1) &gt; col(temp1)])
+}
+
+ordering_high &lt;- order(tab, decreasing =  TRUE)[1:100]
+ordering_low &lt;- order(tab, decreasing =  FALSE)[1:100]</code></pre>
+<pre class="r"><code>top_gene &lt;- gene_names_1[ordering_high[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_high[1]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="enrichment_heart_nonheart_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<pre class="r"><code>bottom_gene &lt;- gene_names_1[ordering_low[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_low[1]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="enrichment_heart_nonheart_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<pre class="r"><code>high_heart_nonheart_genes &lt;- gene_names_1[ordering_high]
+low_heart_nonheart_genes &lt;- gene_names_1[ordering_low]
+
+write.table(cbind.data.frame(high_heart_nonheart_genes), quote = FALSE, file = &quot;../utilities/heart_nonheart/high_heart_nonheart.txt&quot;, row.names = FALSE, col.names = FALSE)
+
+write.table(cbind.data.frame(low_heart_nonheart_genes), quote = FALSE, file = &quot;../utilities/heart_nonheart/low_heart_nonheart.txt&quot;, row.names = FALSE, col.names = FALSE)</code></pre>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/heart_nonheart/pathway_high.tab&quot;)
+head(cbind.data.frame(tab$pathway, tab$q.value), 10)</code></pre>
+<pre><code>##                                                         tab$pathway
+## 1                                                          Integrin
+## 2                               Formation of the cornified envelope
+## 3                                                             EGFR1
+## 4  Aldosterone-regulated sodium reabsorption - Homo sapiens (human)
+## 5                                                    Focal Adhesion
+## 6                             Focal adhesion - Homo sapiens (human)
+## 7                                                    Keratinization
+## 8                                      PDGFR-beta signaling pathway
+## 9                                           Sphingolipid Metabolism
+## 10                                               Signaling by NODAL
+##    tab$q.value
+## 1   0.04221750
+## 2   0.04221750
+## 3   0.04221750
+## 4   0.05994840
+## 5   0.09830775
+## 6   0.09830775
+## 7   0.09830775
+## 8   0.09830775
+## 9   0.09830775
+## 10  0.09830775</code></pre>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/heart_nonheart/GO_high.tab&quot;)
+head(cbind.data.frame(tab$term_name, tab$q.value), 10)</code></pre>
+<pre><code>##                                                 tab$term_name  tab$q.value
+## 1                                           intercalated disc 0.0001920839
+## 2                                                   desmosome 0.0003201332
+## 3  protein binding involved in heterotypic cell-cell adhesion 0.0002191457
+## 4                                      cell-cell contact zone 0.0003502631
+## 5              protein binding involved in cell-cell adhesion 0.0006668701
+## 6        bundle of His cell to Purkinje myocyte communication 0.0039072680
+## 7                                homotypic cell-cell adhesion 0.0039072680
+## 8                               epithelial cell-cell adhesion 0.0039072680
+## 9                   protein binding involved in cell adhesion 0.0032437213
+## 10          cell communication involved in cardiac conduction 0.0161137270</code></pre>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/heart_nonheart/pathway_low.tab&quot;)
+head(cbind.data.frame(tab$pathway, tab$q.value), 10)</code></pre>
+<pre><code>##                                                                                                            tab$pathway
+## 1                                                                                       Respiratory electron transport
+## 2                                                                          Huntington,s disease - Homo sapiens (human)
+## 3                                                                                             Electron Transport Chain
+## 4  Respiratory electron transport, ATP synthesis by chemiosmotic coupling, and heat production by uncoupling proteins.
+## 5                                                                                                 Complex I biogenesis
+## 6                                                                     Oxidative phosphorylation - Homo sapiens (human)
+## 7                                                                           Parkinson,s disease - Homo sapiens (human)
+## 8                                                                                            Oxidative phosphorylation
+## 9                                                     Non-alcoholic fatty liver disease (NAFLD) - Homo sapiens (human)
+## 10                                                      The citric acid (TCA) cycle and respiratory electron transport
+##    tab$q.value
+## 1  0.001237644
+## 2  0.001237644
+## 3  0.001237644
+## 4  0.001609607
+## 5  0.001609607
+## 6  0.001609607
+## 7  0.001609607
+## 8  0.001609607
+## 9  0.001766041
+## 10 0.002295144</code></pre>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/heart_nonheart/GO_low.tab&quot;)
+head(cbind.data.frame(tab$term_name, tab$q.value), 10)</code></pre>
+<pre><code>##                                   tab$term_name tab$q.value
+## 1                     respiratory chain complex 0.001053175
+## 2               mitochondrial respiratory chain 0.001509083
+## 3                             respiratory chain 0.003253966
+## 4          respiratory electron transport chain 0.013759766
+## 5                      electron transport chain 0.014250866
+## 6                     oxidative phosphorylation 0.013759766
+## 7                            mitochondrial part 0.002297785
+## 8                   NADH dehydrogenase activity 0.003709563
+## 9         NADH dehydrogenase (quinone) activity 0.002720346
+## 10 inner mitochondrial membrane protein complex 0.001900859</code></pre>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

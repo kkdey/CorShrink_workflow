@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Kushal K Dey" />
+
+
+<title>Esophagus and Colon</title>
+
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="cosmo.css" type="text/css" />
+
+</head>
+
+<body>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
+    <link href="../docs/cosmo.css" rel="stylesheet">
+    <link href="../docs/cosmo.min.css" rel="stylesheet">
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../docs/bootstrap/js/bootstrap.min.js"></script>
+
+<body>
+
+<div class = "nav" align = "middle">
+<div class= "p1"></div>
+<p>
+  <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "workflow.html">WORKFLOW</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "about.html">METHODS</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "license.html">LICENSE</a> 
+   &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
+ </p>
+</div>  
+<!-- <div class="nav">
+  <a href="index.html">Home page</a> &nbsp &nbsp
+  <a href="musings.html">Musings</a> &nbsp &nbsp
+  <a href="town.html">My town</a> &nbsp &nbsp
+  <a href="links.html">Links</a>
+</div> -->
+
+<!-- Main content -->
+</body>
+</html>
+
+
+<h1 class="title toc-ignore">Esophagus and Colon</h1>
+<h4 class="author"><em>Kushal K Dey</em></h4>
+<h4 class="date"><em>5/26/2017</em></h4>
+
+
+
+<pre class="r"><code>rm(list=ls())
+corshrink_data &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_normal_gtex_tissues.rda&quot;))
+cor_data &lt;- get(load(&quot;../output/cor_tissues_non_ash_voom_pearson.rda&quot;))</code></pre>
+<pre class="r"><code>common_samples &lt;- get(load(&quot;../output/common_samples.rda&quot;))
+tissue_labels &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;)[,3]
+
+#library(data.table)
+#data &lt;- data.frame(fread(&quot;../data/GTEX_V6/cis_gene_expression.txt&quot;))
+#matdata &lt;- t(data[,-c(1,2)])
+
+gene_names &lt;- as.character(read.table(file = &quot;../data/GTEX_V6/gene_names_GTEX_V6.txt&quot;)[,1])
+gene_names_1 &lt;- as.character(sapply(gene_names, function(x) return(strsplit(x, &quot;[.]&quot;)[[1]][1])))
+
+
+U &lt;- unique(tissue_labels)</code></pre>
+<pre class="r"><code>tab &lt;- array(0, dim(corshrink_data)[3])
+esophagus_colon_set &lt;- match(c(&quot;Esophagus - Gastroesophageal Junction&quot;, &quot;Colon - Sigmoid&quot;, &quot;Esophagus - Muscularis&quot;), U)
+for(m in 1:dim(corshrink_data)[3]){
+  temp &lt;- corshrink_data[esophagus_colon_set, esophagus_colon_set, m]
+  temp1 &lt;-  corshrink_data[order_index[-(1:13)], order_index[-(1:13)],m]
+  tab[m] &lt;-  median(temp[row(temp) &gt; col(temp)]) - median(temp1[row(temp1) &gt; col(temp1)])
+}
+
+ordering_high &lt;- order(tab, decreasing =  TRUE)[1:100]
+ordering_low &lt;- order(tab, decreasing =  FALSE)[1:100]</code></pre>
+<pre class="r"><code>top_gene &lt;- gene_names_1[ordering_high[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_high[1]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="enrichment_esophagus_colon_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<pre class="r"><code>bottom_gene &lt;- gene_names_1[ordering_low[1]]
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(corshrink_data[order_index,order_index, ordering_low[1]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="enrichment_esophagus_colon_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<pre class="r"><code>high_esophagus_colon_genes &lt;- gene_names_1[ordering_high]
+low_esophagus_colon_genes &lt;- gene_names_1[ordering_low]
+
+write.table(cbind.data.frame(high_esophagus_colon_genes), quote = FALSE, file = &quot;../utilities/esophagus_colon/high_esophagus_colon.txt&quot;, row.names = FALSE, col.names = FALSE)
+
+write.table(cbind.data.frame(low_esophagus_colon_genes), quote = FALSE, file = &quot;../utilities/esophagus_colon/low_esophagus_colon.txt&quot;, row.names = FALSE, col.names = FALSE)</code></pre>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/esophagus_colon/pathway_high.tab&quot;)
+head(cbind.data.frame(tab$pathway, tab$q.value), 10)</code></pre>
+<pre><code>##                                                                                       tab$pathway
+## 1                                                          Oxidative Stress Pathway (Erythrocyte)
+## 2                                                                             Pathway_PA165980337
+## 3                                                          Oxidative Stress Pathway (Erythrocyte)
+## 4                                               Oxidative Stress Regulatory Pathway (Erythrocyte)
+## 5                                                                                     p53 pathway
+## 6                                                                    Cellular responses to stress
+## 7  Regulation of lipid metabolism by Peroxisome proliferator-activated receptor alpha (PPARalpha)
+## 8                                                           RIP-mediated NFkB activation via ZBP1
+## 9                                                                 TRAF6 mediated NF-kB activation
+## 10                                                    ZBP1(DAI) mediated induction of type I IFNs
+##    tab$q.value
+## 1  0.008311781
+## 2  0.008311781
+## 3  0.008311781
+## 4  0.021596418
+## 5  0.097959927
+## 6  0.097959927
+## 7  0.097959927
+## 8  0.097959927
+## 9  0.097959927
+## 10 0.097959927</code></pre>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/esophagus_colon/GO_high.tab&quot;)
+head(cbind.data.frame(tab$term_name, tab$q.value), 10)</code></pre>
+<pre><code>##                                       tab$term_name  tab$q.value
+## 1                                  cytoplasmic part 0.0001350927
+## 2                                           cytosol 0.0001333920
+## 3                                         cytoplasm 0.0002382135
+## 4                               cuticle development 0.0111058003
+## 5                 protein homodimerization activity 0.0174442171
+## 6                                            ruffle 0.0130258464
+## 7  auditory receptor cell stereocilium organization 0.1355638666
+## 8                                      NADP binding 0.0207771800
+## 9            hydrogen peroxide biosynthetic process 0.1052506873
+## 10                           small molecule binding 0.0149310882</code></pre>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/esophagus_colon/pathway_low.tab&quot;)
+head(cbind.data.frame(tab$pathway, tab$q.value), 10)</code></pre>
+<pre><code>##                                                       tab$pathway
+## 1  Chk1/Chk2(Cds1) mediated inactivation of Cyclin B:Cdk1 complex
+## 2                              the 41bb-dependent immune response
+## 3                                           atm signaling pathway
+## 4                                            Direct p53 effectors
+## 5                             Formation of the cornified envelope
+## 6                                             Alpha6Beta4Integrin
+## 7                                     cell cycle: g2/m checkpoint
+## 8                                    Acyl chain remodelling of PS
+## 9                  Myometrial Relaxation and Contraction Pathways
+## 10                     Glucocorticoid receptor regulatory network
+##    tab$q.value
+## 1   0.06964467
+## 2   0.06964467
+## 3   0.06964467
+## 4   0.06964467
+## 5   0.06964467
+## 6   0.06964467
+## 7   0.06964467
+## 8   0.06964467
+## 9   0.06964467
+## 10  0.07239866</code></pre>
+<pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/esophagus_colon/GO_low.tab&quot;)
+head(cbind.data.frame(tab$term_name, tab$q.value), 10)</code></pre>
+<pre><code>##                                                                        tab$term_name
+## 1                                          movement of cell or subcellular component
+## 2                                              single-organism developmental process
+## 3                                          protein binding involved in cell adhesion
+## 4                                                                 tissue development
+## 5                                                                      cell adhesion
+## 6  regulation of transcription from RNA polymerase II promoter in response to stress
+## 7                                                   anatomical structure development
+## 8                                                   single-organism cellular process
+## 9                                                           regulation of locomotion
+## 10                   regulation of DNA-templated transcription in response to stress
+##     tab$q.value
+## 1  0.0013142456
+## 2  0.0007672473
+## 3  0.0009977507
+## 4  0.0030974124
+## 5  0.0010470077
+## 6  0.0136518200
+## 7  0.0013049617
+## 8  0.0013049617
+## 9  0.0062343164
+## 10 0.0178470306</code></pre>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

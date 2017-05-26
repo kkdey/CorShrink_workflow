@@ -73,9 +73,9 @@ order_index <- c(order_index, grep("Bladder", U))
 
 ```{r}
 tab <- array(0, dim(corshrink_data)[3])
-esophagus_colon_set <- match(c("Artery - Coronary", "Artery - Aorta", "Artery - Tibial"), U)
+artery_set <- match(c("Artery - Coronary", "Artery - Aorta", "Artery - Tibial"), U)
 for(m in 1:dim(corshrink_data)[3]){
-  temp <- corshrink_data[esophagus_colon_set, esophagus_colon_set, m]
+  temp <- corshrink_data[artery_set, artery_set, m]
   temp1 <-  corshrink_data[order_index[-(1:13)], order_index[-(1:13)],m]
   tab[m] <-  median(temp[row(temp) > col(temp)]) - median(temp1[row(temp1) > col(temp1)])
 }
@@ -108,30 +108,30 @@ axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axi
 ```
 
 ```{r}
-high_esophagus_colon_genes <- gene_names_1[ordering_high]
-low_esophagus_colon_genes <- gene_names_1[ordering_low]
+high_artery_genes <- gene_names_1[ordering_high]
+low_artery_genes <- gene_names_1[ordering_low]
 
-write.table(cbind.data.frame(high_esophagus_colon_genes), quote = FALSE, file = "../utilities/esophagus_colon/high_esophagus_colon.txt", row.names = FALSE, col.names = FALSE)
+write.table(cbind.data.frame(high_artery_genes), quote = FALSE, file = "../utilities/artery/high_artery.txt", row.names = FALSE, col.names = FALSE)
 
-write.table(cbind.data.frame(low_esophagus_colon_genes), quote = FALSE, file = "../utilities/esophagus_colon/low_esophagus_colon.txt", row.names = FALSE, col.names = FALSE)
+write.table(cbind.data.frame(low_artery_genes), quote = FALSE, file = "../utilities/artery/low_artery.txt", row.names = FALSE, col.names = FALSE)
 ```
 
 ```{r}
-tab <- read.delim("../utilities/esophagus_colon/pathway_high.tab")
+tab <- read.delim("../utilities/artery/pathway_high.tab")
 head(cbind.data.frame(tab$pathway, tab$q.value), 10)
 ```
 
 ```{r}
-tab <- read.delim("../utilities/esophagus_colon/GO_high.tab")
+tab <- read.delim("../utilities/artery/GO_high.tab")
 head(cbind.data.frame(tab$term_name, tab$q.value), 10)
 ```
 
 ```{r}
-tab <- read.delim("../utilities/esophagus_colon/pathway_low.tab")
+tab <- read.delim("../utilities/artery/pathway_low.tab")
 head(cbind.data.frame(tab$pathway, tab$q.value), 10)
 ```
 
 ```{r}
-tab <- read.delim("../utilities/esophagus_colon/GO_low.tab")
+tab <- read.delim("../utilities/artery/GO_low.tab")
 head(cbind.data.frame(tab$term_name, tab$q.value), 10)
 ```

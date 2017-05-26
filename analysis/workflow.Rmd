@@ -46,6 +46,19 @@ interest is how this correlation structure depends on the expression patterns of
 - [GSEA of CorShrink correlation patterns on all tissues ](gsea_corshrink_corpcor_2.html)
 - [Enrichment of tissue subsets based on correlation design](correlation_analysis_subset_enrichment.html)
 
+We dig deeper into the enrichment analysis 
+
+- [Enrichment analysis of high correlation genes in Arteries](enrichment_arteries.html)
+- [Enrichment analysis of high correlation in Brain vs other tissues](enrichment_brain_other_tissues.html)
+- [Enrichment analysis of high correlation in Brain vs non brain](enrichment_brain_nonbrain.html)
+- [Enrichment analysis of high correlation in Blood vs Spleen](enrichment_blood_spleen.html)
+- [Enrichment analysis of high correlation in Breast and Adipose](enrichment_breast_adipose.html)
+- [Enrichment analysis of high correlation in Esophagus and Colon](enrichment_esophagus_colon.html)
+- [Enrichment analysis of high correlation in Heart vs other tissues](enrichment_heart_nonheart.html)
+- [Enrichment analysis of high correlation in Skin vs other tissues](enrichment_skin_nonskin.html)
+- [Enrichment analysis of high correlation in Stomach and Pancreas](enrichment_stomach_pancreas.html)
+- [Enrichment analysis of high correlation in Pituitary and Testis](enrichment_pituitary_testis.html)
+
 
 ### Expression vs CorShrink
 
