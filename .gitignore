@@ -17,3 +17,8 @@ docs/cor_flash_files/
 docs/correlation_analysis_subset_enrichment_files/
 docs/thresholding_Corshrink_files/
 docs/figure/gsea_corshrink_corpcor.Rmd/unnamed-chunk-10-1.png
+docs/corshrink_corpcor_glasso_files/
+docs/corshrink_flash_files/
+docs/one_gene_correlation_files/
+docs/reads_expression_CorShrink_files/
+docs/spcov_CorShrink_files/
