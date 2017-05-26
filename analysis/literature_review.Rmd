@@ -41,9 +41,22 @@ We find that the performance is better than softimpute + GLASSO, or
 softimpute + Shafer Strimmer. But still there are scaling issues with this method.
 However this can be considered the closest competitor to CorShrink. Also it is slower than CorShrink in estimation.
 
-## Donoho - Optimal Shrinkage of Eigenvalues
+## DONOHO - OPTIMAL SHRINKAGE OF EIGENVALUES
 
 Another way of dealing with correlation shrinkage is to do something like a Factor Analysis. We tried FLASH (Wei and Stephens) and PCA. [Donoho and Gavish](https://arxiv.org/abs/1405.7511) proposed an optimal shrinkage of the singular values using three types of norms, that would reduce the dimensionality of the data but not be a hard thresholding redution. These are all methods to build a lower rank factorization of the patterns. However, from applying FLASH and PCA, we have realized that there are very subtle details in many genes, that are not captured by the 15-20 factors we fit. 
+
+
+## MISSING VALUE CORRELATION SHRINKAGE
+
+Wang et al (2013) talks about imputation methods in microarray experiments and 
+different sophisticated methods of imputation. But they do not talk about correlation structure. However these imputation methods can be used along with softImpute. 
+My general feeling is it would not do any better.
+
+Some correlation shrinkage based methods under the presence of missing values come from Minami and Shimuzu 1998, who did MLE and RMLE etimation to get estimates of common correlation under missing data. But their solutions are computationally hard to find as they did not give an explicit solution. A partial correlation shrinkage was performed using imputation by Angelo et al in 2012, she considers the missing data to be missing at random but could be non-monotonic. In finance, people have investigated a scenario of a monotone missing scheme with missing values patterns occurring completely at random in Hyodo et al 2013. I think the CorShrink approach is more generic to these methods. 
+
+It is easy to implement compared to Minami and Shimuzu 1998, has lesser assumtions compared to Hyodo et al 2013. 
+
+
 
 
 
