@@ -50,6 +50,7 @@ We dig deeper into the enrichment analysis
 
 - [Enrichment analysis of high correlation genes in Arteries](enrichment_arteries.html)
 - [Enrichment analysis of high correlation genes inside Brain](enrichment_inside_brain.html)
+- [Enrichment analysis of high correlation genes in non brain](enrichment_non_brain.html)
 - [Enrichment analysis of high correlation in Brain vs other tissues](enrichment_brain_other_tissues.html)
 - [Enrichment analysis of high correlation in Brain vs non brain](enrichment_brain_nonbrain.html)
 - [Enrichment analysis of high correlation in Blood vs Spleen](enrichment_blood_spleen.html)
@@ -66,6 +67,7 @@ We dig deeper into the enrichment analysis
 In this section, we check how the reads expression of the genes in the GTEx data are connected to the CorShrink correlations and how small sample size can indeed produce big correlation values.
 
 - [Reads expression and CorShrink](reads_expression_CorShrink.html)
+- [Reads data for Muscle and Heart genes that show low overall correlation](muscle_heart_genes_reads_expression.html)
 
 
 ### Dimension Reduction and CorShrink
@@ -76,6 +78,7 @@ In the GTEx data, CorShrink was previously applied one gene at a time on its tis
 - [Penalized Matrix Decomposition on CorShrink matrix](corshrink_pmd.html)
 - [FLASH on CorShrink matrix](corshrink_flash.html)
 - [FLASH on sample correlation matrix](cor_flash.html)
+- [Correlation matrix from FLASH imputed data](flash_imputation_CorShrink.html)
 
 
 

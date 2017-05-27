@@ -1,0 +1,166 @@
+---
+title: "Muscle + Heart related genes study"
+author: "Kushal K Dey"
+date: "5/27/2017"
+output: html_document
+---
+
+From our correlation enrichment study, it seemed that the muscle and heart related genes have low correlations with other tissues. We pick some of the top genes enriched for low correlation and look at their expression levels in GTEx.
+
+## smooth muscle contraction
+
+
+```{r echo=TRUE, eval = FALSE}
+
+ENSG00000101335
+ENSG00000065534
+ENSG00000122786
+ENSG00000198467
+ENSG00000163017
+ENSG00000095637
+ENSG00000133392
+ENSG00000082781
+ENSG00000213949
+```
+
+[ENSG00000101335](https://www.gtexportal.org/home/gene/ENSG00000101335)
+[ENSG00000065534](https://www.gtexportal.org/home/gene/ENSG00000065534)
+[ENSG00000122786](https://www.gtexportal.org/home/gene/ENSG00000122786)
+[ENSG00000198467](https://www.gtexportal.org/home/gene/ENSG00000198467)
+[ENSG00000095637](https://www.gtexportal.org/home/gene/ENSG00000095637)
+[ENSG00000133392](https://www.gtexportal.org/home/gene/ENSG00000133392)
+[ENSG00000082781](https://www.gtexportal.org/home/gene/ENSG00000082781)
+[ENSG00000213949](https://www.gtexportal.org/home/gene/ENSG00000213949)
+
+Looking at these plots, it seems they are expressed highly in many different glands and tissues with smooth muscle, but they are low expressed in brain, muscle skeletal and blood.
+
+## cardio - related calcium regulation
+
+```{r echo=TRUE, eval = FALSE}
+
+ENSG00000065675
+ENSG00000171132
+ENSG00000118729
+ENSG00000114450
+ENSG00000078369
+ENSG00000173175
+ENSG00000172380
+ENSG00000150995
+ENSG00000067606
+ENSG00000175793
+ENSG00000169252
+ENSG00000165474
+ENSG00000152661
+ENSG00000058404
+ENSG00000198523
+ENSG00000027075
+ENSG00000156052
+```
+
+[ENSG00000065675](https://www.gtexportal.org/home/gene/ENSG00000065675)
+[ENSG00000171132](https://www.gtexportal.org/home/gene/ENSG00000171132)
+[ENSG00000118729](https://www.gtexportal.org/home/gene/ENSG00000118729)
+[ENSG00000114450](https://www.gtexportal.org/home/gene/ENSG00000114450)
+[ENSG00000078369](https://www.gtexportal.org/home/gene/ENSG00000078369)
+[ENSG00000173175](https://www.gtexportal.org/home/gene/ENSG00000173175)
+[ENSG00000172380](https://www.gtexportal.org/home/gene/ENSG00000172380)
+[ENSG00000150995](https://www.gtexportal.org/home/gene/ENSG00000150995)
+[ENSG00000067606](https://www.gtexportal.org/home/gene/ENSG00000067606)
+
+
+Well these genes are really distinct in their behavior (may be thats one of the reasons they have low correlation), so its really nice that 
+they come together in this correlation framework, because reads expression
+would have never clubbed them together.
+
+
+## Muscle contraction Reactome
+
+```{r echo=TRUE, eval= FALSE}
+ENSG00000101335
+ENSG00000133392
+ENSG00000065534
+ENSG00000175084
+ENSG00000136842
+ENSG00000165995
+ENSG00000122786
+ENSG00000198467
+ENSG00000163017
+ENSG00000134571
+ENSG00000095637
+ENSG00000077522
+ENSG00000082781
+ENSG00000213949
+ENSG00000135750
+ENSG00000198523
+ENSG00000150995
+ENSG00000118194
+ENSG00000058404
+```
+
+
+[ENSG00000101335](https://www.gtexportal.org/home/gene/ENSG00000101335)
+[ENSG00000133392](https://www.gtexportal.org/home/gene/ENSG00000133392)
+[ENSG00000065534](https://www.gtexportal.org/home/gene/ENSG00000065534)
+[ENSG00000175084](https://www.gtexportal.org/home/gene/ENSG00000175084)
+[ENSG00000136842](https://www.gtexportal.org/home/gene/ENSG00000136842)
+[ENSG00000165995](https://www.gtexportal.org/home/gene/ENSG00000165995)
+[ENSG00000122786](https://www.gtexportal.org/home/gene/ENSG00000122786)
+[ENSG00000198467](https://www.gtexportal.org/home/gene/ENSG00000198467)
+[ENSG00000163017](https://www.gtexportal.org/home/gene/ENSG00000163017)
+
+## Dilated cardiomyopathy - Homo sapiens (human)
+
+```{r echo=TRUE, eval = FALSE}
+
+ENSG00000159251
+ENSG00000175084
+ENSG00000132470
+ENSG00000173175
+ENSG00000005884
+ENSG00000165995
+ENSG00000198467
+ENSG00000134571
+ENSG00000082781
+ENSG00000213949
+ENSG00000198523
+ENSG00000077943
+ENSG00000118194
+
+```
+
+[ENSG00000159251](https://www.gtexportal.org/home/gene/ENSG00000159251)
+[ENSG00000175084](https://www.gtexportal.org/home/gene/ENSG00000175084)
+[ENSG00000132470](https://www.gtexportal.org/home/gene/ENSG00000132470)
+[ENSG00000173175](https://www.gtexportal.org/home/gene/ENSG00000173175)
+[ENSG00000005884](https://www.gtexportal.org/home/gene/ENSG00000005884)
+[ENSG00000165995](https://www.gtexportal.org/home/gene/ENSG00000165995)
+[ENSG00000198467](https://www.gtexportal.org/home/gene/ENSG00000198467)
+[ENSG00000134571](https://www.gtexportal.org/home/gene/ENSG00000134571)
+[ENSG00000082781](https://www.gtexportal.org/home/gene/ENSG00000082781)
+
+
+## Arrhythmogenic Right Ventricular Cardiomyopathy	Wikipathways
+
+```{r echo = TRUE, eval = FALSE}
+ENSG00000175084
+ENSG00000148737
+ENSG00000096696
+ENSG00000170558
+ENSG00000005884
+ENSG00000165995
+ENSG00000132470
+ENSG00000077522
+ENSG00000082781
+ENSG00000213949
+ENSG00000152661
+ENSG00000077943
+```
+
+[ENSG00000175084](https://www.gtexportal.org/home/gene/ENSG00000175084)
+[ENSG00000148737](https://www.gtexportal.org/home/gene/ENSG00000148737)
+[ENSG00000096696](https://www.gtexportal.org/home/gene/ENSG00000096696)
+[ENSG00000170558](https://www.gtexportal.org/home/gene/ENSG00000170558)
+[ENSG00000005884](https://www.gtexportal.org/home/gene/ENSG00000005884)
+[ENSG00000165995](https://www.gtexportal.org/home/gene/ENSG00000165995)
+[ENSG00000132470](https://www.gtexportal.org/home/gene/ENSG00000132470)
+[ENSG00000077522](https://www.gtexportal.org/home/gene/ENSG00000077522)

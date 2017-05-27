@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Kushal K Dey" />
+
+
+<title>Muscle + Heart related genes study</title>
+
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="cosmo.css" type="text/css" />
+
+</head>
+
+<body>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
+    <link href="../docs/cosmo.css" rel="stylesheet">
+    <link href="../docs/cosmo.min.css" rel="stylesheet">
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../docs/bootstrap/js/bootstrap.min.js"></script>
+
+<body>
+
+<div class = "nav" align = "middle">
+<div class= "p1"></div>
+<p>
+  <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "workflow.html">WORKFLOW</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "about.html">METHODS</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "license.html">LICENSE</a> 
+   &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
+ </p>
+</div>  
+<!-- <div class="nav">
+  <a href="index.html">Home page</a> &nbsp &nbsp
+  <a href="musings.html">Musings</a> &nbsp &nbsp
+  <a href="town.html">My town</a> &nbsp &nbsp
+  <a href="links.html">Links</a>
+</div> -->
+
+<!-- Main content -->
+</body>
+</html>
+
+
+<h1 class="title toc-ignore">Muscle + Heart related genes study</h1>
+<h4 class="author"><em>Kushal K Dey</em></h4>
+<h4 class="date"><em>5/27/2017</em></h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#smooth-muscle-contraction">smooth muscle contraction</a></li>
+<li><a href="#cardio---related-calcium-regulation">cardio - related calcium regulation</a></li>
+<li><a href="#muscle-contraction-reactome">Muscle contraction Reactome</a></li>
+<li><a href="#dilated-cardiomyopathy---homo-sapiens-human">Dilated cardiomyopathy - Homo sapiens (human)</a></li>
+<li><a href="#arrhythmogenic-right-ventricular-cardiomyopathy-wikipathways">Arrhythmogenic Right Ventricular Cardiomyopathy Wikipathways</a></li>
+</ul>
+</div>
+
+<p>From our correlation enrichment study, it seemed that the muscle and heart related genes have low correlations with other tissues. We pick some of the top genes enriched for low correlation and look at their expression levels in GTEx.</p>
+<div id="smooth-muscle-contraction" class="section level2">
+<h2>smooth muscle contraction</h2>
+<pre class="r"><code>ENSG00000101335
+ENSG00000065534
+ENSG00000122786
+ENSG00000198467
+ENSG00000163017
+ENSG00000095637
+ENSG00000133392
+ENSG00000082781
+ENSG00000213949</code></pre>
+<p><a href="https://www.gtexportal.org/home/gene/ENSG00000101335">ENSG00000101335</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000065534">ENSG00000065534</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000122786">ENSG00000122786</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000198467">ENSG00000198467</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000095637">ENSG00000095637</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000133392">ENSG00000133392</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000082781">ENSG00000082781</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000213949">ENSG00000213949</a></p>
+<p>Looking at these plots, it seems they are expressed highly in many different glands and tissues with smooth muscle, but they are low expressed in brain, muscle skeletal and blood.</p>
+</div>
+<div id="cardio---related-calcium-regulation" class="section level2">
+<h2>cardio - related calcium regulation</h2>
+<pre class="r"><code>ENSG00000065675
+ENSG00000171132
+ENSG00000118729
+ENSG00000114450
+ENSG00000078369
+ENSG00000173175
+ENSG00000172380
+ENSG00000150995
+ENSG00000067606
+ENSG00000175793
+ENSG00000169252
+ENSG00000165474
+ENSG00000152661
+ENSG00000058404
+ENSG00000198523
+ENSG00000027075
+ENSG00000156052</code></pre>
+<p><a href="https://www.gtexportal.org/home/gene/ENSG00000065675">ENSG00000065675</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000171132">ENSG00000171132</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000118729">ENSG00000118729</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000114450">ENSG00000114450</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000078369">ENSG00000078369</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000173175">ENSG00000173175</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000172380">ENSG00000172380</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000150995">ENSG00000150995</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000067606">ENSG00000067606</a></p>
+<p>Well these genes are really distinct in their behavior (may be thats one of the reasons they have low correlation), so its really nice that they come together in this correlation framework, because reads expression would have never clubbed them together.</p>
+</div>
+<div id="muscle-contraction-reactome" class="section level2">
+<h2>Muscle contraction Reactome</h2>
+<pre class="r"><code>ENSG00000101335
+ENSG00000133392
+ENSG00000065534
+ENSG00000175084
+ENSG00000136842
+ENSG00000165995
+ENSG00000122786
+ENSG00000198467
+ENSG00000163017
+ENSG00000134571
+ENSG00000095637
+ENSG00000077522
+ENSG00000082781
+ENSG00000213949
+ENSG00000135750
+ENSG00000198523
+ENSG00000150995
+ENSG00000118194
+ENSG00000058404</code></pre>
+<p><a href="https://www.gtexportal.org/home/gene/ENSG00000101335">ENSG00000101335</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000133392">ENSG00000133392</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000065534">ENSG00000065534</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000175084">ENSG00000175084</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000136842">ENSG00000136842</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000165995">ENSG00000165995</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000122786">ENSG00000122786</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000198467">ENSG00000198467</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000163017">ENSG00000163017</a></p>
+</div>
+<div id="dilated-cardiomyopathy---homo-sapiens-human" class="section level2">
+<h2>Dilated cardiomyopathy - Homo sapiens (human)</h2>
+<pre class="r"><code>ENSG00000159251
+ENSG00000175084
+ENSG00000132470
+ENSG00000173175
+ENSG00000005884
+ENSG00000165995
+ENSG00000198467
+ENSG00000134571
+ENSG00000082781
+ENSG00000213949
+ENSG00000198523
+ENSG00000077943
+ENSG00000118194</code></pre>
+<p><a href="https://www.gtexportal.org/home/gene/ENSG00000159251">ENSG00000159251</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000175084">ENSG00000175084</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000132470">ENSG00000132470</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000173175">ENSG00000173175</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000005884">ENSG00000005884</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000165995">ENSG00000165995</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000198467">ENSG00000198467</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000134571">ENSG00000134571</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000082781">ENSG00000082781</a></p>
+</div>
+<div id="arrhythmogenic-right-ventricular-cardiomyopathy-wikipathways" class="section level2">
+<h2>Arrhythmogenic Right Ventricular Cardiomyopathy Wikipathways</h2>
+<pre class="r"><code>ENSG00000175084
+ENSG00000148737
+ENSG00000096696
+ENSG00000170558
+ENSG00000005884
+ENSG00000165995
+ENSG00000132470
+ENSG00000077522
+ENSG00000082781
+ENSG00000213949
+ENSG00000152661
+ENSG00000077943</code></pre>
+<p><a href="https://www.gtexportal.org/home/gene/ENSG00000175084">ENSG00000175084</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000148737">ENSG00000148737</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000096696">ENSG00000096696</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000170558">ENSG00000170558</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000005884">ENSG00000005884</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000165995">ENSG00000165995</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000132470">ENSG00000132470</a> <a href="https://www.gtexportal.org/home/gene/ENSG00000077522">ENSG00000077522</a></p>
+</div>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Kushal K Dey" />
+
+
+<title>FLASH imputation + CorShrink</title>
+
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="cosmo.css" type="text/css" />
+
+</head>
+
+<body>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
+    <link href="../docs/cosmo.css" rel="stylesheet">
+    <link href="../docs/cosmo.min.css" rel="stylesheet">
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../docs/bootstrap/js/bootstrap.min.js"></script>
+
+<body>
+
+<div class = "nav" align = "middle">
+<div class= "p1"></div>
+<p>
+  <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "workflow.html">WORKFLOW</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "about.html">METHODS</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "license.html">LICENSE</a> 
+   &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
+ </p>
+</div>  
+<!-- <div class="nav">
+  <a href="index.html">Home page</a> &nbsp &nbsp
+  <a href="musings.html">Musings</a> &nbsp &nbsp
+  <a href="town.html">My town</a> &nbsp &nbsp
+  <a href="links.html">Links</a>
+</div> -->
+
+<!-- Main content -->
+</body>
+</html>
+
+
+<h1 class="title toc-ignore">FLASH imputation + CorShrink</h1>
+<h4 class="author"><em>Kushal K Dey</em></h4>
+<h4 class="date"><em>5/27/2017</em></h4>
+
+
+
+<p>We check an example of FLASH imputation on a person by tissues data per gene. We shall see if FLASH imputation gives a better or equally accurate matrix as CorShrink.</p>
+<pre class="r"><code>gene &lt;- &quot;ENSG00000172867&quot; ## update and rerun to see the plots for your gene</code></pre>
+<pre class="r"><code>person_tissue_genes &lt;- get(load(&quot;../output/person_tissue_genes_voom.rda&quot;))</code></pre>
+<pre class="r"><code>gene_names &lt;- as.character(read.table(file = &quot;../data/GTEX_V6/gene_names_GTEX_V6.txt&quot;)[,1])
+gene_names_1 &lt;- as.character(sapply(gene_names, function(x) return(strsplit(x, &quot;[.]&quot;)[[1]][1])))
+ 
+person_label=read.table(&quot;../data/GTEX_V6/person_identifier_labels_with_numbers.txt&quot;);
+samples_id &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;)[,1]
+
+samples_person &lt;- sapply(samples_id, function(x) return(paste0(strsplit(as.character(x), &quot;-&quot;)[[1]][1:2], collapse =&quot;-&quot;)))
+tissue_labels &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;)[,3]
+
+unique_persons &lt;- unique(samples_person)
+unique_tissues &lt;- unique(tissue_labels)</code></pre>
+<pre class="r"><code>numg &lt;- grep(gene, gene_names_1)
+mat &lt;- person_tissue_genes[,,numg]</code></pre>
+<p>We now apply FLASH on this matrix</p>
+<pre class="r"><code>#devtools::install_github(&quot;stephenslab/flashr&quot;, auth_token = &quot;a9de81f6166ea5ac0412326b2e2fa1b9bde8880f&quot;)
+ggd = flashr::greedy(mat,K = 10)</code></pre>
+<pre class="r"><code>save(ggd, file = paste0(&quot;../output/greedy_flash_&quot;, gene, &quot;.rda&quot;))</code></pre>
+<pre class="r"><code>ggd &lt;- get(load(file = paste0(&quot;../output/greedy_flash_&quot;, gene, &quot;.rda&quot;)))
+predicted_mat &lt;- ggd$l %*% t(ggd$f)</code></pre>
+<pre class="r"><code>flash_cov_mat &lt;- t(predicted_mat) %*% predicted_mat </code></pre>
+<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(cov2cor(flash_cov_mat[order_index, order_index])),
+      col=col, main=paste0(&quot;flash sample corr: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="flash_imputation_CorShrink_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<pre class="r"><code>mat2 &lt;- mat
+mat2[is.na(mat2)] = predicted_mat[is.na(mat2)]</code></pre>
+<pre class="r"><code>mat[1:5,1:5]</code></pre>
+<pre><code>##            [,1]       [,2]      [,3]       [,4]       [,5]
+## [1,]  1.0865395  1.4454114 1.1843655         NA         NA
+## [2,] -0.4910000         NA        NA         NA         NA
+## [3,] -0.3669399         NA        NA         NA         NA
+## [4,]  0.4528641  0.7971982 2.2161978  0.7341055         NA
+## [5,] -0.1770442 -1.6942174 0.7994254 -1.2754927 -0.1142739</code></pre>
+<pre class="r"><code>mat2[1:5,1:5]</code></pre>
+<pre><code>##            [,1]       [,2]       [,3]       [,4]       [,5]
+## [1,]  1.0865395  1.4454114  1.1843655 -0.5184517 -0.6022779
+## [2,] -0.4910000  0.4906696 -0.7774929 -0.7664831 -0.8847272
+## [3,] -0.3669399  0.4487992 -0.7256462 -0.7152590 -0.8244966
+## [4,]  0.4528641  0.7971982  2.2161978  0.7341055  0.4830270
+## [5,] -0.1770442 -1.6942174  0.7994254 -1.2754927 -0.1142739</code></pre>
+<pre class="r"><code>predicted_mat[1:5,1:5]</code></pre>
+<pre><code>##           [,1]      [,2]       [,3]       [,4]       [,5]
+## [1,] 0.2598893 0.3615475 -0.5275386 -0.5184517 -0.6022779
+## [2,] 0.3536965 0.4906696 -0.7774929 -0.7664831 -0.8847272
+## [3,] 0.3242212 0.4487992 -0.7256462 -0.7152590 -0.8244966
+## [4,] 0.8465062 1.0975785  0.5164667  0.6004814  0.4830270
+## [5,] 0.3007976 0.4140405 -0.6544812 -0.6448840 -0.7450159</code></pre>
+<pre class="r"><code>cormat2 &lt;- cor(mat2)
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(cormat2[order_index, order_index]),
+      col=col, main=paste0(&quot;flash sample corr: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="flash_imputation_CorShrink_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p>We compare this with the CorShrink matrix.</p>
+<pre class="r"><code>ash_cor_result &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_normal_gtex_tissues.rda&quot;))</code></pre>
+<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_result[order_index, order_index, numg]),
+      col=col, main=paste0(&quot;softimpute sample corr: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="flash_imputation_CorShrink_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p>We now look at the corre</p>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
