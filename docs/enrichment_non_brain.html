@@ -93,7 +93,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 </div>
 
 <p>In this script, we check for the enrichment of genes for high/low correlation in the non-brain regions.</p>
-<pre class="r"><code>corshrink_data &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_normal_gtex_tissues.rda&quot;))
+<pre class="r"><code>corshrink_data &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_halfuniform_gtex_tissues.rda&quot;))
 cor_data &lt;- get(load(&quot;../output/cor_tissues_non_ash_voom_pearson.rda&quot;))</code></pre>
 <pre class="r"><code>common_samples &lt;- get(load(&quot;../output/common_samples.rda&quot;))
 tissue_labels &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;)[,3]
@@ -145,820 +145,719 @@ write.table(cbind.data.frame(high_non_brain_genes), quote = FALSE, file = &quot;
 write.table(cbind.data.frame(low_non_brain_genes), quote = FALSE, file = &quot;../utilities/non_brain/low_non_brain.txt&quot;, row.names = FALSE, col.names = FALSE)</code></pre>
 <pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/non_brain/pathway_high.tab&quot;)
 head(cbind.data.frame(tab$pathway, tab$q.value), 100)</code></pre>
-<pre><code>##                                                             tab$pathway
-## 1                       Herpes simplex infection - Homo sapiens (human)
-## 2                 BMAL1:CLOCK,NPAS2 activates circadian gene expression
-## 3                                                       Circadian Clock
-## 4                 BMAL1-CLOCK,NPAS2 activates circadian gene expression
-## 5                      Graft-versus-host disease - Homo sapiens (human)
-## 6                                                       HSF1 activation
-## 7            Antigen processing and presentation - Homo sapiens (human)
-## 8                                   glutathione-mediated detoxification
-## 9                       Type I diabetes mellitus - Homo sapiens (human)
-## 10                           Allograft rejection - Homo sapiens (human)
-## 11                                                    Attenuation phase
-## 12              Inflammatory bowel disease (IBD) - Homo sapiens (human)
-## 13                                                  Allograft Rejection
-## 14               Staphylococcus aureus infection - Homo sapiens (human)
-## 15                                   Influenza A - Homo sapiens (human)
-## 16                                     Cellular response to heat stress
-## 17                                       HSF1-dependent transactivation
-## 18                     Th17 cell differentiation - Homo sapiens (human)
-## 19                    Autoimmune thyroid disease - Homo sapiens (human)
-## 20                                               il 6 signaling pathway
-## 21                                       Nuclear Receptors Meta-Pathway
-## 22                                                    Folate metabolism
-## 23                                                           Metabolism
-## 24                             Viral myocarditis - Homo sapiens (human)
-## 25  Intestinal immune network for IgA production - Homo sapiens (human)
-## 26                                             Circadian rhythm pathway
-## 27                                                        Immune System
-## 28                                Exercise-induced Circadian Regulation
-## 29      &lt;i&gt;S&lt;/i&gt;-methyl-5-thio-&amp;alpha;-D-ribose 1-phosphate degradation
-## 30      &lt;i&gt;S&lt;/i&gt;-methyl-5-thio-&amp;alpha;-D-ribose 1-phosphate degradation
-## 31                                                Biological oxidations
-## 32                                         Cellular responses to stress
-## 33                  Epstein-Barr virus infection - Homo sapiens (human)
-## 34                    Hematopoietic cell lineage - Homo sapiens (human)
-## 35                                              Glutathione conjugation
-## 36                                                      Circadian Clock
-## 37                      Regulation of HSF1-mediated heat shock response
-## 38                       Chemical carcinogenesis - Homo sapiens (human)
-## 39                                     Melatonin metabolism and effects
-## 40                              Circadian rhythm - Homo sapiens (human)
-## 41                                        Asthma - Homo sapiens (human)
-## 42                                       RORA activates gene expression
-## 43                              HTLV-I infection - Homo sapiens (human)
-## 44                                         Metallothioneins bind metals
-## 45                                               Response to metal ions
-## 46                                       Scavenging of heme from plasma
-## 47                                                 Phase II conjugation
-## 48                     Translocation of ZAP-70 to Immunological synapse
-## 49                                                hemoglobins chaperone
-## 50                                           Endosomal/Vacuolar pathway
-## 51                                           Methionine salvage pathway
-## 52                                        JAK STAT MolecularVariation 2
-## 53                                       Oncostatin M Signaling Pathway
-## 54                                             Neutrophil degranulation
-## 55                                                     Zinc homeostasis
-## 56                           Phosphorylation of CD3 and TCR zeta chains
-## 57                                                    Folate Metabolism
-## 58                                               il 4 signaling pathway
-## 59                                 Aryl hydrocarbon receptor signalling
-## 60                                                       PD-1 signaling
-## 61                                     Cellular response to heat stress
-## 62                                               IL-4 Signaling Pathway
-## 63                 Binding and Uptake of Ligands by Scavenger Receptors
-## 64     Association of TriC/CCT with target proteins during biosynthesis
-## 65                                                         NRF2 pathway
-## 66                                 Legionellosis - Homo sapiens (human)
-## 67  Metabolism of xenobiotics by cytochrome P450 - Homo sapiens (human)
-## 68        Nicotinate and nicotinamide metabolism - Homo sapiens (human)
-## 69           NOD-like receptor signaling pathway - Homo sapiens (human)
-## 70                                                     Oxidative Stress
-## 71                                    MHC class II antigen presentation
-## 72               Erythrocytes take up oxygen and release carbon dioxide
-## 73         Glucocorticoid Pathway (Peripheral Tissue), Pharmacodynamics
-## 74                                            ISG15 antiviral mechanism
-## 75                          Antiviral mechanism by IFN-stimulated genes
-## 76                                   Hepatitis C - Homo sapiens (human)
-## 77                                       Measles - Homo sapiens (human)
-## 78                                                    Hydrolysis of LPE
-## 79                         dolichol and dolichyl phosphate biosynthesis
-## 80             Interconversion of 2-oxoglutarate and 2-hydroxyglutarate
-## 81                     One carbon pool by folate - Homo sapiens (human)
-## 82                                        Metapathway biotransformation
-## 83                                        JAK STAT MolecularVariation 1
-## 84                                       RORA activates gene expression
-## 85        Mammary gland development pathway - Involution (Stage 4 of 4)
-## 86                                         Folding of actin by CCT/TriC
-## 87                                         methionine salvage cycle III
-## 88                                 Toxoplasmosis - Homo sapiens (human)
-## 89                                       Malaria - Homo sapiens (human)
-## 90                                       Selenium Micronutrient Network
-## 91                Photodynamic therapy-induced AP-1 survival signaling.
-## 92                   apoptotic dna-fragmentation and tissue homeostasis
-## 93            The role of GTSE1 in G2/M progression after G2 checkpoint
-## 94                                              Interleukin-6 signaling
-## 95                                               Nicotinamide salvaging
-## 96                                               Leukotriene metabolism
-## 97                                                Nicotinate metabolism
-## 98                                               Vitamin B12 Metabolism
-## 99                             Generation of second messenger molecules
-## 100                           Mineral absorption - Homo sapiens (human)
+<pre><code>##                                                                        tab$pathway
+## 1                                  Herpes simplex infection - Homo sapiens (human)
+## 2                            BMAL1:CLOCK,NPAS2 activates circadian gene expression
+## 3                                                                  HSF1 activation
+## 4                       Antigen processing and presentation - Homo sapiens (human)
+## 5                                  Type I diabetes mellitus - Homo sapiens (human)
+## 6                                                              Allograft Rejection
+## 7                                                                  Circadian Clock
+## 8                                       Allograft rejection - Homo sapiens (human)
+## 9                                                                Attenuation phase
+## 10                                Graft-versus-host disease - Homo sapiens (human)
+## 11                             Epstein-Barr virus infection - Homo sapiens (human)
+## 12                           BMAL1-CLOCK,NPAS2 activates circadian gene expression
+## 13                         Inflammatory bowel disease (IBD) - Homo sapiens (human)
+## 14                                             glutathione-mediated detoxification
+## 15                                              Influenza A - Homo sapiens (human)
+## 16                                                Cellular response to heat stress
+## 17                                                  Nuclear Receptors Meta-Pathway
+## 18                                                  HSF1-dependent transactivation
+## 19                                                    Metallothioneins bind metals
+## 20                                                          Response to metal ions
+## 21                                Th17 cell differentiation - Homo sapiens (human)
+## 22                               Autoimmune thyroid disease - Homo sapiens (human)
+## 23                                                               Folate metabolism
+## 24                          Staphylococcus aureus infection - Homo sapiens (human)
+## 25                                                    Cellular responses to stress
+## 26                                                                   Immune System
+## 27                                        Viral myocarditis - Homo sapiens (human)
+## 28                                                        Neutrophil degranulation
+## 29                                                  IL12-mediated signaling events
+## 30                                                                Zinc homeostasis
+## 31                 &lt;i&gt;S&lt;/i&gt;-methyl-5-thio-&amp;alpha;-D-ribose 1-phosphate degradation
+## 32                 &lt;i&gt;S&lt;/i&gt;-methyl-5-thio-&amp;alpha;-D-ribose 1-phosphate degradation
+## 33                                         HTLV-I infection - Homo sapiens (human)
+## 34                                 Regulation of HSF1-mediated heat shock response
+## 35                                                                      Metabolism
+## 36                                                   Asthma - Homo sapiens (human)
+## 37                                                  RORA activates gene expression
+## 38                                                  Scavenging of heme from plasma
+## 39                                Translocation of ZAP-70 to Immunological synapse
+## 40                                                      Endosomal/Vacuolar pathway
+## 41  DEx/H-box helicases activate type I IFN and inflammatory cytokines production 
+## 42             Intestinal immune network for IgA production - Homo sapiens (human)
+## 43                                                      Methionine salvage pathway
+## 44                               Hematopoietic cell lineage - Homo sapiens (human)
+## 45                                              Hepatitis C - Homo sapiens (human)
+## 46                                                  Oncostatin M Signaling Pathway
+## 47                                      Phosphorylation of CD3 and TCR zeta chains
+## 48                                                               Folate Metabolism
+## 49                                                          il 4 signaling pathway
+## 50                                            Toxoplasmosis - Homo sapiens (human)
+## 51                                            Aryl hydrocarbon receptor signalling
+## 52                                       Mineral absorption - Homo sapiens (human)
+## 53                                                                  PD-1 signaling
+## 54                                                           Biological oxidations
+## 55                                                         Glutathione conjugation
+## 56                                                Cellular response to heat stress
+## 57                                                        Circadian rhythm pathway
+## 58                                                          IL-4 Signaling Pathway
+## 59                            Binding and Uptake of Ligands by Scavenger Receptors
+## 60                Association of TriC/CCT with target proteins during biosynthesis
+## 61                                     Viral carcinogenesis - Homo sapiens (human)
+## 62                                                                    NRF2 pathway
+## 63                                            Legionellosis - Homo sapiens (human)
+## 64                        RIG-I/MDA5 mediated induction of IFN-alpha/beta pathways
+## 65                                   DNA Damage/Telomere Stress Induced Senescence
+## 66                            ApoE and miR-146 in inflammation and atherosclerosis
+## 67                                            Leishmaniasis - Homo sapiens (human)
+## 68                                                Melatonin metabolism and effects
+## 69                   Nicotinate and nicotinamide metabolism - Homo sapiens (human)
+## 70                         Th1 and Th2 cell differentiation - Homo sapiens (human)
+## 71                      NOD-like receptor signaling pathway - Homo sapiens (human)
+## 72                                         Circadian rhythm - Homo sapiens (human)
+## 73                                                                Oxidative Stress
+## 74                                               MHC class II antigen presentation
+## 75                          Erythrocytes take up oxygen and release carbon dioxide
+## 76                    Glucocorticoid Pathway (Peripheral Tissue), Pharmacodynamics
+## 77                                                    Toll-like Receptor Signaling
+## 78                                                       ISG15 antiviral mechanism
+## 79                                     Antiviral mechanism by IFN-stimulated genes
+## 80                                                        Downstream TCR signaling
+## 81                                                       Aryl Hydrocarbon Receptor
+## 82                                                  Measles - Homo sapiens (human)
+## 83                                    dolichol and dolichyl phosphate biosynthesis
+## 84                        Interconversion of 2-oxoglutarate and 2-hydroxyglutarate
+## 85                                One carbon pool by folate - Homo sapiens (human)
+## 86                                                  RORA activates gene expression
+## 87                                                                 Circadian Clock
+## 88                   Mammary gland development pathway - Involution (Stage 4 of 4)
+## 89                                                    Folding of actin by CCT/TriC
+## 90                                                    methionine salvage cycle III
+## 91                                           Exercise-induced Circadian Regulation
+## 92                                                                            TSLP
+## 93                                  Chemical carcinogenesis - Homo sapiens (human)
+## 94                                                  Selenium Micronutrient Network
+## 95                              apoptotic dna-fragmentation and tissue homeostasis
+## 96                       The role of GTSE1 in G2/M progression after G2 checkpoint
+## 97                                                          Nicotinamide salvaging
+## 98                           Photodynamic therapy-induced AP-1 survival signaling.
+## 99                                                   JAK STAT MolecularVariation 2
+## 100                           Cyclin A/B1 associated events during G2/M transition
 ##      tab$q.value
-## 1   3.095193e-07
-## 2   3.786014e-07
-## 3   2.449458e-05
-## 4   2.968287e-05
-## 5   3.488185e-05
-## 6   3.488185e-05
-## 7   3.488185e-05
-## 8   4.045300e-05
-## 9   5.102198e-05
-## 10  1.166265e-04
-## 11  1.504488e-04
-## 12  2.953775e-04
-## 13  3.625914e-04
-## 14  3.625914e-04
-## 15  3.914095e-04
-## 16  6.033874e-04
-## 17  7.091344e-04
-## 18  1.129840e-03
-## 19  1.217954e-03
-## 20  1.360954e-03
-## 21  1.447347e-03
-## 22  1.447347e-03
-## 23  1.447347e-03
-## 24  2.380124e-03
-## 25  3.019546e-03
-## 26  3.151431e-03
-## 27  3.151431e-03
-## 28  3.151431e-03
-## 29  3.729883e-03
-## 30  3.729883e-03
-## 31  3.729883e-03
-## 32  3.729883e-03
-## 33  3.729883e-03
-## 34  4.343389e-03
-## 35  4.343389e-03
-## 36  4.378705e-03
-## 37  4.397509e-03
-## 38  4.748251e-03
-## 39  5.190281e-03
-## 40  6.016431e-03
-## 41  6.016431e-03
-## 42  6.607211e-03
-## 43  7.564721e-03
-## 44  7.699431e-03
-## 45  7.699431e-03
-## 46  7.699431e-03
-## 47  7.784448e-03
-## 48  9.276462e-03
-## 49  9.989741e-03
-## 50  9.989741e-03
-## 51  1.063941e-02
-## 52  1.427486e-02
-## 53  1.427486e-02
-## 54  1.442280e-02
-## 55  1.470265e-02
-## 56  1.471515e-02
-## 57  1.471515e-02
-## 58  1.567359e-02
-## 59  1.573543e-02
-## 60  1.679035e-02
-## 61  1.917321e-02
-## 62  1.917321e-02
-## 63  1.933681e-02
-## 64  1.933681e-02
-## 65  1.980115e-02
-## 66  2.011416e-02
-## 67  2.441767e-02
-## 68  2.483723e-02
-## 69  2.796616e-02
-## 70  2.824833e-02
-## 71  2.836582e-02
-## 72  2.917919e-02
-## 73  2.917919e-02
-## 74  3.067070e-02
-## 75  3.067070e-02
-## 76  3.179452e-02
-## 77  3.420018e-02
-## 78  3.420018e-02
-## 79  3.420018e-02
-## 80  3.420018e-02
-## 81  3.420018e-02
-## 82  3.420018e-02
-## 83  3.420018e-02
-## 84  3.420018e-02
-## 85  3.420018e-02
-## 86  3.420018e-02
-## 87  3.420018e-02
-## 88  3.595408e-02
-## 89  4.037667e-02
-## 90  4.114864e-02
-## 91  4.211059e-02
-## 92  4.211059e-02
-## 93  4.211059e-02
-## 94  4.211059e-02
-## 95  4.211059e-02
-## 96  4.252123e-02
-## 97  4.252123e-02
-## 98  4.491069e-02
-## 99  4.559492e-02
-## 100 4.852011e-02</code></pre>
+## 1   1.791216e-06
+## 2   1.186294e-05
+## 3   6.480762e-05
+## 4   6.480762e-05
+## 5   9.691122e-05
+## 6   1.303588e-04
+## 7   1.363329e-04
+## 8   1.534770e-04
+## 9   1.931660e-04
+## 10  2.490865e-04
+## 11  2.657210e-04
+## 12  2.657210e-04
+## 13  2.880417e-04
+## 14  3.779925e-04
+## 15  4.181433e-04
+## 16  6.393057e-04
+## 17  6.703435e-04
+## 18  7.031494e-04
+## 19  8.957069e-04
+## 20  8.957069e-04
+## 21  1.025550e-03
+## 22  1.106181e-03
+## 23  1.456424e-03
+## 24  1.617968e-03
+## 25  2.034945e-03
+## 26  2.223945e-03
+## 27  2.223945e-03
+## 28  2.553045e-03
+## 29  3.113572e-03
+## 30  3.677864e-03
+## 31  3.677864e-03
+## 32  3.677864e-03
+## 33  3.677864e-03
+## 34  5.035847e-03
+## 35  5.198519e-03
+## 36  7.158281e-03
+## 37  7.784589e-03
+## 38  9.695938e-03
+## 39  1.190163e-02
+## 40  1.259346e-02
+## 41  1.259346e-02
+## 42  1.259346e-02
+## 43  1.309672e-02
+## 44  1.566263e-02
+## 45  1.691942e-02
+## 46  1.723349e-02
+## 47  1.830844e-02
+## 48  1.830844e-02
+## 49  1.889198e-02
+## 50  1.889198e-02
+## 51  1.889198e-02
+## 52  1.901580e-02
+## 53  1.980922e-02
+## 54  2.044376e-02
+## 55  2.047971e-02
+## 56  2.143405e-02
+## 57  2.143405e-02
+## 58  2.143405e-02
+## 59  2.153313e-02
+## 60  2.153313e-02
+## 61  2.169111e-02
+## 62  2.169111e-02
+## 63  2.169111e-02
+## 64  2.169111e-02
+## 65  2.283585e-02
+## 66  2.283585e-02
+## 67  2.337007e-02
+## 68  2.550407e-02
+## 69  2.550407e-02
+## 70  2.822188e-02
+## 71  2.822188e-02
+## 72  2.822188e-02
+## 73  2.822188e-02
+## 74  2.845243e-02
+## 75  2.908353e-02
+## 76  2.908353e-02
+## 77  3.033524e-02
+## 78  3.033524e-02
+## 79  3.033524e-02
+## 80  3.344268e-02
+## 81  3.344268e-02
+## 82  3.430391e-02
+## 83  3.430391e-02
+## 84  3.430391e-02
+## 85  3.430391e-02
+## 86  3.430391e-02
+## 87  3.430391e-02
+## 88  3.430391e-02
+## 89  3.430391e-02
+## 90  3.430391e-02
+## 91  3.707935e-02
+## 92  3.864725e-02
+## 93  3.864725e-02
+## 94  4.122997e-02
+## 95  4.196547e-02
+## 96  4.196547e-02
+## 97  4.196547e-02
+## 98  4.196547e-02
+## 99  4.196547e-02
+## 100 4.228525e-02</code></pre>
 <pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/non_brain/GO_high.tab&quot;)
 head(cbind.data.frame(tab$term_name, tab$q.value), 100)</code></pre>
 <pre><code>##                                                                                                                 tab$term_name
 ## 1                                                                                         type I interferon signaling pathway
 ## 2                                                                                               response to type I interferon
 ## 3                                                                                                         MHC protein complex
-## 4                                                                                      cellular response to cytokine stimulus
-## 5                                                                                 interferon-gamma-mediated signaling pathway
-## 6                                                                                                        response to cytokine
-## 7                                                                                         cytokine-mediated signaling pathway
-## 8                                                                                                response to interferon-gamma
-## 9                                                                              lumenal side of endoplasmic reticulum membrane
-## 10                                                       integral component of lumenal side of endoplasmic reticulum membrane
-## 11                                                                                               xenobiotic catabolic process
-## 12                                                                                                response to biotic stimulus
-## 13                                                                                       response to external biotic stimulus
-## 14                                                                                                 response to other organism
-## 15                                                                                                    peptide antigen binding
-## 16                                                                                                     innate immune response
-## 17                                                                                                          response to virus
-## 18                                                                                                         response to stress
-## 19                                                                                             nitrobenzene metabolic process
-## 20                                                                                                           defense response
-## 21                                                                       transferase activity, transferring one-carbon groups
-## 22                                                                                                 methyltransferase activity
-## 23                                                                                                        cytokine production
-## 24                                                                                         defense response to other organism
-## 25                                                                                           response to temperature stimulus
-## 26                                                                                               MHC class II protein complex
-## 27                                                                                   intracellular membrane-bounded organelle
-## 28                                                                                                           cytoplasmic part
-## 29  adaptive immune response based on somatic recombination of immune receptors built from immunoglobulin superfamily domains
-## 30                                                                                                           response to heat
-## 31                                                                                                    immune effector process
-## 32                                                                                                      RAGE receptor binding
-## 33                                                                                                              amide binding
-## 34                                                                                                  defense response to virus
-## 35                                                                                                            immune response
-## 36                                                                             cellular modified amino acid metabolic process
-## 37                                                                                                         hemoglobin complex
-## 38                                                                                              response to organic substance
-## 39                                                                               cellular detoxification of nitrogen compound
-## 40                                                                                                        haptoglobin binding
-## 41                                                                                                           circadian rhythm
-## 42                                                                                                   viral genome replication
-## 43                                                                                   glutathione derivative metabolic process
-## 44                                                                                glutathione derivative biosynthetic process
-## 45                                                                                                oxygen transporter activity
-## 46                                                                                     ER to Golgi transport vesicle membrane
-## 47                                                                                        nitrogen compound metabolic process
-## 48                                                                                                   unfolded protein binding
-## 49                                                                                                    cellular detoxification
-## 50                                                                                          regulation of cytokine production
-## 51                                                                                                            protein folding
-## 52                                                                              benzene-containing compound metabolic process
-## 53                                                                                           glutathione transferase activity
-## 54                                                                                                interferon-gamma production
-## 55                                                                                     cellular response to chemical stimulus
-## 56                                                                                       negative regulation of viral process
-## 57                                                                                             haptoglobin-hemoglobin complex
-## 58                                                                                     peptidyl-lysine 5-dioxygenase activity
-## 59                                                                                                    endocytic vesicle lumen
-## 60                                                                                                              intracellular
+## 4                                                                                 interferon-gamma-mediated signaling pathway
+## 5                                                                                                        response to cytokine
+## 6                                                                                                response to interferon-gamma
+## 7                                                                                    intracellular membrane-bounded organelle
+## 8                                                                                      cellular response to cytokine stimulus
+## 9                                                                                         cytokine-mediated signaling pathway
+## 10                                                                             lumenal side of endoplasmic reticulum membrane
+## 11                                                       integral component of lumenal side of endoplasmic reticulum membrane
+## 12                                                                                                    peptide antigen binding
+## 13                                                                                                         response to stress
+## 14                                                                                                     innate immune response
+## 15                                                                                                          response to virus
+## 16                                                                                                response to biotic stimulus
+## 17                                                                       transferase activity, transferring one-carbon groups
+## 18                                                                                       response to external biotic stimulus
+## 19                                                                                                 response to other organism
+## 20                                                                                                 methyltransferase activity
+## 21                                                                                               MHC class II protein complex
+## 22                                                                                               xenobiotic catabolic process
+## 23                                                                                                           defense response
+## 24                                                                                                           cytoplasmic part
+## 25                                                                                                 membrane-bounded organelle
+## 26                                                                                                      RAGE receptor binding
+## 27                                                                                                         hemoglobin complex
+## 28                                                                                                            protein folding
+## 29                                                                                                        cytokine production
+## 30                                                                                         defense response to other organism
+## 31                                                                               cellular detoxification of nitrogen compound
+## 32                                                                                                        haptoglobin binding
+## 33                                                                                        nitrogen compound metabolic process
+## 34                                                                                                    intracellular organelle
+## 35                                                                                                              amide binding
+## 36                                                                                                  defense response to virus
+## 37                                                                                                oxygen transporter activity
+## 38                                                                                     ER to Golgi transport vesicle membrane
+## 39                                                                                                    immune effector process
+## 40                                                                                                   unfolded protein binding
+## 41                                                                                                 I-kappaB/NF-kappaB complex
+## 42                                                                                           response to temperature stimulus
+## 43                                                                                                            immune response
+## 44                                                                                                    cellular detoxification
+## 45                                                                             cellular modified amino acid metabolic process
+## 46  adaptive immune response based on somatic recombination of immune receptors built from immunoglobulin superfamily domains
+## 47                                                                                                              viral process
+## 48                                                                                                interferon-gamma production
+## 49                                                                                            multi-organism cellular process
+## 50                                                                                       negative regulation of viral process
+## 51                                                                                                              intracellular
+## 52                                                                                             nitrobenzene metabolic process
+## 53                                                                                             haptoglobin-hemoglobin complex
+## 54                                                                                     peptidyl-lysine 5-dioxygenase activity
+## 55                                                                       symbiosis, encompassing mutualism through parasitism
+## 56                                                                                                         intracellular part
+## 57                                                                                                           circadian rhythm
+## 58                                                                                                    endocytic vesicle lumen
+## 59                                                                                                           response to heat
+## 60                                                                                 interspecies interaction between organisms
 ## 61                                                                                                             oxygen binding
-## 62                                                                              negative regulation of multi-organism process
-## 63                                                                                                       condensed chromosome
-## 64                                                                                 positive regulation of cytokine production
-## 65                                                                                                   T cell mediated immunity
-## 66                                                                                     cellular response to organic substance
-## 67                                                                                          organic acid biosynthetic process
-## 68                                                                                       carboxylic acid biosynthetic process
-## 69                                                                                                   adaptive immune response
-## 70                                                                               cellular aromatic compound metabolic process
-## 71                                                                                                 membrane-bounded organelle
-## 72                                                                                                         intracellular part
-## 73                                                                                                            peptide binding
-## 74                                                                                                              gas transport
-## 75                                                                                                        glutathione binding
-## 76                                                                                             MHC class II receptor activity
-## 77                                                                                                MHC class I protein complex
-## 78                                                                                              coenzyme biosynthetic process
-## 79                                                                                      alpha-amino acid biosynthetic process
-## 80                                                                                                            antigen binding
-## 81                                                                                                                    cytosol
-## 82                                                                                        detoxification of nitrogen compound
-## 83                                                                                         purine deoxyribonucleotide binding
-## 84                                                                                          carboxylic acid metabolic process
-## 85                                                                                                              viral process
-## 86                                                                                                response to toxic substance
-## 87                                                                                            multi-organism cellular process
-## 88                                                                                    circadian regulation of gene expression
-## 89                                                                                                                methylation
-## 90                                                                                  organic cyclic compound metabolic process
-## 91                                                                                                       oligopeptide binding
-## 92                                                                  S-adenosylmethionine-dependent methyltransferase activity
-## 93                                                                                                       response to zinc ion
-## 94                                                                                             regulation of defense response
-## 95                                                                            cytokine production involved in immune response
-## 96                                                                       symbiosis, encompassing mutualism through parasitism
-## 97                                                                        production of molecular mediator of immune response
-## 98                                                                                 interspecies interaction between organisms
-## 99                                                                                                  cellular response to heat
-## 100                                                                              cellular nitrogen compound metabolic process
+## 62                                                                                         chaperone-mediated protein folding
+## 63                                                                              negative regulation of multi-organism process
+## 64                                                                                            T-helper 1 type immune response
+## 65                                                                                         alpha-amino acid metabolic process
+## 66                                                                                                   viral genome replication
+## 67                                                                                                              mitochondrion
+## 68                                                                               cellular aromatic compound metabolic process
+## 69                                                                                              intracellular organelle lumen
+## 70                                                                                                              gas transport
+## 71                                                                                                            organelle lumen
+## 72                                                                                             MHC class II receptor activity
+## 73                                                                                                MHC class I protein complex
+## 74                                                                              aspartate family amino acid metabolic process
+## 75                                                                                        detoxification of nitrogen compound
+## 76                                                                                         purine deoxyribonucleotide binding
+## 77                                                                                      alpha-amino acid biosynthetic process
+## 78                                                                                                            antigen binding
+## 79                                                                               cellular nitrogen compound metabolic process
+## 80                                                                                                               nuclear part
+## 81                                                                                    circadian regulation of gene expression
+## 82                                                                                          carboxylic acid metabolic process
+## 83                                                                                          regulation of cytokine production
+## 84                                                                                                       response to zinc ion
+## 85                                                                  S-adenosylmethionine-dependent methyltransferase activity
+## 86                                                                            cytokine production involved in immune response
+## 87                                                                                              response to organic substance
+## 88                                                                                  organic cyclic compound metabolic process
+## 89                                                                                                       condensed chromosome
+## 90                                                                                                  cellular response to heat
+## 91                                                                                   glutathione derivative metabolic process
+## 92                                                                                glutathione derivative biosynthetic process
+## 93                                                                                                   female gamete generation
+## 94                                                                                                deoxyribonucleotide binding
+## 95                                                                                 regulation of type I interferon production
+## 96                                                                                           glutathione transferase activity
+## 97                                                                                                            peptide binding
+## 98                                                                                               type I interferon production
+## 99                                                                                     cellular response to chemical stimulus
+## 100                                                                                 regulation of interferon-gamma production
 ##      tab$q.value
-## 1   1.311879e-09
-## 2   1.669568e-09
-## 3   3.260976e-07
-## 4   6.998818e-07
-## 5   6.998818e-07
-## 6   3.330837e-06
-## 7   4.052414e-06
-## 8   1.835313e-06
-## 9   1.366205e-05
-## 10  5.273073e-06
-## 11  3.323342e-05
-## 12  1.421170e-05
-## 13  7.665378e-05
-## 14  3.564091e-05
-## 15  2.650560e-05
-## 16  9.856120e-05
-## 17  5.882373e-05
-## 18  3.405085e-05
-## 19  1.040340e-04
-## 20  1.514947e-04
-## 21  1.175014e-04
-## 22  4.115101e-04
-## 23  2.587482e-04
-## 24  5.075211e-04
-## 25  2.723601e-04
-## 26  1.037054e-04
-## 27  2.697783e-04
-## 28  2.697783e-04
-## 29  8.614094e-04
-## 30  4.090222e-04
-## 31  2.923833e-04
-## 32  6.744135e-04
-## 33  4.831787e-04
-## 34  5.921564e-04
-## 35  3.526791e-04
-## 36  6.839641e-04
-## 37  4.795041e-04
-## 38  7.562391e-04
-## 39  9.392583e-04
-## 40  1.076814e-03
-## 41  6.005467e-04
-## 42  3.242457e-03
-## 43  1.162272e-03
-## 44  3.242457e-03
-## 45  1.170581e-03
-## 46  2.183877e-03
-## 47  7.244336e-04
-## 48  1.170581e-03
-## 49  7.244336e-04
-## 50  4.443384e-03
-## 51  7.244336e-04
-## 52  4.443384e-03
-## 53  3.286562e-03
-## 54  4.666577e-03
-## 55  2.454707e-03
-## 56  7.270903e-03
-## 57  2.482254e-03
-## 58  9.798370e-03
-## 59  1.390691e-03
-## 60  4.309841e-03
-## 61  2.518295e-03
-## 62  6.942035e-03
-## 63  1.390691e-03
-## 64  8.620714e-03
-## 65  8.620714e-03
-## 66  7.275309e-03
-## 67  7.275309e-03
-## 68  8.620714e-03
-## 69  4.079407e-03
-## 70  4.079407e-03
-## 71  4.309841e-03
-## 72  4.309841e-03
-## 73  3.879543e-03
-## 74  9.523581e-03
-## 75  3.879543e-03
-## 76  7.129331e-03
-## 77  2.060171e-03
-## 78  1.206719e-02
-## 79  1.206719e-02
-## 80  3.613124e-03
-## 81  8.789472e-03
-## 82  2.702460e-03
-## 83  7.129331e-03
-## 84  1.206719e-02
-## 85  6.221757e-03
-## 86  6.221757e-03
-## 87  2.702460e-03
-## 88  6.249708e-03
-## 89  2.702460e-03
-## 90  6.249708e-03
-## 91  7.654822e-03
-## 92  1.553523e-02
-## 93  1.353664e-02
-## 94  1.353664e-02
-## 95  6.475022e-03
-## 96  6.475022e-03
-## 97  2.927682e-03
-## 98  2.927682e-03
-## 99  1.677531e-02
-## 100 6.918622e-03</code></pre>
+## 1   1.525800e-08
+## 2   1.822588e-08
+## 3   3.758830e-07
+## 4   1.049031e-06
+## 5   2.877048e-05
+## 6   1.319718e-05
+## 7   7.163943e-06
+## 8   1.328419e-05
+## 9   4.142516e-05
+## 10  7.163943e-06
+## 11  5.937683e-06
+## 12  2.804277e-05
+## 13  4.458052e-05
+## 14  2.571765e-04
+## 15  7.095991e-05
+## 16  9.861193e-05
+## 17  1.330896e-04
+## 18  5.429870e-04
+## 19  6.615367e-04
+## 20  4.643775e-04
+## 21  1.140123e-04
+## 22  9.961240e-04
+## 23  9.763428e-04
+## 24  2.998339e-04
+## 25  6.870070e-04
+## 26  6.931635e-04
+## 27  4.870266e-04
+## 28  6.605068e-04
+## 29  2.121322e-03
+## 30  3.430940e-03
+## 31  2.121322e-03
+## 32  1.086391e-03
+## 33  7.765028e-04
+## 34  1.324507e-03
+## 35  1.682328e-03
+## 36  2.561959e-03
+## 37  1.201510e-03
+## 38  2.477129e-03
+## 39  8.301683e-04
+## 40  1.251092e-03
+## 41  1.227010e-03
+## 42  2.997287e-03
+## 43  8.301683e-04
+## 44  8.301683e-04
+## 45  3.024974e-03
+## 46  7.828724e-03
+## 47  3.305709e-03
+## 48  7.828724e-03
+## 49  1.062632e-03
+## 50  7.802245e-03
+## 51  1.991149e-03
+## 52  3.634763e-03
+## 53  2.067251e-03
+## 54  1.016864e-02
+## 55  3.634763e-03
+## 56  1.991149e-03
+## 57  1.166773e-03
+## 58  1.851177e-03
+## 59  3.634763e-03
+## 60  1.166773e-03
+## 61  2.674637e-03
+## 62  3.634763e-03
+## 63  1.115636e-02
+## 64  1.159270e-02
+## 65  1.242878e-02
+## 66  1.258988e-02
+## 67  7.106357e-03
+## 68  5.595076e-03
+## 69  3.398795e-03
+## 70  1.329046e-02
+## 71  2.993315e-03
+## 72  9.008439e-03
+## 73  2.784009e-03
+## 74  1.591837e-02
+## 75  2.332764e-03
+## 76  9.008439e-03
+## 77  1.591837e-02
+## 78  3.947725e-03
+## 79  7.074489e-03
+## 80  4.328293e-03
+## 81  7.534219e-03
+## 82  1.732006e-02
+## 83  1.872315e-02
+## 84  1.773634e-02
+## 85  1.706871e-02
+## 86  8.014476e-03
+## 87  8.014476e-03
+## 88  8.014476e-03
+## 89  3.975215e-03
+## 90  2.191720e-02
+## 91  8.395129e-03
+## 92  2.191720e-02
+## 93  2.329095e-02
+## 94  1.013699e-02
+## 95  2.633473e-02
+## 96  1.616739e-02
+## 97  1.033270e-02
+## 98  2.750663e-02
+## 99  1.154542e-02
+## 100 2.633473e-02</code></pre>
 <pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/non_brain/pathway_low.tab&quot;)
 head(cbind.data.frame(tab$pathway, tab$q.value), 100)</code></pre>
-<pre><code>##                                                                        tab$pathway
-## 1                                                            Developmental Biology
-## 2                                  Arrhythmogenic Right Ventricular Cardiomyopathy
-## 3                                    Dilated cardiomyopathy - Homo sapiens (human)
-## 4                                                Extracellular matrix organization
-## 5                                                        Smooth Muscle Contraction
-## 6                                                                         Integrin
-## 7                                   Myometrial Relaxation and Contraction Pathways
-## 8    Arrhythmogenic right ventricular cardiomyopathy (ARVC) - Homo sapiens (human)
-## 9                                  Primary Focal Segmental Glomerulosclerosis FSGS
-## 10                        Hypertrophic cardiomyopathy (HCM) - Homo sapiens (human)
-## 11                                                              Muscle contraction
-## 12                                                                           EGFR1
-## 13                                                                   Axon guidance
-## 14                                                              Netrin-1 signaling
-## 15                                                     Striated Muscle Contraction
-## 16                                                                  Keratinization
-## 17                                                         Cell-Cell communication
-## 18                                           Focal adhesion - Homo sapiens (human)
-## 19                                  Proteoglycans in cancer - Homo sapiens (human)
-## 20                                              EPHA-mediated growth cone collapse
-## 21                                           Tight junction - Homo sapiens (human)
-## 22                                                         Elastic fibre formation
-## 23                       Vascular smooth muscle contraction - Homo sapiens (human)
-## 24                         Regulation of actin cytoskeleton - Homo sapiens (human)
-## 25                                                            EPH-Ephrin signaling
-## 26                  Beta5 beta6 beta7 and beta8 integrin cell surface interactions
-## 27                                          Beta-catenin independent WNT signaling
-## 28                                 ECM-receptor interaction - Homo sapiens (human)
-## 29                                                         Semaphorin interactions
-## 30                                                                             Wnt
-## 31                                                                  Focal Adhesion
-## 32                                          Non-integrin membrane-ECM interactions
-## 33                                        Molecules associated with elastic fibres
-## 34                                                      Cell junction organization
-## 35                                          Reversible hydration of carbon dioxide
-## 36                           Cell adhesion molecules (CAMs) - Homo sapiens (human)
-## 37                         Validated transcriptional targets of deltaNp63 isoforms
-## 38                                                     Striated Muscle Contraction
-## 39                                          Calcium Regulation in the Cardiac Cell
-## 40                          Sema4D induced cell migration and growth-cone collapse
-## 41  Association Between Physico-Chemical Features and Toxicity Associated Pathways
-## 42                 Hypothesized Pathways in Pathogenesis of Cardiovascular Disease
-## 43                             Beta-agonist/Beta-blocker Pathway, Pharmacodynamics
-## 44                                               DCC mediated attractive signaling
-## 45                                  Platelet activation, signaling and aggregation
-## 46                                              Integrin cell surface interactions
-## 47                                        Beta1 integrin cell surface interactions
-## 48                                            Axon guidance - Homo sapiens (human)
-## 49                                   Transport of connexons to the plasma membrane
-## 50                                                alanine biosynthesis/degradation
-## 51                                                  Sema4D in semaphorin signaling
-## 52                                        Antiarrhythmic Pathway, Pharmacodynamics
-## 53                                                                    Ca2+ pathway
-## 54                    Regulation of lipolysis in adipocytes - Homo sapiens (human)
-## 55                             Validated transcriptional targets of TAp63 isoforms
-## 56                                                             Alpha6Beta4Integrin
-## 57                                        Adherens junction - Homo sapiens (human)
-## 58                                      Nitrogen metabolism - Homo sapiens (human)
-## 59                       NOTCH1 regulation of human endothelial cell calcification
-## 60                                                                      Hemostasis
-## 61                                                              Collagen formation
-## 62                                                                    cGMP effects
-## 63                                                                  TarBasePathway
-## 64                                          EPH-ephrin mediated repulsion of cells
-## 65                                   Rap1 signaling pathway - Homo sapiens (human)
-## 66                                                                Signaling by Wnt
-## 67                                     miR-targeted genes in muscle cell - TarBase
-## 68                                                   Other semaphorin interactions
-## 69                                                a6b1 and a6b4 Integrin signaling
-## 70                                                     Ephrin A  reverse signaling
-## 71                              Transport of connexins along the secretory pathway
-## 72                                     Oligomerization of connexins into connexons
-## 73                                                           Gap junction assembly
-## 74                                                           Syndecan interactions
-## 75              Hormone-sensitive lipase (HSL)-mediated triacylglycerol hydrolysis
-## 76                                               Netrin mediated repulsion signals
-## 77                                                Netrin-mediated signaling events
-## 78                                                                   Wnt Canonical
-## 79                                                                     Wnt Mammals
-## 80                    Assembly of collagen fibrils and other multimeric structures
-## 81                                          Wnt Signaling Pathway and Pluripotency
-## 82                                                           Wnt Signaling Pathway
-## 83                               TGF-beta signaling pathway - Homo sapiens (human)
-## 84                                    Wnt signaling pathway - Homo sapiens (human)
-## 85                                   Apoptotic cleavage of cell adhesion  proteins
-## 86                                                          PPAR signaling pathway
-## 87                                  Focal Adhesion-PI3K-Akt-mTOR-signaling pathway
-## 88                                                             Signal Transduction
-## 89                                                            Laminin interactions
-## 90                                                       RHO GTPases activate PAKs
-## 91                    MFAP5-mediated ovarian cancer cell motility and invasiveness
-## 92                                             Formation of the cornified envelope
-## 93    Posttranslational regulation of adherens junction stability and dissassembly
-## 94                                    Lipid digestion, mobilization, and transport
-## 95                                 Proteoglycan syndecan-mediated signaling events
-## 96                                              hop pathway in cardiac development
-## 97                                         Apoptotic cleavage of cellular proteins
-## 98                            regulation of ck1/cdk5 by type 1 glutamate receptors
-## 99                                       Nitric oxide stimulates guanylate cyclase
-## 100                                                   G Protein Signaling Pathways
+<pre><code>##                                                                       tab$pathway
+## 1                                                              Muscle contraction
+## 2                                                           Developmental Biology
+## 3                                                       Smooth Muscle Contraction
+## 4                                 Primary Focal Segmental Glomerulosclerosis FSGS
+## 5                                               Extracellular matrix organization
+## 6                                                                   Axon guidance
+## 7                                  Myometrial Relaxation and Contraction Pathways
+## 8                                                     Striated Muscle Contraction
+## 9                                 Arrhythmogenic Right Ventricular Cardiomyopathy
+## 10                                  Dilated cardiomyopathy - Homo sapiens (human)
+## 11                                 Proteoglycans in cancer - Homo sapiens (human)
+## 12  Arrhythmogenic right ventricular cardiomyopathy (ARVC) - Homo sapiens (human)
+## 13                                                             Netrin-1 signaling
+## 14                                          Tight junction - Homo sapiens (human)
+## 15                      Vascular smooth muscle contraction - Homo sapiens (human)
+## 16                                                                       Integrin
+## 17                                                        Cell-Cell communication
+## 18                       Hypertrophic cardiomyopathy (HCM) - Homo sapiens (human)
+## 19                                                        Elastic fibre formation
+## 20                                                           EPH-Ephrin signaling
+## 21                                         Beta-catenin independent WNT signaling
+## 22                 Beta5 beta6 beta7 and beta8 integrin cell surface interactions
+## 23                                             Integrin cell surface interactions
+## 24                                                        Semaphorin interactions
+## 25                                                                          EGFR1
+## 26                        Regulation of actin cytoskeleton - Homo sapiens (human)
+## 27                                                                   Ca2+ pathway
+## 28                                       Molecules associated with elastic fibres
+## 29                                 Platelet activation, signaling and aggregation
+## 30                                          Focal adhesion - Homo sapiens (human)
+## 31                               Calcium signaling pathway - Homo sapiens (human)
+## 32                                                                 Keratinization
+## 33                          Cell adhesion molecules (CAMs) - Homo sapiens (human)
+## 34                                         Reversible hydration of carbon dioxide
+## 35                                                   G Protein Signaling Pathways
+## 36                                                                     Hemostasis
+## 37                                             EPHA-mediated growth cone collapse
+## 38                                         Calcium Regulation in the Cardiac Cell
+## 39                                                               Signaling by Wnt
+## 40                         Sema4D induced cell migration and growth-cone collapse
+## 41                                           Axon guidance - Homo sapiens (human)
+## 42                            Beta-agonist/Beta-blocker Pathway, Pharmacodynamics
+## 43                Hypothesized Pathways in Pathogenesis of Cardiovascular Disease
+## 44                              TGF-beta signaling pathway - Homo sapiens (human)
+## 45                                                          G13 Signaling Pathway
+## 46                                              DCC mediated attractive signaling
+## 47                                                     Cell junction organization
+## 48                                                     Effects of PIP2 hydrolysis
+## 49                                                 Sema4D in semaphorin signaling
+## 50                                       Antiarrhythmic Pathway, Pharmacodynamics
+## 51                                       Adherens junction - Homo sapiens (human)
+## 52                                            ucalpain and friends in cell spread
+## 53                                     Nitrogen metabolism - Homo sapiens (human)
+## 54                      NOTCH1 regulation of human endothelial cell calcification
+## 55                                                       RHO GTPases activate CIT
+## 56                                                           Platelet homeostasis
+## 57                                  Rap1 signaling pathway - Homo sapiens (human)
+## 58                  Adrenergic signaling in cardiomyocytes - Homo sapiens (human)
+## 59                                                EPHB-mediated forward signaling
+## 60                                                                   cGMP effects
+## 61    erk and pi-3 kinase are necessary for collagen binding in corneal epithelia
+## 62                                                Cell-cell junction organization
+## 63                                                      Bopindolol Action Pathway
+## 64                                                         Timolol Action Pathway
+## 65                                                       Carteolol Action Pathway
+## 66                                                      Bevantolol Action Pathway
+## 67                                                       Practolol Action Pathway
+## 68                                                      Dobutamine Action Pathway
+## 69                                                    Isoprenaline Action Pathway
+## 70                                                      Arbutamine Action Pathway
+## 71                                                     Levobunolol Action Pathway
+## 72                                                    Metipranolol Action Pathway
+## 73                                                         Sotalol Action Pathway
+## 74                                                     Epinephrine Action Pathway
+## 75                                                       Betaxolol Action Pathway
+## 76                                                        Atenolol Action Pathway
+## 77                                                      Alprenolol Action Pathway
+## 78                                                      Acebutolol Action Pathway
+## 79                                                     Propranolol Action Pathway
+## 80                                                        Pindolol Action Pathway
+## 81                                                      Penbutolol Action Pathway
+## 82                                                      Oxprenolol Action Pathway
+## 83                                                      Metoprolol Action Pathway
+## 84                                                         Esmolol Action Pathway
+## 85                                                      Bisoprolol Action Pathway
+## 86                                                      Bupranolol Action Pathway
+## 87                                                       Nebivolol Action Pathway
+## 88                                                         Nadolol Action Pathway
+## 89                                                       Muscle/Heart Contraction
+## 90                                                       Diltiazem Action Pathway
+## 91                                                      Amlodipine Action Pathway
+## 92                                                       Verapamil Action Pathway
+## 93                                                    Nitrendipine Action Pathway
+## 94                                                     Nisoldipine Action Pathway
+## 95                                                      Nimodipine Action Pathway
+## 96                                                      Isradipine Action Pathway
+## 97                                                      Nifedipine Action Pathway
+## 98                                                      Felodipine Action Pathway
+## 99                                                      Amiodarone Action Pathway
+## 100                                                      Ibutilide Action Pathway
 ##      tab$q.value
-## 1   0.0001239643
-## 2   0.0001239643
-## 3   0.0001239643
-## 4   0.0001263826
-## 5   0.0001263826
-## 6   0.0001289889
-## 7   0.0001289889
-## 8   0.0001688280
-## 9   0.0001748006
-## 10  0.0005429774
-## 11  0.0005429774
-## 12  0.0005429774
-## 13  0.0006323074
-## 14  0.0007816168
-## 15  0.0009000970
-## 16  0.0012787560
-## 17  0.0018242384
-## 18  0.0018242384
-## 19  0.0023979243
-## 20  0.0027538463
-## 21  0.0029520113
-## 22  0.0029520113
-## 23  0.0029520113
-## 24  0.0031299935
-## 25  0.0041639311
-## 26  0.0041639311
-## 27  0.0046201710
-## 28  0.0056534847
-## 29  0.0056534847
-## 30  0.0061347635
-## 31  0.0062753823
-## 32  0.0068188924
-## 33  0.0068188924
-## 34  0.0078707585
-## 35  0.0092702448
-## 36  0.0101630376
-## 37  0.0124443582
-## 38  0.0139413765
-## 39  0.0139413765
-## 40  0.0156340815
-## 41  0.0167829243
-## 42  0.0177112102
-## 43  0.0177112102
-## 44  0.0177112102
-## 45  0.0177112102
-## 46  0.0177112102
-## 47  0.0177112102
-## 48  0.0177112102
-## 49  0.0178516171
-## 50  0.0178516171
-## 51  0.0216295556
-## 52  0.0228267522
-## 53  0.0228267522
-## 54  0.0234498205
-## 55  0.0234498205
-## 56  0.0234498205
-## 57  0.0234498205
-## 58  0.0234498205
-## 59  0.0234498205
-## 60  0.0234498205
-## 61  0.0275996110
-## 62  0.0275996110
-## 63  0.0275996110
-## 64  0.0282611302
-## 65  0.0283369177
-## 66  0.0289916862
-## 67  0.0309101950
-## 68  0.0316297491
-## 69  0.0343552754
-## 70  0.0350076601
-## 71  0.0350076601
-## 72  0.0350076601
-## 73  0.0350076601
-## 74  0.0350076601
-## 75  0.0350076601
-## 76  0.0359582319
-## 77  0.0363443833
-## 78  0.0363648958
-## 79  0.0363648958
-## 80  0.0369195129
-## 81  0.0405149866
-## 82  0.0427447345
-## 83  0.0432301103
-## 84  0.0432301103
-## 85  0.0432301103
-## 86  0.0482138444
-## 87  0.0494664767
-## 88  0.0495676651
-## 89  0.0496674046
-## 90  0.0496674046
-## 91  0.0524205379
-## 92  0.0524205379
-## 93  0.0524205379
-## 94  0.0534592555
-## 95  0.0534592555
-## 96  0.0534592555
-## 97  0.0534592555
-## 98  0.0534592555
-## 99  0.0592524521
-## 100 0.0592524521</code></pre>
+## 1   7.777017e-06
+## 2   7.777017e-06
+## 3   1.171990e-05
+## 4   3.636221e-05
+## 5   6.039905e-05
+## 6   7.707865e-05
+## 7   7.707865e-05
+## 8   1.251704e-04
+## 9   1.399622e-04
+## 10  1.559372e-04
+## 11  1.891910e-04
+## 12  5.319165e-04
+## 13  6.483768e-04
+## 14  6.901578e-04
+## 15  6.901578e-04
+## 16  8.595099e-04
+## 17  1.272777e-03
+## 18  1.424676e-03
+## 19  2.815169e-03
+## 20  3.978363e-03
+## 21  4.150147e-03
+## 22  4.150147e-03
+## 23  5.217979e-03
+## 24  5.217979e-03
+## 25  5.529549e-03
+## 26  5.954987e-03
+## 27  6.248037e-03
+## 28  6.613002e-03
+## 29  6.885019e-03
+## 30  7.795059e-03
+## 31  7.795059e-03
+## 32  7.795059e-03
+## 33  7.870901e-03
+## 34  8.307815e-03
+## 35  9.100969e-03
+## 36  1.021568e-02
+## 37  1.021568e-02
+## 38  1.021568e-02
+## 39  1.275413e-02
+## 40  1.326533e-02
+## 41  1.436952e-02
+## 42  1.436952e-02
+## 43  1.506188e-02
+## 44  1.573727e-02
+## 45  1.573727e-02
+## 46  1.580372e-02
+## 47  1.701449e-02
+## 48  1.701449e-02
+## 49  1.701449e-02
+## 50  1.701449e-02
+## 51  1.701449e-02
+## 52  1.701449e-02
+## 53  1.701449e-02
+## 54  1.701449e-02
+## 55  1.701449e-02
+## 56  1.701449e-02
+## 57  1.701449e-02
+## 58  1.701449e-02
+## 59  1.701449e-02
+## 60  1.701449e-02
+## 61  1.701449e-02
+## 62  1.701449e-02
+## 63  1.701449e-02
+## 64  1.701449e-02
+## 65  1.701449e-02
+## 66  1.701449e-02
+## 67  1.701449e-02
+## 68  1.701449e-02
+## 69  1.701449e-02
+## 70  1.701449e-02
+## 71  1.701449e-02
+## 72  1.701449e-02
+## 73  1.701449e-02
+## 74  1.701449e-02
+## 75  1.701449e-02
+## 76  1.701449e-02
+## 77  1.701449e-02
+## 78  1.701449e-02
+## 79  1.701449e-02
+## 80  1.701449e-02
+## 81  1.701449e-02
+## 82  1.701449e-02
+## 83  1.701449e-02
+## 84  1.701449e-02
+## 85  1.701449e-02
+## 86  1.701449e-02
+## 87  1.701449e-02
+## 88  1.701449e-02
+## 89  1.701449e-02
+## 90  1.701449e-02
+## 91  1.701449e-02
+## 92  1.701449e-02
+## 93  1.701449e-02
+## 94  1.701449e-02
+## 95  1.701449e-02
+## 96  1.701449e-02
+## 97  1.701449e-02
+## 98  1.701449e-02
+## 99  1.701449e-02
+## 100 1.701449e-02</code></pre>
 <pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/non_brain/GO_low.tab&quot;)
 head(cbind.data.frame(tab$term_name, tab$q.value), 100)</code></pre>
-<pre><code>##                                                     tab$term_name
-## 1                              anatomical structure morphogenesis
-## 2                                              actin cytoskeleton
-## 3                                anatomical structure development
-## 4                                    cytoskeletal protein binding
-## 5                           single-organism developmental process
-## 6                                              system development
-## 7                                    actin filament-based process
-## 8                                              tissue development
-## 9                  regulation of multicellular organismal process
-## 10                             multicellular organism development
-## 11                          single-multicellular organism process
-## 12                                                protein binding
-## 13                               single-organism cellular process
-## 14                                 cellular developmental process
-## 15                                                  actin binding
-## 16                                           cell differentiation
-## 17                                      cytoskeleton organization
-## 18                                               cell development
-## 19                            regulation of developmental process
-## 20                                                 cell periphery
-## 21                                              contractile fiber
-## 22                                          muscle system process
-## 23                                       animal organ development
-## 24                                actin cytoskeleton organization
-## 25                             regulation of cell differentiation
-## 26                                         contractile fiber part
-## 27                      movement of cell or subcellular component
-## 28             regulation of multicellular organismal development
-## 29                     regulation of cell projection organization
-## 30                                                plasma membrane
-## 31                                                        vesicle
-## 32                                         supramolecular polymer
-## 33                                             cell communication
-## 34                                     regulation of localization
-## 35                       regulation of nervous system development
-## 36                                      single organism signaling
-## 37                                                      myofibril
-## 38                                                  cell adhesion
-## 39                                 regulation of cell development
-## 40                                           supramolecular fiber
-## 41                                             muscle contraction
-## 42                                             cell-cell junction
-## 43                                   muscle structure development
-## 44                               regulation of cell communication
-## 45                                                         I band
-## 46                                             anchoring junction
-## 47                  regulation of cellular component organization
-## 48                      regulation of cellular component movement
-## 49                                                      sarcomere
-## 50                                           tissue morphogenesis
-## 51                    positive regulation of cell differentiation
-## 52                                        regulation of signaling
-## 53                                                   cytoskeleton
-## 54                               cellular component morphogenesis
-## 55                                                  cell motility
-## 56                                           localization of cell
-## 57                                                 cell migration
-## 58                                           plasma membrane part
-## 59                                    regulation of cell motility
-## 60                               regulation of cell morphogenesis
-## 61                                     cell junction organization
-## 62                        cell surface receptor signaling pathway
-## 63                                          extracellular exosome
-## 64                                       regulation of locomotion
-## 65                                              adherens junction
-## 66                                          extracellular vesicle
-## 67                                        extracellular organelle
-## 68                                                   neurogenesis
-## 69                                                    neuron part
-## 70                              supramolecular fiber organization
-## 71                   positive regulation of developmental process
-## 72                              actomyosin structure organization
-## 73                                                     actomyosin
-## 74                                                         Z disc
-## 75                                   regulation of system process
-## 76               enzyme linked receptor protein signaling pathway
-## 77                                              heart development
-## 78                                            signal transduction
-## 79               regulation of anatomical structure morphogenesis
-## 80                                        protein complex binding
-## 81                                 circulatory system development
-## 82                              extracellular matrix organization
-## 83                                   cell projection organization
-## 84  cellular response to transforming growth factor beta stimulus
-## 85       anatomical structure formation involved in morphogenesis
-## 86                           extracellular structure organization
-## 87                                               tissue migration
-## 88                                         neuron differentiation
-## 89                                             cell morphogenesis
-## 90                               structural constituent of muscle
-## 91                                         plasma membrane region
-## 92                    response to transforming growth factor beta
-## 93                                     nervous system development
-## 94                                                cell projection
-## 95                                                      cytoplasm
-## 96                                     animal organ morphogenesis
-## 97                              regulation of signal transduction
-## 98                                             cell-cell adhesion
-## 99                   negative regulation of developmental process
-## 100                             contractile actin filament bundle
-##      tab$q.value
-## 1   1.607937e-16
-## 2   9.344338e-17
-## 3   1.607937e-16
-## 4   1.141925e-15
-## 5   8.168972e-16
-## 6   3.213350e-14
-## 7   1.825066e-13
-## 8   1.825066e-13
-## 9   2.580669e-13
-## 10  3.193331e-13
-## 11  1.913887e-13
-## 12  6.399548e-13
-## 13  4.435346e-13
-## 14  3.341280e-12
-## 15  1.137086e-11
-## 16  4.111588e-11
-## 17  4.111588e-11
-## 18  7.140839e-12
-## 19  7.599187e-12
-## 20  1.190423e-11
-## 21  1.868831e-11
-## 22  8.736330e-12
-## 23  1.660644e-11
-## 24  1.304430e-10
-## 25  1.334681e-10
-## 26  2.992867e-11
-## 27  3.255886e-11
-## 28  1.339619e-10
-## 29  5.735034e-10
-## 30  4.106629e-11
-## 31  2.969389e-10
-## 32  5.818500e-11
-## 33  5.196547e-11
-## 34  1.766229e-10
-## 35  1.833032e-09
-## 36  8.441602e-11
-## 37  1.562423e-10
-## 38  1.059818e-10
-## 39  2.703991e-09
-## 40  1.083567e-09
-## 41  2.526663e-09
-## 42  6.847170e-10
-## 43  1.551660e-09
-## 44  5.166594e-09
-## 45  3.404872e-09
-## 46  1.305176e-09
-## 47  9.274922e-09
-## 48  9.274922e-09
-## 49  3.404872e-09
-## 50  3.831762e-09
-## 51  2.311224e-08
-## 52  4.460793e-09
-## 53  1.359139e-08
-## 54  6.686442e-09
-## 55  2.247660e-09
-## 56  2.247660e-09
-## 57  7.546142e-09
-## 58  3.986799e-09
-## 59  3.055743e-08
-## 60  7.555917e-08
-## 61  1.544646e-08
-## 62  1.683414e-08
-## 63  3.354310e-08
-## 64  2.093132e-08
-## 65  2.410481e-08
-## 66  2.410481e-08
-## 67  1.184348e-08
-## 68  1.479204e-07
-## 69  1.393297e-08
-## 70  3.805382e-08
-## 71  1.641576e-07
-## 72  2.334401e-07
-## 73  8.662035e-08
-## 74  5.841185e-08
-## 75  2.375357e-07
-## 76  2.934746e-07
-## 77  1.174425e-07
-## 78  5.975926e-08
-## 79  4.096039e-07
-## 80  5.326304e-07
-## 81  5.977448e-07
-## 82  5.977448e-07
-## 83  2.378537e-07
-## 84  5.977448e-07
-## 85  9.934493e-08
-## 86  2.378537e-07
-## 87  2.378537e-07
-## 88  1.189308e-06
-## 89  6.228466e-07
-## 90  2.895203e-07
-## 91  1.297127e-07
-## 92  2.908163e-07
-## 93  7.039763e-07
-## 94  1.403250e-07
-## 95  3.038837e-07
-## 96  3.752879e-07
-## 97  9.286393e-07
-## 98  4.291539e-07
-## 99  1.223190e-06
-## 100 4.190082e-07</code></pre>
+<pre><code>##                                          tab$term_name  tab$q.value
+## 1                         cytoskeletal protein binding 1.098524e-15
+## 2                   anatomical structure morphogenesis 1.793176e-15
+## 3                         actin filament-based process 1.433205e-14
+## 4                                   actin cytoskeleton 6.556934e-15
+## 5                     anatomical structure development 1.222939e-14
+## 6                single-organism developmental process 1.222939e-14
+## 7                                        actin binding 9.109185e-14
+## 8                                   tissue development 4.073164e-13
+## 9                                   system development 6.390964e-13
+## 10                      cellular developmental process 6.390964e-13
+## 11                               muscle system process 6.390964e-13
+## 12                                     protein binding 5.010433e-13
+## 13                                cell differentiation 6.437246e-12
+## 14                     actin cytoskeleton organization 6.437246e-12
+## 15                           cytoskeleton organization 6.437246e-12
+## 16                              contractile fiber part 2.652630e-12
+## 17                                   contractile fiber 4.828328e-12
+## 18      regulation of multicellular organismal process 5.237610e-12
+## 19                                    cell development 9.695118e-12
+## 20                  multicellular organism development 2.352917e-11
+## 21                          regulation of localization 3.200099e-11
+## 22                    single-organism cellular process 2.314404e-11
+## 23                                  muscle contraction 2.125638e-10
+## 24               single-multicellular organism process 4.154207e-11
+## 25                            animal organ development 9.334314e-11
+## 26                        muscle structure development 9.334314e-11
+## 27                                  cell-cell junction 7.670988e-11
+## 28                                           myofibril 4.798947e-11
+## 29                              supramolecular polymer 7.670988e-11
+## 30           movement of cell or subcellular component 1.204692e-10
+## 31          regulation of cell projection organization 4.449322e-09
+## 32                 regulation of developmental process 2.424961e-10
+## 33                  regulation of cell differentiation 1.665483e-09
+## 34                                             vesicle 1.092038e-09
+## 35                                       cell adhesion 1.657814e-10
+## 36                           single organism signaling 1.720435e-10
+## 37                      regulation of cell development 5.444465e-09
+## 38                                supramolecular fiber 1.092038e-09
+## 39                                      cell periphery 3.915697e-10
+## 40                                  cell communication 2.647381e-10
+## 41                                              I band 1.158594e-09
+## 42                                           sarcomere 1.158594e-09
+## 43           regulation of cellular component movement 5.841584e-09
+## 44  regulation of multicellular organismal development 5.841584e-09
+## 45                         regulation of cell motility 6.685842e-09
+## 46                                  anchoring junction 1.184817e-09
+## 47                                     plasma membrane 1.397095e-09
+## 48                    regulation of cell morphogenesis 2.319620e-08
+## 49                   actomyosin structure organization 2.319620e-08
+## 50         positive regulation of cell differentiation 2.319620e-08
+## 51       regulation of cellular component organization 1.804447e-08
+## 52            regulation of nervous system development 2.339498e-08
+## 53                    cellular component morphogenesis 6.860473e-09
+## 54                                tissue morphogenesis 6.860473e-09
+## 55                   extracellular matrix organization 1.932707e-08
+## 56                extracellular structure organization 7.104476e-09
+## 57                   supramolecular fiber organization 1.072909e-08
+## 58                            regulation of locomotion 1.107804e-08
+## 59                                        cytoskeleton 3.403524e-08
+## 60                             protein complex binding 2.869645e-08
+## 61        positive regulation of developmental process 5.221999e-08
+## 62                                  calmodulin binding 2.869645e-08
+## 63                                       cell motility 8.089224e-09
+## 64                                localization of cell 8.089224e-09
+## 65                                   adherens junction 2.125593e-08
+## 66    regulation of anatomical structure morphogenesis 7.818142e-08
+## 67  positive regulation of cellular component movement 1.189329e-07
+## 68                                      cell migration 2.819894e-08
+## 69                                              Z disc 3.003858e-08
+## 70                                          actomyosin 5.759856e-08
+## 71                    regulation of cell communication 1.396181e-07
+## 72                        regulation of system process 1.660758e-07
+## 73                   positive regulation of locomotion 1.798802e-07
+## 74                         muscle cell differentiation 3.253974e-07
+## 75                          cell junction organization 9.868179e-08
+## 76                             regulation of signaling 1.288582e-07
+## 77                   intracellular signal transduction 1.288582e-07
+## 78                               extracellular exosome 1.851033e-07
+## 79                     cell-cell junction organization 3.659158e-07
+## 80                              actin filament binding 5.553683e-07
+## 81                                        neurogenesis 6.308078e-07
+## 82                               extracellular vesicle 1.504263e-07
+## 83                             extracellular organelle 1.006938e-07
+## 84                       actin filament-based movement 5.658382e-07
+## 85                                  cell-cell adhesion 2.420934e-07
+## 86                                plasma membrane part 1.372381e-07
+## 87                                  cell morphogenesis 7.469746e-07
+## 88                   contractile actin filament bundle 2.357492e-07
+## 89                                 signal transduction 1.753608e-07
+## 90                                    tissue migration 4.147534e-07
+## 91                                           cytoplasm 3.546736e-07
+## 92                                         neuron part 2.415681e-07
+## 93                                 apical part of cell 2.415681e-07
+## 94                         actin-based cell projection 4.450014e-07
+## 95                              plasma membrane region 3.089600e-07
+## 96                               actin filament bundle 9.983470e-07
+## 97                                   heart development 8.270315e-07
+## 98                        cell projection organization 8.466374e-07
+## 99                              neuron differentiation 3.547692e-06
+## 100     cell morphogenesis involved in differentiation 3.547692e-06</code></pre>
 </div>
 <div id="non-brain" class="section level2">
 <h2>Non brain</h2>

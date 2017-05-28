@@ -87,7 +87,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 
 
 <pre class="r"><code>rm(list=ls())
-corshrink_data &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_normal_gtex_tissues.rda&quot;))
+corshrink_data &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_halfuniform_gtex_tissues.rda&quot;))
 cor_data &lt;- get(load(&quot;../output/cor_tissues_non_ash_voom_pearson.rda&quot;))</code></pre>
 <pre class="r"><code>common_samples &lt;- get(load(&quot;../output/common_samples.rda&quot;))
 tissue_labels &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;)[,3]
@@ -137,67 +137,67 @@ write.table(cbind.data.frame(high_stomach_pancreas_genes), quote = FALSE, file =
 write.table(cbind.data.frame(low_stomach_pancreas_genes), quote = FALSE, file = &quot;../utilities/stomach_pancreas/low_stomach_pancreas.txt&quot;, row.names = FALSE, col.names = FALSE)</code></pre>
 <pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/stomach_pancreas/pathway_high.tab&quot;)
 head(cbind.data.frame(tab$pathway, tab$q.value), 10)</code></pre>
-<pre><code>##                                                  tab$pathway  tab$q.value
-## 1                                Striated Muscle Contraction 0.0002252591
-## 2                                Striated Muscle Contraction 0.0024785670
-## 3                                            Gene Expression 0.0284350415
-## 4                      Tight junction - Homo sapiens (human) 0.0284350415
-## 5                          RNA Polymerase I Chain Elongation 0.0301815973
-## 6  Formation of the beta-catenin:TCF transactivating complex 0.0301815973
-## 7        B-WICH complex positively regulates rRNA expression 0.0301815973
-## 8                                        Translation Factors 0.0301815973
-## 9                  NoRC negatively regulates rRNA expression 0.0301815973
-## 10         Positive epigenetic regulation of rRNA expression 0.0301815973</code></pre>
+<pre><code>##                                                              tab$pathway
+## 1                                            Striated Muscle Contraction
+## 2                                            Striated Muscle Contraction
+## 3                                                        Gene Expression
+## 4                      Positive epigenetic regulation of rRNA expression
+## 5                                    RNA Polymerase I Promoter Clearance
+## 6                                         RNA Polymerase I Transcription
+## 7        ERCC6 (CSB) and EHMT2 (G9a) positively regulate rRNA expression
+## 8                                  Tight junction - Homo sapiens (human)
+## 9  RNA Polymerase I, RNA Polymerase III, and Mitochondrial Transcription
+## 10                              Epigenetic regulation of gene expression
+##     tab$q.value
+## 1  6.557453e-06
+## 2  8.544633e-05
+## 3  3.218885e-03
+## 4  9.163677e-03
+## 5  9.163677e-03
+## 6  9.163677e-03
+## 7  1.670503e-02
+## 8  1.670503e-02
+## 9  1.988971e-02
+## 10 1.988971e-02</code></pre>
 <pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/stomach_pancreas/GO_high.tab&quot;)
 head(cbind.data.frame(tab$term_name, tab$q.value), 10)</code></pre>
 <pre><code>##                      tab$term_name  tab$q.value
-## 1    heterocyclic compound binding 4.314547e-06
-## 2  organic cyclic compound binding 4.314547e-06
-## 3              poly(A) RNA binding 8.008163e-06
-## 4            muscle myosin complex 6.291327e-05
-## 5  actin-mediated cell contraction 8.410020e-04
-## 6                myosin II complex 2.553388e-04
-## 7                      RNA binding 4.059733e-04
-## 8    actin filament-based movement 3.381841e-03
-## 9                   myosin complex 3.082952e-04
-## 10                     nucleoplasm 3.616341e-04</code></pre>
+## 1               intracellular part 4.649242e-06
+## 2  actin-mediated cell contraction 3.372853e-05
+## 3    actin filament-based movement 1.527648e-04
+## 4                    intracellular 1.356017e-05
+## 5            muscle myosin complex 3.254466e-05
+## 6                      nucleoplasm 6.929917e-05
+## 7                        sarcomere 3.254466e-05
+## 8          intracellular organelle 1.895428e-05
+## 9           contractile fiber part 2.728568e-05
+## 10             poly(A) RNA binding 5.580100e-05</code></pre>
 <pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/stomach_pancreas/pathway_low.tab&quot;)
 head(cbind.data.frame(tab$pathway, tab$q.value), 10)</code></pre>
-<pre><code>##                                                         tab$pathway
-## 1                                                        Metabolism
-## 2  Mitochondrial Beta-Oxidation of Long Chain Saturated Fatty Acids
-## 3                     Beta Oxidation of Very Long Chain Fatty Acids
-## 4                                    Adrenoleukodystrophy, X-linked
-## 5                    Carnitine-acylcarnitine translocase deficiency
-## 6                           Oxidation of Branched Chain Fatty Acids
-## 7                                    Scavenging of heme from plasma
-## 8           Antimetabolite Pathway - Folate Cycle, Pharmacodynamics
-## 9               Long chain acyl-CoA dehydrogenase deficiency (LCAD)
-## 10                                 Trifunctional protein deficiency
-##    tab$q.value
-## 1  0.002980212
-## 2  0.002980212
-## 3  0.002980212
-## 4  0.002980212
-## 5  0.002980212
-## 6  0.002980212
-## 7  0.002980212
-## 8  0.002980212
-## 9  0.002980212
-## 10 0.002980212</code></pre>
+<pre><code>##                                                tab$pathway tab$q.value
+## 1                              Selenoamino Acid Metabolism  0.01626532
+## 2  Antimetabolite Pathway - Folate Cycle, Pharmacodynamics  0.01626532
+## 3     Methotrexate Pathway (Cancer Cell), Pharmacodynamics  0.01626532
+## 4                                    Tryptophan Metabolism  0.01626532
+## 5                   superpathway of methionine degradation  0.01626532
+## 6                                               Metabolism  0.01626532
+## 7                                    Nicotinate metabolism  0.01626532
+## 8                                    Amino Acid metabolism  0.01626532
+## 9              3-Phosphoglycerate dehydrogenase deficiency  0.01626532
+## 10                             Non Ketotic Hyperglycinemia  0.01626532</code></pre>
 <pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/stomach_pancreas/GO_low.tab&quot;)
 head(cbind.data.frame(tab$term_name, tab$q.value), 10)</code></pre>
 <pre><code>##                                        tab$term_name tab$q.value
-## 1                         cofactor metabolic process 0.001655049
-## 2                         coenzyme metabolic process 0.004501635
-## 3  pyridine-containing compound biosynthetic process 0.001938034
-## 4                      coenzyme biosynthetic process 0.001938034
-## 5                      cofactor biosynthetic process 0.011753916
-## 6               single-organism biosynthetic process 0.012870256
-## 7                 alpha-amino acid metabolic process 0.021588098
-## 8           S-adenosylhomocysteine metabolic process 0.021588098
-## 9                                 microbody membrane 0.021822472
-## 10                              peroxisomal membrane 0.016730562</code></pre>
+## 1              cellular amino acid metabolic process 0.005360514
+## 2  pyridine-containing compound biosynthetic process 0.003970295
+## 3              alpha-amino acid biosynthetic process 0.003970295
+## 4                 alpha-amino acid metabolic process 0.016202428
+## 5           cellular amino acid biosynthetic process 0.016202428
+## 6         serine family amino acid metabolic process 0.011425886
+## 7                  organic acid biosynthetic process 0.023458740
+## 8               carboxylic acid biosynthetic process 0.012331775
+## 9                         coenzyme metabolic process 0.023458740
+## 10          S-adenosylhomocysteine metabolic process 0.025189460</code></pre>
 
 <hr>
 <p>

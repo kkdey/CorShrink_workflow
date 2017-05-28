@@ -87,7 +87,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 
 
 <p>This is the start of the GTEx analysis using CorShrink. Here we pick up one gene and use look at the Corshrink estimation of the tissue-tissue correlation for that single gene. This script can be used as a model script to check the Corshrink function as well when under development.</p>
-<pre class="r"><code>name &lt;- &quot;ENSG00000197971&quot;</code></pre>
+<pre class="r"><code>name &lt;- &quot;ENSG00000166819&quot;</code></pre>
 <pre class="r"><code>cor_data &lt;- get(load(&quot;../output/cor_tissues_non_ash_voom_pearson.rda&quot;))</code></pre>
 <pre class="r"><code>gene_names &lt;- as.character(read.table(file = &quot;../data/GTEX_V6/gene_names_GTEX_V6.txt&quot;)[,1])
 gene_names_1 &lt;- as.character(sapply(gene_names, function(x) return(strsplit(x, &quot;[.]&quot;)[[1]][1])))
@@ -109,7 +109,7 @@ system.time(cor_sample_ML &lt;-  CorShrink::CorShrinkML(cor_mat, common_samples,
                                                                nullweight = 100)))</code></pre>
 <pre><code>## ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.225   0.061   0.290</code></pre>
+##   1.394   0.230   1.615</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_mat)[order_index, order_index],
@@ -134,7 +134,7 @@ system.time(cor_sample_ML &lt;-  CorShrink::CorShrinkML(cor_mat, common_samples,
                                                                nullweight = 100)))</code></pre>
 <pre><code>## ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.869   0.246   1.195</code></pre>
+##   1.021   0.399   1.671</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cor_sample_ML$ash_cor_only)[order_index, order_index],

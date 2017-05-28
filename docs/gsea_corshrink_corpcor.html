@@ -89,6 +89,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <ul>
 <li><a href="#median-comparison-gsea-clusters-brain">Median comparison GSEA clusters Brain</a><ul>
 <li><a href="#cluster-1">cluster 1</a></li>
+<li><a href="#cluster-2">cluster 2</a></li>
 <li><a href="#cluster-3">cluster 3</a></li>
 <li><a href="#cluster-4">cluster 4</a></li>
 <li><a href="#cluster-5">cluster 5</a></li>
@@ -111,12 +112,12 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2017-05-25</p>
+<p><strong>Last updated:</strong> 2017-05-27</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> b35b652</p>
+<p><strong>Code version:</strong> cedfc43</p>
 <p>In this script, we try to perform some gene set enrichment analysis of the CountClust clusters with respect to the CorShrink patterns observed.</p>
-<pre class="r"><code>ash_cor_result &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_normal_gtex_tissues.rda&quot;))
+<pre class="r"><code>ash_cor_result &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_halfuniform_gtex_tissues.rda&quot;))
 common_samples &lt;- get(load(&quot;../output/common_samples.rda&quot;))
 tissue_labels &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;)[,3]
 
@@ -162,24 +163,24 @@ library(fgsea)</code></pre>
              nperm = 100000)
 out</code></pre>
 <pre><code>           pval         padj         ES        NES nMoreExtreme size
-1: 2.039484e-05 4.758797e-05  0.7000420  3.0337749            0  100
-2: 1.107710e-01 1.550795e-01 -0.2840353 -1.2285560         5645  100
-3: 2.501864e-01 2.918841e-01 -0.2562051 -1.1081801        12751  100
-4: 1.961938e-05 4.758797e-05 -0.5457240 -2.3604546            0  100
-5: 1.961938e-05 4.758797e-05 -0.6638557 -2.8714174            0  100
-6: 1.019742e-04 1.784549e-04  0.4240753  1.8378172            4  100
-7: 9.178340e-01 9.178340e-01 -0.1800248 -0.7786729        46781  100
+1: 1.877546e-05 4.992048e-05  0.7250305  3.0151920            0  100
+2: 9.689566e-02 1.356539e-01 -0.2904797 -1.2385240         4528  100
+3: 5.227744e-01 5.227744e-01 -0.2271594 -0.9685438        24434  100
+4: 2.139449e-05 4.992048e-05 -0.5709661 -2.4344389            0  100
+5: 2.139449e-05 4.992048e-05 -0.6567638 -2.8002565            0  100
+6: 5.632639e-05 9.857119e-05  0.4547686  1.8912510            2  100
+7: 2.889326e-01 3.370881e-01 -0.2536637 -1.0815507        13504  100
                                                                                         leadingEdge
-1: ENSG00000184557,ENSG00000132002,ENSG00000106211,ENSG00000149257,ENSG00000173110,ENSG00000144381,
-2: ENSG00000171992,ENSG00000128656,ENSG00000117632,ENSG00000221890,ENSG00000186907,ENSG00000254528,
-3: ENSG00000112139,ENSG00000169758,ENSG00000167371,ENSG00000172794,ENSG00000074964,ENSG00000142765,
-4: ENSG00000204681,ENSG00000053438,ENSG00000100030,ENSG00000068831,ENSG00000126351,ENSG00000128578,
-5: ENSG00000136237,ENSG00000136938,ENSG00000189058,ENSG00000105290,ENSG00000167123,ENSG00000152689,
-6: ENSG00000225972,ENSG00000271043,ENSG00000255823,ENSG00000229344,ENSG00000225630,ENSG00000249119,
-7: ENSG00000270094,ENSG00000269956,ENSG00000271347,ENSG00000214357,ENSG00000034971,ENSG00000255322,</code></pre>
+1: ENSG00000184557,ENSG00000106211,ENSG00000132002,ENSG00000173110,ENSG00000149257,ENSG00000099860,
+2: ENSG00000074317,ENSG00000137267,ENSG00000023287,ENSG00000171992,ENSG00000254528,ENSG00000128656,
+3: ENSG00000167978,ENSG00000163050,ENSG00000196576,ENSG00000077044,ENSG00000137802,ENSG00000072786,
+4: ENSG00000176533,ENSG00000136153,ENSG00000091039,ENSG00000167106,ENSG00000169282,ENSG00000242265,
+5: ENSG00000105290,ENSG00000099194,ENSG00000026652,ENSG00000256545,ENSG00000140450,ENSG00000164124,
+6: ENSG00000225972,ENSG00000271043,ENSG00000255823,ENSG00000229344,ENSG00000225630,ENSG00000237973,
+7: ENSG00000211584,ENSG00000197256,ENSG00000171812,ENSG00000229117,ENSG00000135632,ENSG00000103018,</code></pre>
 <p>The number of leadingEdge genes</p>
 <pre class="r"><code>unlist(lapply(out$leadingEdge, function(x) return(length(x))))</code></pre>
-<pre><code>[1] 60 23 28 55 83 25  9</code></pre>
+<pre><code>[1] 61 27 47 66 80 23 33</code></pre>
 <div id="cluster-1" class="section level3">
 <h3>cluster 1</h3>
 <pre class="r"><code>genes_clus &lt;- cluster_list[[1]][1:9]
@@ -196,7 +197,10 @@ for(m in 1:length(matched_indices)){
     axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
     axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
 }</code></pre>
-<p><img src="figure/gsea_corshrink_corpcor.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /> ### cluster 2</p>
+<p><img src="figure/gsea_corshrink_corpcor.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cluster-2" class="section level3">
+<h3>cluster 2</h3>
 <pre class="r"><code>genes_clus &lt;- cluster_list[[2]][1:9]
 #genes_clus &lt;- out$leadingEdge[[2]][1:9]
 
@@ -335,24 +339,24 @@ out &lt;- fgsea(pathways = cluster_list,
              nperm = 100000)
 out</code></pre>
 <pre><code>           pval         padj         ES        NES nMoreExtreme size
-1: 2.044530e-05 0.0000477057  0.7000420  3.0376261            0  100
-2: 1.087080e-01 0.1521911883 -0.2840353 -1.2285636         5553  100
-3: 2.479497e-01 0.2892746929 -0.2562051 -1.1081870        12667  100
-4: 1.957292e-05 0.0000477057 -0.5457240 -2.3604691            0  100
-5: 1.957292e-05 0.0000477057 -0.6638557 -2.8714351            0  100
-6: 6.133590e-05 0.0001073378  0.4240753  1.8401502            2  100
-7: 8.352547e-01 0.8352547415 -0.1924389 -0.8323732        42673  100
+1: 1.867693e-05 5.022241e-05  0.7250305  3.0095786            0  100
+2: 9.537236e-02 1.335213e-01 -0.2904797 -1.2391306         4430  100
+3: 5.238485e-01 6.111566e-01 -0.2271594 -0.9690181        24337  100
+4: 2.152389e-05 5.022241e-05 -0.5709661 -2.4356311            0  100
+5: 2.152389e-05 5.022241e-05 -0.6567638 -2.8016278            0  100
+6: 5.603078e-05 9.805386e-05  0.4547686  1.8877300            2  100
+7: 8.682903e-01 8.682903e-01  0.1945630  0.8076248        46489  100
                                                                                         leadingEdge
-1: ENSG00000184557,ENSG00000132002,ENSG00000106211,ENSG00000149257,ENSG00000173110,ENSG00000144381,
-2: ENSG00000171992,ENSG00000128656,ENSG00000117632,ENSG00000221890,ENSG00000186907,ENSG00000254528,
-3: ENSG00000112139,ENSG00000169758,ENSG00000167371,ENSG00000172794,ENSG00000074964,ENSG00000142765,
-4: ENSG00000204681,ENSG00000053438,ENSG00000100030,ENSG00000068831,ENSG00000126351,ENSG00000128578,
-5: ENSG00000136237,ENSG00000136938,ENSG00000189058,ENSG00000105290,ENSG00000167123,ENSG00000152689,
-6: ENSG00000225972,ENSG00000271043,ENSG00000255823,ENSG00000229344,ENSG00000225630,ENSG00000249119,
-7: ENSG00000070731,ENSG00000065833,ENSG00000066855,ENSG00000246477,ENSG00000116652,ENSG00000239653,</code></pre>
+1: ENSG00000184557,ENSG00000106211,ENSG00000132002,ENSG00000173110,ENSG00000149257,ENSG00000099860,
+2: ENSG00000074317,ENSG00000137267,ENSG00000023287,ENSG00000171992,ENSG00000254528,ENSG00000128656,
+3: ENSG00000167978,ENSG00000163050,ENSG00000196576,ENSG00000077044,ENSG00000137802,ENSG00000072786,
+4: ENSG00000176533,ENSG00000136153,ENSG00000091039,ENSG00000167106,ENSG00000169282,ENSG00000242265,
+5: ENSG00000105290,ENSG00000099194,ENSG00000026652,ENSG00000256545,ENSG00000140450,ENSG00000164124,
+6: ENSG00000225972,ENSG00000271043,ENSG00000255823,ENSG00000229344,ENSG00000225630,ENSG00000237973,
+7: ENSG00000129167,ENSG00000136436,ENSG00000133874,ENSG00000134202,ENSG00000228981,ENSG00000219481,</code></pre>
 <p>The number of leadingEdge genes</p>
 <pre class="r"><code>unlist(lapply(out$leadingEdge, function(x) return(length(x))))</code></pre>
-<pre><code>[1] 60 23 28 55 83 25 12</code></pre>
+<pre><code>[1] 61 27 47 66 80 23 25</code></pre>
 <div id="cluster-1-1" class="section level3">
 <h3>cluster 1</h3>
 <pre class="r"><code>genes_clus &lt;- cluster_list[[1]][1:9]
@@ -485,7 +489,7 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] fgsea_1.1.2  Rcpp_0.12.10
+[1] fgsea_1.1.2  Rcpp_0.12.11
 
 loaded via a namespace (and not attached):
  [1] knitr_1.15.1       magrittr_1.5       munsell_0.4.3     

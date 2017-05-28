@@ -122,7 +122,7 @@ unique_tissues &lt;- unique(tissue_labels)</code></pre>
 <h2>Sample correlation</h2>
 <pre class="r"><code>cor_result &lt;- get(load(&quot;../output/cor_tissues_non_ash_voom_pearson.rda&quot;))
 cor_result[is.na(cor_result)] = 0
-ash_cor_result &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_normal_gtex_tissues.rda&quot;))</code></pre>
+ash_cor_result &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_halfuniform_gtex_tissues.rda&quot;))</code></pre>
 <pre class="r"><code>numg &lt;- match(gene, gene_names_1)
 cor_mat &lt;- diag(1, 53) + cor_result[,,numg]
 col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),

@@ -182,7 +182,7 @@ order_index <- c(order_index, grep("Bladder", U))
 ```
 
 ```{r fig.width=10, fig.height=12}
-cor_result <- get(load("../output/ash_cor_only_gtex_tissues.rda"))
+cor_result <- get(load("../output/ash_cor_only_voom_pearson_halfuniform_gtex_tissues.rda"))
 
 par(mfrow=c(3,2))
 col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),

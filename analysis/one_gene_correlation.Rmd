@@ -8,7 +8,7 @@ output: html_document
 This is the start of the GTEx analysis using CorShrink. Here we pick up one gene and use look at the Corshrink estimation of the tissue-tissue correlation for that single gene. This script can be used as a model script to check the Corshrink function as well when under development.
 
 ```{r}
-name <- "ENSG00000197971"
+name <- "ENSG00000166819"
 ```
 
 ```{r}

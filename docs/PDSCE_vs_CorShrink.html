@@ -119,7 +119,7 @@ unique_tissues &lt;- unique(tissue_labels)</code></pre>
 <h2>Sample correlation</h2>
 <pre class="r"><code>cor_result &lt;- get(load(&quot;../output/cor_tissues_non_ash_voom_pearson.rda&quot;))
 cor_result[is.na(cor_result)] = 0
-ash_cor_result &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_normal_gtex_tissues.rda&quot;))</code></pre>
+ash_cor_result &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_halfuniform_gtex_tissues.rda&quot;))</code></pre>
 <pre class="r"><code>numg &lt;- match(gene, gene_names_1)
 cor_mat &lt;- diag(1, 53) + cor_result[,,numg]
 col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
@@ -195,8 +195,10 @@ axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], l
 </div>
 <div id="softimpute-pdsoft-cv" class="section level2">
 <h2>Softimpute + pdsoft cv</h2>
-<pre class="r"><code>library(softImpute)
-impute_method &lt;- &quot;svd&quot; ## other option tested is &quot;als&quot;</code></pre>
+<pre class="r"><code>library(softImpute)</code></pre>
+<pre><code>## Loading required package: Matrix</code></pre>
+<pre><code>## Loaded softImpute 1.4</code></pre>
+<pre class="r"><code>impute_method &lt;- &quot;svd&quot; ## other option tested is &quot;als&quot;</code></pre>
 <pre class="r"><code>person_tissue_genes &lt;- get(load(&quot;../output/person_tissue_genes_voom.rda&quot;))</code></pre>
 <pre class="r"><code>numg &lt;- grep(gene, gene_names_1)
 mat &lt;- person_tissue_genes[,,numg]

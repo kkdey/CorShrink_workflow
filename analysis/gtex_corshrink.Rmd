@@ -28,7 +28,7 @@ How do the genes from the GTEx clusters obtained through CountClust look like in
 output.
 
 ```{r}
-cor_result <- get(load("../output/ash_cor_only_gtex_tissues.rda"))
+cor_result <- get(load("../output/ash_cor_only_voom_pearson_halfuniform_gtex_tissues.rda"))
 common_samples <- get(load("../output/common_samples.rda"))
 tissue_labels <- read.table(file = "../data/GTEX_V6/samples_id.txt")[,3]
 
@@ -96,7 +96,7 @@ source("../../CorShrink/R/CorShrinkML.R")
 
 ## Whole body clusters vs CorShrink
 
-```{r fig.width = 13, fig.height = 8}
+```{r fig.width = 15, fig.height = 8}
 
 for(k in 1:20){
       genes <- as.character(read.table(paste0("../utilities/gene_names_clus_", k, ".txt"))[1:6,1])
@@ -108,8 +108,8 @@ for(k in 1:20){
       image(as.matrix(cor_result[order_index,order_index,grep(paste0(genes[l]),gene_names_1)]),
             col=col, main=paste0("corshrink: ", genes[l]), cex.main=2,
             xaxt = "n", yaxt = "n", zlim=c(-1,1))
-      axis(1, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_index], las=2, cex.axis = 1)
-      axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_index], las=2, cex.axis = 1)
+      axis(1, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_index], las=2, cex.axis = 0.5)
+      axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_index], las=2, cex.axis = 0.5)
     }
 }
 
@@ -130,8 +130,8 @@ for(k in 1:6){
    image(as.matrix(cor_result[order_index[1:13],order_index[1:13],grep(paste0(genes[l]),gene_names_1)]),
          col=col, main=paste0("corshrink: ", genes[l]), cex.main=2,
          xaxt = "n", yaxt = "n", zlim=c(-1,1))
-   axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1.5)
-   axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1.5)
+   axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+   axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
  }
 }
  

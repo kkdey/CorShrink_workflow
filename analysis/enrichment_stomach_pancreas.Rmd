@@ -7,7 +7,7 @@ output: html_document
 
 ```{r}
 rm(list=ls())
-corshrink_data <- get(load("../output/ash_cor_only_voom_pearson_normal_gtex_tissues.rda"))
+corshrink_data <- get(load("../output/ash_cor_only_voom_pearson_halfuniform_gtex_tissues.rda"))
 cor_data <- get(load("../output/cor_tissues_non_ash_voom_pearson.rda"))
 ```
 

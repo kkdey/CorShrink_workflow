@@ -27,7 +27,7 @@ knitr::read_chunk("chunks.R")
 In this script, I try to tell a story about brains and corshrink.
 
 ```{r}
-cor_result <- get(load("../output/ash_cor_only_gtex_tissues.rda"))
+cor_result <- get(load("../output/ash_cor_only_voom_pearson_halfuniform_gtex_tissues.rda"))
 common_samples <- get(load("../output/common_samples.rda"))
 tissue_labels <- read.table(file = "../data/GTEX_V6/samples_id.txt")[,3]
 

@@ -28,7 +28,7 @@ In this script, we try to perform some gene set enrichment analysis of the Count
 clusters with respect to the CorShrink patterns observed
 
 ```{r}
-ash_cor_result <- get(load("../output/ash_cor_only_voom_pearson_normal_gtex_tissues.rda"))
+ash_cor_result <- get(load("../output/ash_cor_only_voom_pearson_halfuniform_gtex_tissues.rda"))
 common_samples <- get(load("../output/common_samples.rda"))
 tissue_labels <- read.table(file = "../data/GTEX_V6/samples_id.txt")[,3]
 
