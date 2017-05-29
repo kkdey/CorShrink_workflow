@@ -111,16 +111,22 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <p><a href="http://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1006599">Dey et al 2017</a> obtained clusters of GTEx tissue samples from the gene expression data using a Grade of Membership approach. Here we try to relate the clusters obtained there and the genes that were found to drive these clusters with their tissue-tissue correlation structure patterns. Also of interest is how this correlation structure depends on the expression patterns of the genes.</p>
 <ul>
 <li><a href="one_gene_correlation.html">CorShrink demo on one gene in GTEx</a></li>
-<li><a href="gtex_corshrink.html">CorShrink of top genes driving GTEx Countclust clusters</a></li>
+<li><a href="genewide_vs_tissuewide_corshrink.html">Genewide vs Tissue wide CorShrink</a></li>
+<li><a href="gtex_corshrink.html">tissue wide CorShrink of top genes driving GTEx Countclust clusters</a></li>
+<li><a href="gtex_genewide_CorShrink.html">gene wide CorShrink of top genes driving GTEx CountClust clusters</a></li>
 <li><a href="corshrink_brain_func.html">Curious case of high correlation in Brain</a></li>
 <li><a href="gsea_corshrink_corpcor.html">GSEA of CorShrink correlation patterns on brain tissues</a></li>
 <li><a href="gsea_corshrink_corpcor_2.html">GSEA of CorShrink correlation patterns on all tissues</a></li>
 <li><a href="correlation_analysis_subset_enrichment.html">Enrichment of tissue subsets based on correlation design</a></li>
+<li><a href="pathway_grouping.html">Pathway Grouping and Heatmap Representation</a></li>
 </ul>
 <p>We dig deeper into the enrichment analysis</p>
 <ul>
+<li>Tissue wide CorShrink Enrichment Analysis
+<ul>
 <li><a href="enrichment_arteries.html">Enrichment analysis of high correlation genes in Arteries</a></li>
 <li><a href="enrichment_inside_brain.html">Enrichment analysis of high correlation genes inside Brain</a></li>
+<li><a href="enrichment_non_brain.html">Enrichment analysis of high correlation genes in non brain</a></li>
 <li><a href="enrichment_brain_other_tissues.html">Enrichment analysis of high correlation in Brain vs other tissues</a></li>
 <li><a href="enrichment_brain_nonbrain.html">Enrichment analysis of high correlation in Brain vs non brain</a></li>
 <li><a href="enrichment_blood_spleen.html">Enrichment analysis of high correlation in Blood vs Spleen</a></li>
@@ -130,6 +136,15 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <li><a href="enrichment_skin_nonskin.html">Enrichment analysis of high correlation in Skin vs other tissues</a></li>
 <li><a href="enrichment_stomach_pancreas.html">Enrichment analysis of high correlation in Stomach and Pancreas</a></li>
 <li><a href="enrichment_pituitary_testis.html">Enrichment analysis of high correlation in Pituitary and Testis</a></li>
+</ul></li>
+<li>Gene wide CorShrink Enrichment Analysis
+<ul>
+<li><a href="enrichment_inside_brain_2.html">Enrichment analysis inside brain</a></li>
+<li><a href="enrichment_non_brain.html">Enrichment analysis in non brain</a></li>
+<li><a href="enrichment_breast_adipose_2.html">Enrichment analysis in Breast and Adipose</a></li>
+<li><a href="enrichment_skin_nonskin_2.html">Enrichment analysis in Skin and Non skin</a></li>
+<li><a href="enrichment_stomach_pancreas_2.html">Enrichment analysis in Stomach and Pancreas</a></li>
+</ul></li>
 </ul>
 </div>
 <div id="expression-vs-corshrink" class="section level3">
@@ -137,6 +152,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <p>In this section, we check how the reads expression of the genes in the GTEx data are connected to the CorShrink correlations and how small sample size can indeed produce big correlation values.</p>
 <ul>
 <li><a href="reads_expression_CorShrink.html">Reads expression and CorShrink</a></li>
+<li><a href="muscle_heart_genes_reads_expression.html">Reads data for Muscle and Heart genes that show low overall correlation</a></li>
 </ul>
 </div>
 <div id="dimension-reduction-and-corshrink" class="section level3">
@@ -147,6 +163,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <li><a href="corshrink_pmd.html">Penalized Matrix Decomposition on CorShrink matrix</a></li>
 <li><a href="corshrink_flash.html">FLASH on CorShrink matrix</a></li>
 <li><a href="cor_flash.html">FLASH on sample correlation matrix</a></li>
+<li><a href="flash_imputation_CorShrink.html">Correlation matrix estimation from FLASH imputed data</a></li>
 </ul>
 </div>
 </div>

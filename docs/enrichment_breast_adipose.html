@@ -166,6 +166,26 @@ head(cbind.data.frame(tab$pathway, tab$q.value), 100)</code></pre>
 ## 11  0.10054491
 ## 12  0.10054491
 ## 13  0.10054491</code></pre>
+<p>Pathway grouping</p>
+<pre class="r"><code>pathway2 &lt;- read.delim(&quot;../utilities/breast_adipose/pathway_high.tab&quot;)
+maxpath = 75
+pathway &lt;- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes &lt;- pathway$members_input_overlap
+pathway_list_genes &lt;- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), &quot;; &quot;)))
+all_genes &lt;- Reduce(union, pathway_list_genes)
+pathway_mat &lt;- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] &lt;- 1
+}
+
+pathway_bimat &lt;- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop &lt;- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = &quot;none&quot;, margins = c(5, 5))</code></pre>
+<p><img src="enrichment_breast_adipose_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 <pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/breast_adipose/GO_high.tab&quot;)
 head(cbind.data.frame(tab$term_name, tab$q.value), 100)</code></pre>
 <pre><code>##                                                                        tab$term_name
@@ -458,6 +478,41 @@ head(cbind.data.frame(tab$pathway, tab$q.value), 100)</code></pre>
 ## 98  1.711429e-02
 ## 99  1.718341e-02
 ## 100 1.718341e-02</code></pre>
+<pre class="r"><code>pathway2 &lt;- read.delim(&quot;../utilities/breast_adipose/pathway_low.tab&quot;)
+maxpath = 75
+pathway &lt;- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes &lt;- pathway$members_input_overlap
+pathway_list_genes &lt;- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), &quot;; &quot;)))
+all_genes &lt;- Reduce(union, pathway_list_genes)
+pathway_mat &lt;- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] &lt;- 1
+}
+
+pathway_bimat &lt;- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop &lt;- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = &quot;none&quot;, margins = c(5, 5))</code></pre>
+<p><img src="enrichment_breast_adipose_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<pre class="r"><code>pathway &lt;- read.delim(&quot;../utilities/breast_adipose/pathway_low.tab&quot;)
+ensembl_genes &lt;- pathway$members_input_overlap
+pathway_list_genes &lt;- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), &quot;; &quot;)))
+all_genes &lt;- Reduce(union, pathway_list_genes)
+pathway_mat &lt;- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] &lt;- 1
+}
+
+pathway_bimat &lt;- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop &lt;- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway,
+        cexRow = 0.3, cexCol = 0.3, col=col, zlim=c(-1,1) )</code></pre>
+<p><img src="enrichment_breast_adipose_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
 <pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/breast_adipose/GO_low.tab&quot;)
 head(cbind.data.frame(tab$term_name, tab$q.value), 100)</code></pre>
 <pre><code>##                                                      tab$term_name

@@ -1,0 +1,84 @@
+---
+title: "Pathway analysis by genes"
+author: "Kushal K Dey"
+date: "5/29/2017"
+output: html_document
+---
+
+In this script, we look into how different pathways from different sources are
+similar to one another. Here we pool in pathways from multiple sources - KEGG,
+Wikipathways etc.
+
+```{r}
+pathway_brain <- read.delim("../utilities/non_brain/pathway_high.tab")
+```
+
+```{r}
+dim(pathway_brain)
+```
+```{r}
+ensembl_genes <- pathway_brain$members_input_overlap
+```
+
+```{r}
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+head(pathway_list_genes)
+```
+```{r}
+all_genes <- Reduce(union, pathway_list_genes)
+```
+
+```{r}
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+```
+
+```{r}
+pathway_mat[1:10,1:10]
+```
+
+```{r}
+dim(pathway_mat)
+```
+
+We present a PCA of the similarity matrix above
+
+```{r fig.height = 8}
+pca <- prcomp(pathway_mat)
+plot(pca$x[,1], pca$x[,2], pch = 20)
+text(pca$x[,1], pca$x[,2], pathway_brain$pathway, cex = 0.5)
+```
+
+We next present a heatmap of the pathways based on the pathway matrix above.
+
+```{r fig.height=8}
+plot(pca$x[,2], pca$x[,3], pch = 20)
+text(pca$x[,2], pca$x[,3], pathway_brain$pathway, cex = 0.5)
+```
+
+
+```{r fig.height = 8}
+plot(pca$x[,1], pca$x[,3], pch = 20)
+text(pca$x[,1], pca$x[,3], pathway_brain$pathway, cex = 0.5)
+```
+```{r}
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+```
+
+```{r fig.height =20}
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway_brain$pathway, labCol = pathway_brain$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = "none")
+```
+```{r}
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(pathway_bimat_prop,
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+```
+

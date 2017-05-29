@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Kushal K Dey" />
+
+
+<title>Pathway analysis by genes</title>
+
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="cosmo.css" type="text/css" />
+
+</head>
+
+<body>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
+    <link href="../docs/cosmo.css" rel="stylesheet">
+    <link href="../docs/cosmo.min.css" rel="stylesheet">
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../docs/bootstrap/js/bootstrap.min.js"></script>
+
+<body>
+
+<div class = "nav" align = "middle">
+<div class= "p1"></div>
+<p>
+  <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "workflow.html">WORKFLOW</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "about.html">METHODS</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "license.html">LICENSE</a> 
+   &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
+ </p>
+</div>  
+<!-- <div class="nav">
+  <a href="index.html">Home page</a> &nbsp &nbsp
+  <a href="musings.html">Musings</a> &nbsp &nbsp
+  <a href="town.html">My town</a> &nbsp &nbsp
+  <a href="links.html">Links</a>
+</div> -->
+
+<!-- Main content -->
+</body>
+</html>
+
+
+<h1 class="title toc-ignore">Pathway analysis by genes</h1>
+<h4 class="author"><em>Kushal K Dey</em></h4>
+<h4 class="date"><em>5/29/2017</em></h4>
+
+
+
+<p>In this script, we look into how different pathways from different sources are similar to one another. Here we pool in pathways from multiple sources - KEGG, Wikipathways etc.</p>
+<pre class="r"><code>pathway_brain &lt;- read.delim(&quot;../utilities/non_brain/pathway_high.tab&quot;)</code></pre>
+<pre class="r"><code>dim(pathway_brain)</code></pre>
+<pre><code>## [1] 152   9</code></pre>
+<pre class="r"><code>ensembl_genes &lt;- pathway_brain$members_input_overlap</code></pre>
+<pre class="r"><code>pathway_list_genes &lt;- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), &quot;; &quot;)))
+head(pathway_list_genes)</code></pre>
+<pre><code>## [[1]]
+##  [1] &quot;ENSG00000223865&quot; &quot;ENSG00000137462&quot; &quot;ENSG00000111331&quot;
+##  [4] &quot;ENSG00000111335&quot; &quot;ENSG00000089127&quot; &quot;ENSG00000127191&quot;
+##  [7] &quot;ENSG00000067182&quot; &quot;ENSG00000231389&quot; &quot;ENSG00000179094&quot;
+## [10] &quot;ENSG00000185745&quot; &quot;ENSG00000133794&quot; &quot;ENSG00000241106&quot;
+## [13] &quot;ENSG00000206503&quot; &quot;ENSG00000179344&quot; &quot;ENSG00000123374&quot;
+## [16] &quot;ENSG00000204632&quot; &quot;ENSG00000085514&quot; &quot;ENSG00000049246&quot;
+## [19] &quot;ENSG00000196126&quot; &quot;ENSG00000185507&quot; &quot;ENSG00000204525&quot;
+## [22] &quot;ENSG00000184557&quot; &quot;ENSG00000173039&quot; &quot;ENSG00000198502&quot;
+## 
+## [[2]]
+## [1] &quot;ENSG00000126368&quot; &quot;ENSG00000133794&quot; &quot;ENSG00000179094&quot; &quot;ENSG00000105835&quot;
+## [5] &quot;ENSG00000134107&quot; &quot;ENSG00000163884&quot; &quot;ENSG00000106366&quot; &quot;ENSG00000105516&quot;
+## 
+## [[3]]
+## [1] &quot;ENSG00000120694&quot; &quot;ENSG00000149257&quot; &quot;ENSG00000117748&quot; &quot;ENSG00000004478&quot;
+## [5] &quot;ENSG00000080824&quot; &quot;ENSG00000204388&quot; &quot;ENSG00000096384&quot; &quot;ENSG00000110958&quot;
+## [9] &quot;ENSG00000112110&quot;
+## 
+## [[4]]
+##  [1] &quot;ENSG00000170606&quot; &quot;ENSG00000198502&quot; &quot;ENSG00000096384&quot;
+##  [4] &quot;ENSG00000241106&quot; &quot;ENSG00000080824&quot; &quot;ENSG00000204525&quot;
+##  [7] &quot;ENSG00000223865&quot; &quot;ENSG00000204388&quot; &quot;ENSG00000206503&quot;
+## [10] &quot;ENSG00000179344&quot; &quot;ENSG00000204632&quot; &quot;ENSG00000196126&quot;
+## [13] &quot;ENSG00000231389&quot;
+## 
+## [[5]]
+##  [1] &quot;ENSG00000198502&quot; &quot;ENSG00000241106&quot; &quot;ENSG00000204525&quot;
+##  [4] &quot;ENSG00000223865&quot; &quot;ENSG00000206503&quot; &quot;ENSG00000179344&quot;
+##  [7] &quot;ENSG00000144381&quot; &quot;ENSG00000204632&quot; &quot;ENSG00000196126&quot;
+## [10] &quot;ENSG00000231389&quot;
+## 
+## [[6]]
+##  [1] &quot;ENSG00000198502&quot; &quot;ENSG00000115523&quot; &quot;ENSG00000241106&quot;
+##  [4] &quot;ENSG00000165806&quot; &quot;ENSG00000244731&quot; &quot;ENSG00000223865&quot;
+##  [7] &quot;ENSG00000204520&quot; &quot;ENSG00000206503&quot; &quot;ENSG00000179344&quot;
+## [10] &quot;ENSG00000204632&quot; &quot;ENSG00000231389&quot; &quot;ENSG00000204525&quot;
+## [13] &quot;ENSG00000196126&quot;</code></pre>
+<pre class="r"><code>all_genes &lt;- Reduce(union, pathway_list_genes)</code></pre>
+<pre class="r"><code>pathway_mat &lt;- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] &lt;- 1
+}</code></pre>
+<pre class="r"><code>pathway_mat[1:10,1:10]</code></pre>
+<pre><code>##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
+##  [1,]    1    1    1    1    1    1    1    1    1     1
+##  [2,]    0    0    0    0    0    0    0    0    1     0
+##  [3,]    0    0    0    0    0    0    0    0    0     0
+##  [4,]    1    0    0    0    0    0    0    1    0     0
+##  [5,]    1    0    0    0    0    0    0    1    0     0
+##  [6,]    1    0    0    0    0    0    0    1    0     0
+##  [7,]    0    0    0    0    0    0    0    0    1     0
+##  [8,]    1    0    0    0    0    0    0    1    0     0
+##  [9,]    0    0    0    0    0    0    0    0    0     0
+## [10,]    1    0    0    0    0    0    0    1    0     0</code></pre>
+<pre class="r"><code>dim(pathway_mat)</code></pre>
+<pre><code>## [1] 152 237</code></pre>
+<p>We present a PCA of the similarity matrix above</p>
+<pre class="r"><code>pca &lt;- prcomp(pathway_mat)
+plot(pca$x[,1], pca$x[,2], pch = 20)
+text(pca$x[,1], pca$x[,2], pathway_brain$pathway, cex = 0.5)</code></pre>
+<p><img src="pathway_grouping_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>We next present a heatmap of the pathways based on the pathway matrix above.</p>
+<pre class="r"><code>plot(pca$x[,2], pca$x[,3], pch = 20)
+text(pca$x[,2], pca$x[,3], pathway_brain$pathway, cex = 0.5)</code></pre>
+<p><img src="pathway_grouping_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<pre class="r"><code>plot(pca$x[,1], pca$x[,3], pch = 20)
+text(pca$x[,1], pca$x[,3], pathway_brain$pathway, cex = 0.5)</code></pre>
+<p><img src="pathway_grouping_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<pre class="r"><code>pathway_bimat &lt;- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop &lt;- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])</code></pre>
+<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway_brain$pathway, labCol = pathway_brain$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = &quot;none&quot;)</code></pre>
+<p><img src="pathway_grouping_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(pathway_bimat_prop,
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))</code></pre>
+<p><img src="pathway_grouping_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

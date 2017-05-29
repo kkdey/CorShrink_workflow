@@ -40,26 +40,39 @@ obtained clusters of GTEx tissue samples from the gene expression data using a G
 interest is how this correlation structure depends on the expression patterns of the genes.
 
 - [CorShrink demo on one gene in GTEx](one_gene_correlation.html)
-- [CorShrink of top genes driving GTEx Countclust clusters](gtex_corshrink.html)
+- [Genewide vs Tissue wide CorShrink](genewide_vs_tissuewide_corshrink.html)
+- [tissue wide CorShrink of top genes driving GTEx Countclust clusters](gtex_corshrink.html)
+- [gene wide CorShrink of top genes driving GTEx CountClust clusters](gtex_genewide_CorShrink.html)
 - [Curious case of high correlation in Brain](corshrink_brain_func.html)
 - [GSEA of CorShrink correlation patterns on brain tissues ](gsea_corshrink_corpcor.html)
 - [GSEA of CorShrink correlation patterns on all tissues ](gsea_corshrink_corpcor_2.html)
 - [Enrichment of tissue subsets based on correlation design](correlation_analysis_subset_enrichment.html)
+- [Pathway Grouping and Heatmap Representation](pathway_grouping.html)
 
 We dig deeper into the enrichment analysis 
 
-- [Enrichment analysis of high correlation genes in Arteries](enrichment_arteries.html)
-- [Enrichment analysis of high correlation genes inside Brain](enrichment_inside_brain.html)
-- [Enrichment analysis of high correlation genes in non brain](enrichment_non_brain.html)
-- [Enrichment analysis of high correlation in Brain vs other tissues](enrichment_brain_other_tissues.html)
-- [Enrichment analysis of high correlation in Brain vs non brain](enrichment_brain_nonbrain.html)
-- [Enrichment analysis of high correlation in Blood vs Spleen](enrichment_blood_spleen.html)
-- [Enrichment analysis of high correlation in Breast and Adipose](enrichment_breast_adipose.html)
-- [Enrichment analysis of high correlation in Esophagus and Colon](enrichment_esophagus_colon.html)
-- [Enrichment analysis of high correlation in Heart vs other tissues](enrichment_heart_nonheart.html)
-- [Enrichment analysis of high correlation in Skin vs other tissues](enrichment_skin_nonskin.html)
-- [Enrichment analysis of high correlation in Stomach and Pancreas](enrichment_stomach_pancreas.html)
-- [Enrichment analysis of high correlation in Pituitary and Testis](enrichment_pituitary_testis.html)
+- Tissue wide CorShrink Enrichment Analysis
+    - [Enrichment analysis of high correlation genes in Arteries](enrichment_arteries.html)
+    - [Enrichment analysis of high correlation genes inside Brain](enrichment_inside_brain.html)
+    - [Enrichment analysis of high correlation genes in non brain](enrichment_non_brain.html)
+    - [Enrichment analysis of high correlation in Brain vs other tissues](enrichment_brain_other_tissues.html)
+    - [Enrichment analysis of high correlation in Brain vs non brain](enrichment_brain_nonbrain.html)
+    - [Enrichment analysis of high correlation in Blood vs Spleen](enrichment_blood_spleen.html)
+    - [Enrichment analysis of high correlation in Breast and Adipose](enrichment_breast_adipose.html)
+    - [Enrichment analysis of high correlation in Esophagus and Colon](enrichment_esophagus_colon.html)
+    - [Enrichment analysis of high correlation in Heart vs other tissues](enrichment_heart_nonheart.html)
+    - [Enrichment analysis of high correlation in Skin vs other tissues](enrichment_skin_nonskin.html)
+    - [Enrichment analysis of high correlation in Stomach and Pancreas](enrichment_stomach_pancreas.html)
+    - [Enrichment analysis of high correlation in Pituitary and Testis](enrichment_pituitary_testis.html)
+
+
+
+- Gene wide CorShrink Enrichment Analysis
+    - [Enrichment analysis inside brain](enrichment_inside_brain_2.html)
+    - [Enrichment analysis in non brain](enrichment_non_brain.html)
+    - [Enrichment analysis in Breast and Adipose](enrichment_breast_adipose_2.html)
+    - [Enrichment analysis in Skin and Non skin](enrichment_skin_nonskin_2.html)
+    - [Enrichment analysis in Stomach and Pancreas](enrichment_stomach_pancreas_2.html)
 
 
 ### Expression vs CorShrink
@@ -78,7 +91,7 @@ In the GTEx data, CorShrink was previously applied one gene at a time on its tis
 - [Penalized Matrix Decomposition on CorShrink matrix](corshrink_pmd.html)
 - [FLASH on CorShrink matrix](corshrink_flash.html)
 - [FLASH on sample correlation matrix](cor_flash.html)
-- [Correlation matrix from FLASH imputed data](flash_imputation_CorShrink.html)
+- [Correlation matrix estimation from FLASH imputed data](flash_imputation_CorShrink.html)
 
 
 

@@ -337,6 +337,25 @@ head(cbind.data.frame(tab$pathway, tab$q.value), 100)</code></pre>
 ## 98  8.865912e-04
 ## 99  8.865912e-04
 ## 100 8.865912e-04</code></pre>
+<pre class="r"><code>pathway2 &lt;- read.delim(&quot;../utilities/inside_brain_2/pathway_high.tab&quot;)
+maxpath &lt;- 75
+pathway &lt;- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes &lt;- pathway$members_input_overlap
+pathway_list_genes &lt;- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), &quot;; &quot;)))
+all_genes &lt;- Reduce(union, pathway_list_genes)
+pathway_mat &lt;- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] &lt;- 1
+}
+
+pathway_bimat &lt;- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop &lt;- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = &quot;none&quot;, margins = c(5, 5))</code></pre>
+<p><img src="enrichment_inside_brain_2_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 <pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/inside_brain_2/GO_high.tab&quot;)
 head(cbind.data.frame(tab$term_name, tab$q.value), 100)</code></pre>
 <pre><code>##                                                                                                                 tab$term_name
@@ -591,6 +610,25 @@ head(cbind.data.frame(tab$pathway, tab$q.value), 100)</code></pre>
 ## 21 0.184023164
 ## 22 0.184023164
 ## 23 0.184023164</code></pre>
+<pre class="r"><code>pathway2 &lt;- read.delim(&quot;../utilities/inside_brain_2/pathway_low.tab&quot;)
+maxpath = 75
+pathway &lt;- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes &lt;- pathway$members_input_overlap
+pathway_list_genes &lt;- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), &quot;; &quot;)))
+all_genes &lt;- Reduce(union, pathway_list_genes)
+pathway_mat &lt;- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] &lt;- 1
+}
+
+pathway_bimat &lt;- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop &lt;- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = &quot;none&quot;, margins = c(5, 5))</code></pre>
+<p><img src="enrichment_inside_brain_2_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 <pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/inside_brain_2/GO_low.tab&quot;)
 head(cbind.data.frame(tab$term_name, tab$q.value), 100)</code></pre>
 <pre><code>##                                            tab$term_name tab$q.value
