@@ -1,5 +1,5 @@
 ---
-title: "Stomach and Pacnreas Enrichment"
+title: "Stomach and Pacnreas Enrichment: Tissuewide CorShrink"
 author: "Kushal K Dey"
 date: "5/25/2017"
 output: html_document

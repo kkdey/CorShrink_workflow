@@ -1,5 +1,5 @@
 ---
-title: "Inside brain enrichment"
+title: "Inside brain enrichment : Tissue wide CorShrink"
 author: "Kushal K Dey"
 date: "5/26/2017"
 output: html_document

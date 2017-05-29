@@ -1,5 +1,5 @@
 ---
-title: "Skin and Non skin enrichment"
+title: "Skin and Non skin enrichment : Tissuewide CorShrink"
 author: "Kushal K Dey"
 date: "5/25/2017"
 output: html_document

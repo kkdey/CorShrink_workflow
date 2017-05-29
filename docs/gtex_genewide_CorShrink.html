@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Kushal K Dey" />
+
+
+<title>GTEx clusters vs genewide CorShrink</title>
+
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="cosmo.css" type="text/css" />
+
+</head>
+
+<body>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
+    <link href="../docs/cosmo.css" rel="stylesheet">
+    <link href="../docs/cosmo.min.css" rel="stylesheet">
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../docs/bootstrap/js/bootstrap.min.js"></script>
+
+<body>
+
+<div class = "nav" align = "middle">
+<div class= "p1"></div>
+<p>
+  <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "workflow.html">WORKFLOW</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "about.html">METHODS</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "license.html">LICENSE</a> 
+   &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
+ </p>
+</div>  
+<!-- <div class="nav">
+  <a href="index.html">Home page</a> &nbsp &nbsp
+  <a href="musings.html">Musings</a> &nbsp &nbsp
+  <a href="town.html">My town</a> &nbsp &nbsp
+  <a href="links.html">Links</a>
+</div> -->
+
+<!-- Main content -->
+</body>
+</html>
+
+
+<h1 class="title toc-ignore">GTEx clusters vs genewide CorShrink</h1>
+<h4 class="author"><em>Kushal K Dey</em></h4>
+<h4 class="date"><em>5/28/2017</em></h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#whole-body-clusters-vs-corshrink">Whole body clusters vs CorShrink</a></li>
+<li><a href="#brain-clusters-vs-corshrink">Brain clusters vs CorShrink</a></li>
+<li><a href="#session-information">Session information</a></li>
+</ul>
+</div>
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2017-05-28</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> b5ed7ab</p>
+<p>How do the genes from the GTEx clusters obtained through CountClust look like in terms of CorShrink output.</p>
+<pre class="r"><code>cor_result &lt;- get(load(&quot;../output/genewide_ash_out_tissue_mat.rda&quot;))
+common_samples &lt;- get(load(&quot;../output/common_samples.rda&quot;))
+tissue_labels &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;)[,3]
+
+#library(data.table)
+#data &lt;- data.frame(fread(&quot;../data/GTEX_V6/cis_gene_expression.txt&quot;))
+#matdata &lt;- t(data[,-c(1,2)])
+
+gene_names &lt;- as.character(read.table(file = &quot;../data/GTEX_V6/gene_names_GTEX_V6.txt&quot;)[,1])
+gene_names_1 &lt;- as.character(sapply(gene_names, function(x) return(strsplit(x, &quot;[.]&quot;)[[1]][1])))
+
+
+U &lt;- unique(tissue_labels)</code></pre>
+<pre class="r"><code>library(CorShrink)
+source(&quot;../../CorShrink/R/CorShrinkML.R&quot;)</code></pre>
+<div id="whole-body-clusters-vs-corshrink" class="section level2">
+<h2>Whole body clusters vs CorShrink</h2>
+<pre class="r"><code>for(k in 1:20){
+      genes &lt;- as.character(read.table(paste0(&quot;../utilities/gene_names_clus_&quot;, k, &quot;.txt&quot;))[1:6,1])
+    par(mfrow=c(2,3))
+    
+    for(l in 1:length(genes)){
+      col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+            rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+      image(as.matrix(cor_result[order_index,order_index,grep(paste0(genes[l]),gene_names_1)]),
+            col=col, main=paste0(&quot;corshrink: &quot;, genes[l]), cex.main=2,
+            xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+      axis(1, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_index], las=2, cex.axis = 0.5)
+      axis(2, at = seq(0, 1, length.out = ncol(cor_result[,,1])), labels = U[order_index], las=2, cex.axis = 0.5)
+    }
+}</code></pre>
+<p><img src="figure/gtex_genewide_CorShrink.Rmd/unnamed-chunk-4-1.png" width="1440" style="display: block; margin: auto;" /><img src="figure/gtex_genewide_CorShrink.Rmd/unnamed-chunk-4-2.png" width="1440" style="display: block; margin: auto;" /><img src="figure/gtex_genewide_CorShrink.Rmd/unnamed-chunk-4-3.png" width="1440" style="display: block; margin: auto;" /><img src="figure/gtex_genewide_CorShrink.Rmd/unnamed-chunk-4-4.png" width="1440" style="display: block; margin: auto;" /><img src="figure/gtex_genewide_CorShrink.Rmd/unnamed-chunk-4-5.png" width="1440" style="display: block; margin: auto;" /><img src="figure/gtex_genewide_CorShrink.Rmd/unnamed-chunk-4-6.png" width="1440" style="display: block; margin: auto;" /><img src="figure/gtex_genewide_CorShrink.Rmd/unnamed-chunk-4-7.png" width="1440" style="display: block; margin: auto;" /><img src="figure/gtex_genewide_CorShrink.Rmd/unnamed-chunk-4-8.png" width="1440" style="display: block; margin: auto;" /><img src="figure/gtex_genewide_CorShrink.Rmd/unnamed-chunk-4-9.png" width="1440" style="display: block; margin: auto;" /><img src="figure/gtex_genewide_CorShrink.Rmd/unnamed-chunk-4-10.png" width="1440" style="display: block; margin: auto;" /><img src="figure/gtex_genewide_CorShrink.Rmd/unnamed-chunk-4-11.png" width="1440" style="display: block; margin: auto;" /><img src="figure/gtex_genewide_CorShrink.Rmd/unnamed-chunk-4-12.png" width="1440" style="display: block; margin: auto;" /><img src="figure/gtex_genewide_CorShrink.Rmd/unnamed-chunk-4-13.png" width="1440" style="display: block; margin: auto;" /><img src="figure/gtex_genewide_CorShrink.Rmd/unnamed-chunk-4-14.png" width="1440" style="display: block; margin: auto;" /><img src="figure/gtex_genewide_CorShrink.Rmd/unnamed-chunk-4-15.png" width="1440" style="display: block; margin: auto;" /><img src="figure/gtex_genewide_CorShrink.Rmd/unnamed-chunk-4-16.png" width="1440" style="display: block; margin: auto;" /><img src="figure/gtex_genewide_CorShrink.Rmd/unnamed-chunk-4-17.png" width="1440" style="display: block; margin: auto;" /><img src="figure/gtex_genewide_CorShrink.Rmd/unnamed-chunk-4-18.png" width="1440" style="display: block; margin: auto;" /><img src="figure/gtex_genewide_CorShrink.Rmd/unnamed-chunk-4-19.png" width="1440" style="display: block; margin: auto;" /><img src="figure/gtex_genewide_CorShrink.Rmd/unnamed-chunk-4-20.png" width="1440" style="display: block; margin: auto;" /></p>
+</div>
+<div id="brain-clusters-vs-corshrink" class="section level2">
+<h2>Brain clusters vs CorShrink</h2>
+<pre class="r"><code>for(k in 1:6){
+  genes &lt;- as.character(read.table(paste0(&quot;../utilities/gene_names_brain_clus_&quot;, k, &quot;.txt&quot;))[1:6,1])
+ par(mfrow=c(2,3))
+
+ for(l in 1:length(genes)){
+   col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+         rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+   image(as.matrix(cor_result[order_index[1:13],order_index[1:13],grep(paste0(genes[l]),gene_names_1)]),
+         col=col, main=paste0(&quot;corshrink: &quot;, genes[l]), cex.main=2,
+         xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+   axis(1, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+   axis(2, at = seq(0, 1, length.out = 13), labels = U[order_index[1:13]], las=2, cex.axis = 1)
+ }
+}</code></pre>
+<p><img src="figure/gtex_genewide_CorShrink.Rmd/unnamed-chunk-5-1.png" width="1248" style="display: block; margin: auto;" /><img src="figure/gtex_genewide_CorShrink.Rmd/unnamed-chunk-5-2.png" width="1248" style="display: block; margin: auto;" /><img src="figure/gtex_genewide_CorShrink.Rmd/unnamed-chunk-5-3.png" width="1248" style="display: block; margin: auto;" /><img src="figure/gtex_genewide_CorShrink.Rmd/unnamed-chunk-5-4.png" width="1248" style="display: block; margin: auto;" /><img src="figure/gtex_genewide_CorShrink.Rmd/unnamed-chunk-5-5.png" width="1248" style="display: block; margin: auto;" /><img src="figure/gtex_genewide_CorShrink.Rmd/unnamed-chunk-5-6.png" width="1248" style="display: block; margin: auto;" /></p>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<!-- Insert the session information into the document -->
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.3.3 (2017-03-06)
+Platform: x86_64-apple-darwin13.4.0 (64-bit)
+Running under: macOS Sierra 10.12
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] CorShrink_0.99.0
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.11        knitr_1.15.1        magrittr_1.5       
+ [4] MASS_7.3-45         doParallel_1.0.10   pscl_1.4.9         
+ [7] SQUAREM_2016.8-2    lattice_0.20-35     foreach_1.4.3      
+[10] plyr_1.8.4          ashr_2.1-15         stringr_1.2.0      
+[13] tools_3.3.3         parallel_3.3.3      grid_3.3.3         
+[16] git2r_0.18.0        htmltools_0.3.6     iterators_1.0.8    
+[19] yaml_2.1.14         rprojroot_1.2       digest_0.6.12      
+[22] Matrix_1.2-8        reshape2_1.4.2.9000 codetools_0.2-15   
+[25] evaluate_0.10       rmarkdown_1.5       stringi_1.1.5      
+[28] backports_1.0.5     expm_0.999-2        truncnorm_1.0-7    </code></pre>
+</div>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
