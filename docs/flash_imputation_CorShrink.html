@@ -154,7 +154,7 @@ axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], l
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(ash_cor_result[order_index, order_index, numg]),
-      col=col, main=paste0(&quot;softimpute sample corr: &quot;), cex.main=2,
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
       xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
 axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
 axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
