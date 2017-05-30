@@ -70,9 +70,13 @@ We dig deeper into the enrichment analysis
 - Gene wide CorShrink Enrichment Analysis
     - [Enrichment analysis inside brain](enrichment_inside_brain_2.html)
     - [Enrichment analysis in non brain](enrichment_non_brain.html)
+    - [Enrichment analysis in brain and non brain](enrichment_brain_nonbrain_2.html)
     - [Enrichment analysis in Breast and Adipose](enrichment_breast_adipose_2.html)
     - [Enrichment analysis in Skin and Non skin](enrichment_skin_nonskin_2.html)
     - [Enrichment analysis in Stomach and Pancreas](enrichment_stomach_pancreas_2.html)
+    - [Enrichment analysis in Arteries](enrichment_arteries_2.html)
+    - [Enrichment analysis in Blood and Spleen](enrichment_blood_spleen_2.html)
+    
 
 
 ### Expression vs CorShrink
