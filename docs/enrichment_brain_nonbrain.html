@@ -86,7 +86,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 
 
 
-<pre class="r"><code>corshrink_data &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_normal_gtex_tissues.rda&quot;))
+<pre class="r"><code>corshrink_data &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_halfuniform_gtex_tissues.rda&quot;))
 cor_data &lt;- get(load(&quot;../output/cor_tissues_non_ash_voom_pearson.rda&quot;))</code></pre>
 <pre class="r"><code>common_samples &lt;- get(load(&quot;../output/common_samples.rda&quot;))
 tissue_labels &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;)[,3]
@@ -157,6 +157,28 @@ head(cbind.data.frame(tab$pathway, tab$q.value), 10)</code></pre>
 ## 8  3.507673e-04
 ## 9  4.246073e-04
 ## 10 4.977479e-04</code></pre>
+<pre class="r"><code>pathway2 &lt;- read.delim(&quot;../utilities/brain_nonbrain/pathway_high.tab&quot;)
+if(length(which(pathway2$q.value &lt; 0.05)) &gt; 2){
+  pathway2 &lt;- pathway2[which(pathway2$q.value &lt; 0.05),]
+}
+maxpath = 75
+pathway &lt;- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes &lt;- pathway$members_input_overlap
+pathway_list_genes &lt;- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), &quot;; &quot;)))
+all_genes &lt;- Reduce(union, pathway_list_genes)
+pathway_mat &lt;- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] &lt;- 1
+}
+
+pathway_bimat &lt;- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop &lt;- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = &quot;none&quot;, margins = c(5, 5))</code></pre>
+<p><img src="enrichment_brain_nonbrain_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 <pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/brain_nonbrain/GO_high.tab&quot;)
 head(cbind.data.frame(tab$term_name, tab$q.value), 10)</code></pre>
 <pre><code>##                                  tab$term_name  tab$q.value
@@ -186,6 +208,28 @@ head(cbind.data.frame(tab$pathway, tab$q.value), 10)</code></pre>
 ## 4 0.025061818
 ## 5 0.025061818
 ## 6 0.026129420</code></pre>
+<pre class="r"><code>pathway2 &lt;- read.delim(&quot;../utilities/brain_nonbrain/pathway_low.tab&quot;)
+if(length(which(pathway2$q.value &lt; 0.05)) &gt; 2){
+  pathway2 &lt;- pathway2[which(pathway2$q.value &lt; 0.05),]
+}
+maxpath = 75
+pathway &lt;- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes &lt;- pathway$members_input_overlap
+pathway_list_genes &lt;- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), &quot;; &quot;)))
+all_genes &lt;- Reduce(union, pathway_list_genes)
+pathway_mat &lt;- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] &lt;- 1
+}
+
+pathway_bimat &lt;- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop &lt;- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = &quot;none&quot;, margins = c(5, 5))</code></pre>
+<p><img src="enrichment_brain_nonbrain_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 <pre class="r"><code>tab &lt;- read.delim(&quot;../utilities/brain_nonbrain/GO_low.tab&quot;)
 head(cbind.data.frame(tab$term_name, tab$q.value), 10)</code></pre>
 <pre><code>##                                    tab$term_name tab$q.value

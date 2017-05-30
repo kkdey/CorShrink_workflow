@@ -340,6 +340,9 @@ head(cbind.data.frame(tab$pathway, tab$q.value), 100)</code></pre>
 ## 99  0.0146044163
 ## 100 0.0146044163</code></pre>
 <pre class="r"><code>pathway2 &lt;- read.delim(&quot;../utilities/skin_nonskin_2/pathway_high.tab&quot;)
+if(length(which(pathway2$q.value &lt; 0.05)) &gt; 2){
+  pathway2 &lt;- pathway2[which(pathway2$q.value &lt; 0.05),]
+}
 maxpath = 75
 pathway &lt;- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
 ensembl_genes &lt;- pathway$members_input_overlap
@@ -571,6 +574,9 @@ head(cbind.data.frame(tab$pathway, tab$q.value), 100)</code></pre>
 ## 4  GABAergic synapse - Homo sapiens (human)  0.05332995
 ## 5 Salivary secretion - Homo sapiens (human)  0.05332995</code></pre>
 <pre class="r"><code>pathway2 &lt;- read.delim(&quot;../utilities/skin_nonskin_2/pathway_low.tab&quot;)
+if(length(which(pathway2$q.value &lt; 0.05)) &gt; 2){
+  pathway2 &lt;- pathway2[which(pathway2$q.value &lt; 0.05),]
+}
 maxpath = 75
 pathway &lt;- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
 ensembl_genes &lt;- pathway$members_input_overlap

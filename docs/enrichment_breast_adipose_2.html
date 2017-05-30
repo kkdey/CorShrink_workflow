@@ -275,6 +275,9 @@ head(cbind.data.frame(tab$pathway, tab$q.value), 100)</code></pre>
 ## 66 0.0243269846
 ## 67 0.0253973830</code></pre>
 <pre class="r"><code>pathway2 &lt;- read.delim(&quot;../utilities/breast_adipose_2/pathway_high.tab&quot;)
+if(length(which(pathway2$q.value &lt; 0.05)) &gt; 2){
+  pathway2 &lt;- pathway2[which(pathway2$q.value &lt; 0.05),]
+}
 maxpath = 75
 pathway &lt;- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
 ensembl_genes &lt;- pathway$members_input_overlap
@@ -702,6 +705,9 @@ head(cbind.data.frame(tab$pathway, tab$q.value), 100)</code></pre>
 ## 99  5.515673e-03
 ## 100 5.515673e-03</code></pre>
 <pre class="r"><code>pathway2 &lt;- read.delim(&quot;../utilities/breast_adipose_2/pathway_low.tab&quot;)
+if(length(which(pathway2$q.value &lt; 0.05)) &gt; 2){
+  pathway2 &lt;- pathway2[which(pathway2$q.value &lt; 0.05),]
+}
 maxpath = 75
 pathway &lt;- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
 ensembl_genes &lt;- pathway$members_input_overlap

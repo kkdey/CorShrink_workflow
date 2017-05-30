@@ -123,6 +123,9 @@ head(cbind.data.frame(tab$pathway, tab$q.value), 10)
 
 ```{r fig.height = 10}
 pathway2 <- read.delim("../utilities/heart_nonheart/pathway_high.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
 maxpath = 75
 pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
 ensembl_genes <- pathway$members_input_overlap
@@ -154,6 +157,9 @@ head(cbind.data.frame(tab$pathway, tab$q.value), 10)
 
 ```{r fig.height = 10}
 pathway2 <- read.delim("../utilities/heart_nonheart/pathway_low.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
 maxpath = 75
 pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
 ensembl_genes <- pathway$members_input_overlap
