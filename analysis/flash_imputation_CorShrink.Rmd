@@ -81,13 +81,14 @@ order_index <- c(order_index, grep("Bladder", U))
 ```{r}
 numg <- grep(gene, gene_names_1)
 mat <- person_tissue_genes[,,numg]
+mat2 <- apply(mat, 2, function(x) return(x - mean(x, na.rm= TRUE)))
 ```
 
 We now apply FLASH on this matrix
 
 ```{r echo=TRUE, eval=FALSE}
 #devtools::install_github("stephenslab/flashr", auth_token = "a9de81f6166ea5ac0412326b2e2fa1b9bde8880f")
-ggd = flashr::greedy(mat,K = 10)
+ggd = flashr::greedy(mat2,K = 10)
 ```
 
 ```{r echo=TRUE, eval=FALSE}
@@ -96,11 +97,19 @@ save(ggd, file = paste0("../output/greedy_flash_", gene, ".rda"))
 
 ```{r}
 ggd <- get(load(file = paste0("../output/greedy_flash_", gene, ".rda")))
-predicted_mat <- ggd$l %*% t(ggd$f)
+```
+
+
+```{r}
+predicted_mat <- ggd$l %*% t(ggd$f) 
 ```
 
 ```{r}
-flash_cov_mat <- t(predicted_mat) %*% predicted_mat 
+cov2cor(t(ggd$l)%*%ggd$l)
+```
+
+```{r}
+flash_cov_mat <- (ggd$f) %*% t(ggd$f)  + ggd$sigmae2*diag(1, 53)
 ```
 
 ```{r}

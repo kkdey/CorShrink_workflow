@@ -101,14 +101,21 @@ tissue_labels &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;
 unique_persons &lt;- unique(samples_person)
 unique_tissues &lt;- unique(tissue_labels)</code></pre>
 <pre class="r"><code>numg &lt;- grep(gene, gene_names_1)
-mat &lt;- person_tissue_genes[,,numg]</code></pre>
+mat &lt;- person_tissue_genes[,,numg]
+mat2 &lt;- apply(mat, 2, function(x) return(x - mean(x, na.rm= TRUE)))</code></pre>
 <p>We now apply FLASH on this matrix</p>
 <pre class="r"><code>#devtools::install_github(&quot;stephenslab/flashr&quot;, auth_token = &quot;a9de81f6166ea5ac0412326b2e2fa1b9bde8880f&quot;)
-ggd = flashr::greedy(mat,K = 10)</code></pre>
+ggd = flashr::greedy(mat2,K = 10)</code></pre>
 <pre class="r"><code>save(ggd, file = paste0(&quot;../output/greedy_flash_&quot;, gene, &quot;.rda&quot;))</code></pre>
-<pre class="r"><code>ggd &lt;- get(load(file = paste0(&quot;../output/greedy_flash_&quot;, gene, &quot;.rda&quot;)))
-predicted_mat &lt;- ggd$l %*% t(ggd$f)</code></pre>
-<pre class="r"><code>flash_cov_mat &lt;- t(predicted_mat) %*% predicted_mat </code></pre>
+<pre class="r"><code>ggd &lt;- get(load(file = paste0(&quot;../output/greedy_flash_&quot;, gene, &quot;.rda&quot;)))</code></pre>
+<pre class="r"><code>predicted_mat &lt;- ggd$l %*% t(ggd$f) </code></pre>
+<pre class="r"><code>cov2cor(t(ggd$l)%*%ggd$l)</code></pre>
+<pre><code>##             [,1]          [,2]          [,3]          [,4]
+## [1,]  1.00000000 -0.0405723759 -0.0929793487 -0.0725178238
+## [2,] -0.04057238  1.0000000000  0.1144127989  0.0001698347
+## [3,] -0.09297935  0.1144127989  1.0000000000 -0.0001717631
+## [4,] -0.07251782  0.0001698347 -0.0001717631  1.0000000000</code></pre>
+<pre class="r"><code>flash_cov_mat &lt;- (ggd$f) %*% t(ggd$f)  + ggd$sigmae2*diag(1, 53)</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cov2cor(flash_cov_mat[order_index, order_index])),
@@ -116,30 +123,42 @@ image(as.matrix(cov2cor(flash_cov_mat[order_index, order_index])),
       xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
 axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
 axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
-<p><img src="flash_imputation_CorShrink_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p><img src="flash_imputation_CorShrink_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 <pre class="r"><code>mat2 &lt;- mat
 mat2[is.na(mat2)] = predicted_mat[is.na(mat2)]</code></pre>
 <pre class="r"><code>mat[1:5,1:5]</code></pre>
-<pre><code>##            [,1]       [,2]      [,3]       [,4]       [,5]
-## [1,]  1.0865395  1.4454114 1.1843655         NA         NA
-## [2,] -0.4910000         NA        NA         NA         NA
-## [3,] -0.3669399         NA        NA         NA         NA
-## [4,]  0.4528641  0.7971982 2.2161978  0.7341055         NA
-## [5,] -0.1770442 -1.6942174 0.7994254 -1.2754927 -0.1142739</code></pre>
+<pre><code>##            Adipose - Subcutaneous Adipose - Visceral (Omentum)
+## GTEX-111CU              1.0865395                    1.4454114
+## GTEX-111FC             -0.4910000                           NA
+## GTEX-111VG             -0.3669399                           NA
+## GTEX-111YS              0.4528641                    0.7971982
+## GTEX-1122O             -0.1770442                   -1.6942174
+##            Adrenal Gland Artery - Aorta Artery - Coronary
+## GTEX-111CU     1.1843655             NA                NA
+## GTEX-111FC            NA             NA                NA
+## GTEX-111VG            NA             NA                NA
+## GTEX-111YS     2.2161978      0.7341055                NA
+## GTEX-1122O     0.7994254     -1.2754927        -0.1142739</code></pre>
 <pre class="r"><code>mat2[1:5,1:5]</code></pre>
-<pre><code>##            [,1]       [,2]       [,3]       [,4]       [,5]
-## [1,]  1.0865395  1.4454114  1.1843655 -0.5184517 -0.6022779
-## [2,] -0.4910000  0.4906696 -0.7774929 -0.7664831 -0.8847272
-## [3,] -0.3669399  0.4487992 -0.7256462 -0.7152590 -0.8244966
-## [4,]  0.4528641  0.7971982  2.2161978  0.7341055  0.4830270
-## [5,] -0.1770442 -1.6942174  0.7994254 -1.2754927 -0.1142739</code></pre>
+<pre><code>##            Adipose - Subcutaneous Adipose - Visceral (Omentum)
+## GTEX-111CU              1.0865395                  1.445411419
+## GTEX-111FC             -0.4910000                  0.009303904
+## GTEX-111VG             -0.3669399                  0.004695263
+## GTEX-111YS              0.4528641                  0.797198244
+## GTEX-1122O             -0.1770442                 -1.694217421
+##            Adrenal Gland Artery - Aorta Artery - Coronary
+## GTEX-111CU   1.184365517    0.038897465       0.043558246
+## GTEX-111FC   0.013262143    0.014521520       0.016263132
+## GTEX-111VG   0.005597063    0.006978118       0.007815297
+## GTEX-111YS   2.216197802    0.734105529       1.248783185
+## GTEX-1122O   0.799425429   -1.275492706      -0.114273887</code></pre>
 <pre class="r"><code>predicted_mat[1:5,1:5]</code></pre>
-<pre><code>##           [,1]      [,2]       [,3]       [,4]       [,5]
-## [1,] 0.2598893 0.3615475 -0.5275386 -0.5184517 -0.6022779
-## [2,] 0.3536965 0.4906696 -0.7774929 -0.7664831 -0.8847272
-## [3,] 0.3242212 0.4487992 -0.7256462 -0.7152590 -0.8244966
-## [4,] 0.8465062 1.0975785  0.5164667  0.6004814  0.4830270
-## [5,] 0.3007976 0.4140405 -0.6544812 -0.6448840 -0.7450159</code></pre>
+<pre><code>##             [,1]        [,2]        [,3]        [,4]        [,5]
+## [1,] 0.015775100 0.026093870 0.035418980 0.038897465 0.043558246
+## [2,] 0.005927891 0.009303904 0.013262143 0.014521520 0.016263132
+## [3,] 0.003013358 0.004695263 0.005597063 0.006978118 0.007815297
+## [4,] 0.452138569 0.699390118 1.012669350 1.115386105 1.248783185
+## [5,] 0.005907334 0.003599316 0.013342955 0.014718861 0.016452882</code></pre>
 <pre class="r"><code>cormat2 &lt;- cor(mat2)
 col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
@@ -148,7 +167,7 @@ image(as.matrix(cormat2[order_index, order_index]),
       xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
 axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
 axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
-<p><img src="flash_imputation_CorShrink_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p><img src="flash_imputation_CorShrink_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
 <p>We compare this with the CorShrink matrix.</p>
 <pre class="r"><code>ash_cor_result &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_normal_gtex_tissues.rda&quot;))</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
@@ -158,7 +177,7 @@ image(as.matrix(ash_cor_result[order_index, order_index, numg]),
       xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
 axis(1, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)
 axis(2, at = seq(0, 1, length.out = 53), labels = unique_tissues[order_index], las=2, cex.axis = 0.5)</code></pre>
-<p><img src="flash_imputation_CorShrink_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p><img src="flash_imputation_CorShrink_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
 <p>We now look at the corre</p>
 
 <hr>
