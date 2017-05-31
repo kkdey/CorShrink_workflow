@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Kushal K Dey" />
+
+
+<title>Sample attributes in GTEx</title>
+
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="cosmo.css" type="text/css" />
+
+</head>
+
+<body>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
+    <link href="../docs/cosmo.css" rel="stylesheet">
+    <link href="../docs/cosmo.min.css" rel="stylesheet">
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../docs/bootstrap/js/bootstrap.min.js"></script>
+
+<body>
+
+<div class = "nav" align = "middle">
+<div class= "p1"></div>
+<p>
+  <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "workflow.html">WORKFLOW</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "about.html">METHODS</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "license.html">LICENSE</a> 
+   &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
+ </p>
+</div>  
+<!-- <div class="nav">
+  <a href="index.html">Home page</a> &nbsp &nbsp
+  <a href="musings.html">Musings</a> &nbsp &nbsp
+  <a href="town.html">My town</a> &nbsp &nbsp
+  <a href="links.html">Links</a>
+</div> -->
+
+<!-- Main content -->
+</body>
+</html>
+
+
+<h1 class="title toc-ignore">Sample attributes in GTEx</h1>
+<h4 class="author"><em>Kushal K Dey</em></h4>
+<h4 class="date"><em>5/30/2017</em></h4>
+
+
+
+<p>In this script, we take a look into the sample attributes provided by GTEx for the different samples.</p>
+<pre class="r"><code>person_label=read.table(&quot;../data/GTEX_V6/person_identifier_labels_with_numbers.txt&quot;);
+samples_id &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;)[,1]
+
+samples_person &lt;- sapply(samples_id, function(x) return(paste0(strsplit(as.character(x), &quot;-&quot;)[[1]][1:2], collapse =&quot;-&quot;)))
+tissue_labels &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;)[,3]
+
+xtabs(~ samples_person + tissue_labels)
+
+unique_persons &lt;- unique(samples_person)
+unique_tissues &lt;- unique(tissue_labels)
+
+library(data.table)
+data &lt;- data.frame(fread(&quot;../data/GTEX_V6/cis_gene_expression.txt&quot;))
+matdata &lt;- (data[,-c(1,2)])
+voom_matdata &lt;- t(limma::voom(matdata)$E)
+
+gene_names &lt;- as.character(read.table(file = &quot;../data/GTEX_V6/gene_names_GTEX_V6.txt&quot;)[,1])
+gene_names_1 &lt;- as.character(sapply(gene_names, function(x) return(strsplit(x, &quot;[.]&quot;)[[1]][1])))
+
+mat &lt;- matrix(0, length(unique_persons), length(unique_tissues))
+
+
+person_tissue_genes &lt;- array(NA, c(length(unique_persons), length(unique_tissues), dim(voom_matdata)[2]))
+
+for(u in 1:length(unique_persons)){
+    index_samp &lt;- which(samples_person == unique_persons[u])
+    tissue_lab_samp &lt;- tissue_labels[index_samp]
+    person_tissue_genes[u, match(tissue_lab_samp, unique_tissues), ] = voom_matdata[index_samp, ]
+    cat(&quot;We are at person : &quot;, u, &quot;\n&quot;)
+}
+
+dimnames(person_tissue_genes)[[1]] &lt;- unique_persons
+dimnames(person_tissue_genes)[[2]] &lt;- unique_tissues
+dimnames(person_tissue_genes)[[3]] &lt;- gene_names_1
+
+
+save(person_tissue_genes, file = &quot;../output/person_tissue_genes_voom.rda&quot;)</code></pre>
+<pre class="r"><code>sample_attributes &lt;- read.delim(&quot;../data/GTEX_V6/GTEx_Analysis_2016-01-15_v7_SubjectPhenotypesDS.txt&quot;)</code></pre>
+<pre class="r"><code>sex_attr &lt;- sample_attributes$SEX
+age_attr &lt;- sample_attributes$AGE
+sample_attributes$SUBJID</code></pre>
+<pre><code>##   [1] GTEX-1117F GTEX-111CU GTEX-111FC GTEX-111VG GTEX-111YS GTEX-1122O
+##   [7] GTEX-1128S GTEX-113IC GTEX-113JC GTEX-117XS GTEX-117YW GTEX-117YX
+##  [13] GTEX-1192W GTEX-1192X GTEX-11DXW GTEX-11DXX GTEX-11DXY GTEX-11DXZ
+##  [19] GTEX-11DYG GTEX-11DZ1 GTEX-11EI6 GTEX-11EM3 GTEX-11EMC GTEX-11EQ8
+##  [25] GTEX-11EQ9 GTEX-11GS4 GTEX-11GSO GTEX-11GSP GTEX-11H98 GTEX-11I78
+##  [31] GTEX-11ILO GTEX-11LCK GTEX-11NSD GTEX-11NUK GTEX-11NV4 GTEX-11O72
+##  [37] GTEX-11OC5 GTEX-11OF3 GTEX-11ONC GTEX-11P7K GTEX-11P81 GTEX-11P82
+##  [43] GTEX-11PRG GTEX-11TT1 GTEX-11TTK GTEX-11TUW GTEX-11UD1 GTEX-11UD2
+##  [49] GTEX-11VI4 GTEX-11WQC GTEX-11WQK GTEX-11XUK GTEX-11ZTS GTEX-11ZTT
+##  [55] GTEX-11ZU8 GTEX-11ZUS GTEX-11ZVC GTEX-1211K GTEX-12126 GTEX-1212Z
+##  [61] GTEX-12584 GTEX-12696 GTEX-1269C GTEX-12BJ1 GTEX-12C56 GTEX-12KS4
+##  [67] GTEX-12WS9 GTEX-12WSA GTEX-12WSB GTEX-12WSC GTEX-12WSD GTEX-12WSE
+##  [73] GTEX-12WSF GTEX-12WSG GTEX-12WSH GTEX-12WSI GTEX-12WSJ GTEX-12WSK
+##  [79] GTEX-12WSL GTEX-12WSM GTEX-12WSN GTEX-12ZZW GTEX-12ZZX GTEX-12ZZY
+##  [85] GTEX-12ZZZ GTEX-13111 GTEX-13112 GTEX-13113 GTEX-1313W GTEX-1314G
+##  [91] GTEX-131XE GTEX-131XF GTEX-131XG GTEX-131XH GTEX-131XW GTEX-131YS
+##  [97] GTEX-132AR GTEX-132NY GTEX-132Q8 GTEX-132QS GTEX-1339X GTEX-133LE
+## [103] GTEX-1399Q GTEX-1399R GTEX-1399S GTEX-1399T GTEX-1399U GTEX-139D8
+## [109] GTEX-139T4 GTEX-139T6 GTEX-139T8 GTEX-139TS GTEX-139TT GTEX-139TU
+## [115] GTEX-139UC GTEX-139UW GTEX-139YR GTEX-13CF2 GTEX-13CF3 GTEX-13CIG
+## [121] GTEX-13CZU GTEX-13CZV GTEX-13D11 GTEX-13FH7 GTEX-13FHO GTEX-13FHP
+## [127] GTEX-13FLV GTEX-13FLW GTEX-13FTW GTEX-13FTX GTEX-13FTY GTEX-13FTZ
+## [133] GTEX-13FXS GTEX-13G51 GTEX-13IVO GTEX-13JUV GTEX-13JVG GTEX-13N11
+## [139] GTEX-13N1W GTEX-13N2G GTEX-13NYB GTEX-13NYC GTEX-13NYS GTEX-13NZ8
+## [145] GTEX-13NZ9 GTEX-13NZA GTEX-13NZB GTEX-13O1R GTEX-13O21 GTEX-13O3O
+## [151] GTEX-13O3P GTEX-13O3Q GTEX-13O61 GTEX-13OVG GTEX-13OVH GTEX-13OVI
+## [157] GTEX-13OVJ GTEX-13OVK GTEX-13OVL GTEX-13OW5 GTEX-13OW6 GTEX-13OW7
+## [163] GTEX-13OW8 GTEX-13PDP GTEX-13PL6 GTEX-13PL7 GTEX-13PLJ GTEX-13PVQ
+## [169] GTEX-13PVR GTEX-13QBU GTEX-13QIC GTEX-13QJ3 GTEX-13QJC GTEX-13RTJ
+## [175] GTEX-13RTK GTEX-13RTL GTEX-13S7M GTEX-13S86 GTEX-13SLW GTEX-13SLX
+## [181] GTEX-13U4I GTEX-13VXT GTEX-13VXU GTEX-13W3W GTEX-13W46 GTEX-13X6H
+## [187] GTEX-13X6I GTEX-13X6J GTEX-13X6K GTEX-13YAN GTEX-1445S GTEX-144FL
+## [193] GTEX-144GL GTEX-144GM GTEX-144GN GTEX-144GO GTEX-145LS GTEX-145LT
+## [199] GTEX-145LU GTEX-145LV GTEX-145ME GTEX-145MF GTEX-145MG GTEX-145MH
+## [205] GTEX-145MI GTEX-145MN GTEX-145MO GTEX-146FH GTEX-146FQ GTEX-146FR
+## [211] GTEX-14753 GTEX-1477Z GTEX-147F3 GTEX-147F4 GTEX-147GR GTEX-147JS
+## [217] GTEX-148VI GTEX-148VJ GTEX-1497J GTEX-14A5H GTEX-14A5I GTEX-14A6H
+## [223] GTEX-14ABY GTEX-14AS3 GTEX-14ASI GTEX-14B4R GTEX-14BIL GTEX-14BIM
+## [229] GTEX-14BIN GTEX-14BMU GTEX-14BMV GTEX-14C38 GTEX-14C39 GTEX-14C5O
+## [235] GTEX-14DAQ GTEX-14DAR GTEX-14E1K GTEX-14E6C GTEX-14E6D GTEX-14E6E
+## [241] GTEX-14E7W GTEX-14H4A GTEX-14ICK GTEX-14ICL GTEX-14JFF GTEX-14JG1
+## [247] GTEX-14JG6 GTEX-14JIY GTEX-14LLW GTEX-14LZ3 GTEX-14PHW GTEX-14PHX
+## [253] GTEX-14PHY GTEX-14PII GTEX-14PJ2 GTEX-14PJ3 GTEX-14PJ4 GTEX-14PJ5
+## [259] GTEX-14PJ6 GTEX-14PJM GTEX-14PJN GTEX-14PJO GTEX-14PJP GTEX-14PK6
+## [265] GTEX-14PKU GTEX-14PKV GTEX-14PN3 GTEX-14PN4 GTEX-14PQA GTEX-14XAO
+## [271] GTEX-15CHC GTEX-15CHQ GTEX-15CHR GTEX-15CHS GTEX-15D1Q GTEX-15D79
+## [277] GTEX-15DCD GTEX-15DCE GTEX-15DCZ GTEX-15DDE GTEX-15DYW GTEX-15DZA
+## [283] GTEX-15EO6 GTEX-15EOM GTEX-15ER7 GTEX-15ETS GTEX-15EU6 GTEX-15F5U
+## [289] GTEX-15FZZ GTEX-15G19 GTEX-15G1A GTEX-15RIE GTEX-15RIF GTEX-15RIG
+## [295] GTEX-15RJ7 GTEX-15RJE GTEX-15SB6 GTEX-15SDE GTEX-15SHU GTEX-15SHV
+## [301] GTEX-15SHW GTEX-15SKB GTEX-15SZO GTEX-15TU5 GTEX-15UF6 GTEX-15UF7
+## [307] GTEX-15UKP GTEX-169BO GTEX-16A39 GTEX-16AAH GTEX-16BQI GTEX-16GPK
+## [313] GTEX-16MT8 GTEX-16MT9 GTEX-16MTA GTEX-16NFA GTEX-16NGA GTEX-16NPV
+## [319] GTEX-16NPX GTEX-16XZY GTEX-16XZZ GTEX-16YQH GTEX-16Z82 GTEX-178AV
+## [325] GTEX-17EUY GTEX-17EVP GTEX-17EVQ GTEX-17F96 GTEX-17F97 GTEX-17F98
+## [331] GTEX-17F9E GTEX-17F9Y GTEX-17GQL GTEX-17HG3 GTEX-17HGU GTEX-17HHE
+## [337] GTEX-17HHY GTEX-17HII GTEX-17JCI GTEX-17KNJ GTEX-17MF6 GTEX-17MFQ
+## [343] GTEX-183FY GTEX-183WM GTEX-18464 GTEX-18465 GTEX-18A66 GTEX-18A67
+## [349] GTEX-18A6Q GTEX-18A7A GTEX-18A7B GTEX-18D9A GTEX-18D9B GTEX-18D9U
+## [355] GTEX-18QFQ GTEX-19HZE GTEX-1A32A GTEX-1A3MV GTEX-1A3MW GTEX-1A3MX
+## [361] GTEX-1A8FM GTEX-1A8G6 GTEX-1A8G7 GTEX-1AMEY GTEX-1AMFI GTEX-1AX8Y
+## [367] GTEX-1AX8Z GTEX-1AX9I GTEX-1AX9J GTEX-1AX9K GTEX-1AYCT GTEX-1AYD5
+## [373] GTEX-1B8KE GTEX-1B8KZ GTEX-1B8L1 GTEX-1B8SF GTEX-1B8SG GTEX-1B932
+## [379] GTEX-1B933 GTEX-1B97I GTEX-1B97J GTEX-1B98T GTEX-1B996 GTEX-1BAJH
+## [385] GTEX-1C2JI GTEX-1C475 GTEX-1C4CL GTEX-1C64N GTEX-1C64O GTEX-1C6VQ
+## [391] GTEX-1C6VR GTEX-1C6VS GTEX-1C6WA GTEX-1CAMQ GTEX-1CAMR GTEX-1CAMS
+## [397] GTEX-1CAV2 GTEX-1CB4E GTEX-1CB4F GTEX-1CB4G GTEX-1CB4H GTEX-1CB4I
+## [403] GTEX-1CB4J GTEX-1E1VI GTEX-1E2YA GTEX-1EH9U GTEX-1EKGG GTEX-1EMGI
+## [409] GTEX-1EN7A GTEX-1EU9M GTEX-1EWIQ GTEX-1EX96 GTEX-1F48J GTEX-1F52S
+## [415] GTEX-1F5PK GTEX-1F5PL GTEX-1F6I4 GTEX-1F6IF GTEX-1F6RS GTEX-1F75A
+## [421] GTEX-1F75B GTEX-1F75I GTEX-1F75W GTEX-1F7RK GTEX-1F88F GTEX-1FIGZ
+## [427] GTEX-1GF9U GTEX-1GF9V GTEX-1GF9W GTEX-1GF9X GTEX-1GL5R GTEX-1GMR2
+## [433] GTEX-1GMR3 GTEX-1GMR8 GTEX-1GMRU GTEX-1GN1U GTEX-1GN1V GTEX-1GN1W
+## [439] GTEX-1GN2E GTEX-1GN73 GTEX-1GPI7 GTEX-1GTWX GTEX-1GZ2Q GTEX-1GZ4H
+## [445] GTEX-1GZHY GTEX-N7MS  GTEX-N7MT  GTEX-NFK9  GTEX-NL3G  GTEX-NL3H 
+## [451] GTEX-NL4W  GTEX-NPJ7  GTEX-NPJ8  GTEX-O5YT  GTEX-O5YU  GTEX-O5YV 
+## [457] GTEX-O5YW  GTEX-OHPJ  GTEX-OHPK  GTEX-OHPL  GTEX-OHPM  GTEX-OHPN 
+## [463] GTEX-OIZF  GTEX-OIZG  GTEX-OIZH  GTEX-OIZI  GTEX-OOBJ  GTEX-OOBK 
+## [469] GTEX-OXRK  GTEX-OXRL  GTEX-OXRN  GTEX-OXRO  GTEX-OXRP  GTEX-P44G 
+## [475] GTEX-P44H  GTEX-P4PP  GTEX-P4PQ  GTEX-P4QR  GTEX-P4QS  GTEX-P4QT 
+## [481] GTEX-P78B  GTEX-PLZ4  GTEX-PLZ5  GTEX-PLZ6  GTEX-POMQ  GTEX-POYW 
+## [487] GTEX-PSDG  GTEX-PVOW  GTEX-PW2O  GTEX-PWCY  GTEX-PWN1  GTEX-PWO3 
+## [493] GTEX-PWOO  GTEX-PX3G  GTEX-Q2AG  GTEX-Q2AH  GTEX-Q2AI  GTEX-Q734 
+## [499] GTEX-QCQG  GTEX-QDT8  GTEX-QDVJ  GTEX-QDVN  GTEX-QEG4  GTEX-QEG5 
+## [505] GTEX-QEL4  GTEX-QESD  GTEX-QLQ7  GTEX-QLQW  GTEX-QMR6  GTEX-QMRM 
+## [511] GTEX-QV31  GTEX-QV44  GTEX-QVJO  GTEX-QVUS  GTEX-QXCU  GTEX-R3RS 
+## [517] GTEX-R45C  GTEX-R53T  GTEX-R55C  GTEX-R55D  GTEX-R55E  GTEX-R55F 
+## [523] GTEX-R55G  GTEX-REY6  GTEX-RM2N  GTEX-RN64  GTEX-RNOR  GTEX-RTLS 
+## [529] GTEX-RU1J  GTEX-RU72  GTEX-RUSQ  GTEX-RVPU  GTEX-RVPV  GTEX-RWS6 
+## [535] GTEX-RWSA  GTEX-S32W  GTEX-S33H  GTEX-S341  GTEX-S3XE  GTEX-S4P3 
+## [541] GTEX-S4Q7  GTEX-S4UY  GTEX-S4Z8  GTEX-S7PM  GTEX-S7SE  GTEX-S7SF 
+## [547] GTEX-S95S  GTEX-SE5C  GTEX-SIU7  GTEX-SIU8  GTEX-SJXC  GTEX-SN8G 
+## [553] GTEX-SNMC  GTEX-SNOS  GTEX-SSA3  GTEX-SUCS  GTEX-T2IS  GTEX-T2YK 
+## [559] GTEX-T5JC  GTEX-T5JW  GTEX-T6MN  GTEX-T6MO  GTEX-T8EM  GTEX-TKQ1 
+## [565] GTEX-TKQ2  GTEX-TMKS  GTEX-TML8  GTEX-TMMY  GTEX-TMZS  GTEX-TSE9 
+## [571] GTEX-U3ZG  GTEX-U3ZH  GTEX-U3ZM  GTEX-U3ZN  GTEX-U412  GTEX-U4B1 
+## [577] GTEX-U8T8  GTEX-U8XE  GTEX-UJHI  GTEX-UJMC  GTEX-UPIC  GTEX-UPJH 
+## [583] GTEX-UPK5  GTEX-UTHO  GTEX-V1D1  GTEX-V955  GTEX-VJWN  GTEX-VJYA 
+## [589] GTEX-VUSG  GTEX-VUSH  GTEX-W5WG  GTEX-W5X1  GTEX-WCDI  GTEX-WEY5 
+## [595] GTEX-WFG7  GTEX-WFG8  GTEX-WFJO  GTEX-WFON  GTEX-WH7G  GTEX-WHPG 
+## [601] GTEX-WHSB  GTEX-WHSE  GTEX-WHWD  GTEX-WI4N  GTEX-WK11  GTEX-WL46 
+## [607] GTEX-WOFL  GTEX-WOFM  GTEX-WQUQ  GTEX-WRHK  GTEX-WRHU  GTEX-WVJS 
+## [613] GTEX-WVLH  GTEX-WWTW  GTEX-WWYW  GTEX-WXYG  GTEX-WY7C  GTEX-WYBS 
+## [619] GTEX-WYJK  GTEX-WYVS  GTEX-WZTO  GTEX-X15G  GTEX-X261  GTEX-X3Y1 
+## [625] GTEX-X4EO  GTEX-X4EP  GTEX-X4LF  GTEX-X4XX  GTEX-X4XY  GTEX-X585 
+## [631] GTEX-X5EB  GTEX-X62O  GTEX-X638  GTEX-X88G  GTEX-X8HC  GTEX-XAJ8 
+## [637] GTEX-XBEC  GTEX-XBED  GTEX-XBEW  GTEX-XGQ4  GTEX-XK95  GTEX-XLM4 
+## [643] GTEX-XMD1  GTEX-XMD2  GTEX-XMD3  GTEX-XMK1  GTEX-XOT4  GTEX-XOTO 
+## [649] GTEX-XPT6  GTEX-XPVG  GTEX-XQ3S  GTEX-XQ8I  GTEX-XUJ4  GTEX-XUW1 
+## [655] GTEX-XUYS  GTEX-XUZC  GTEX-XV7Q  GTEX-XXEK  GTEX-XYKS  GTEX-Y111 
+## [661] GTEX-Y114  GTEX-Y3I4  GTEX-Y3IK  GTEX-Y5LM  GTEX-Y5V5  GTEX-Y5V6 
+## [667] GTEX-Y8DK  GTEX-Y8E4  GTEX-Y8E5  GTEX-Y8LW  GTEX-Y9LG  GTEX-YB5E 
+## [673] GTEX-YB5K  GTEX-YBZK  GTEX-YEC3  GTEX-YEC4  GTEX-YECK  GTEX-YF7O 
+## [679] GTEX-YFC4  GTEX-YFCO  GTEX-YJ89  GTEX-YJ8A  GTEX-YJ8O  GTEX-Z93S 
+## [685] GTEX-Z93T  GTEX-Z9EW  GTEX-ZA64  GTEX-ZAB4  GTEX-ZAB5  GTEX-ZAJG 
+## [691] GTEX-ZAK1  GTEX-ZAKK  GTEX-ZC5H  GTEX-ZDTS  GTEX-ZDTT  GTEX-ZDXO 
+## [697] GTEX-ZDYS  GTEX-ZE7O  GTEX-ZE9C  GTEX-ZEX8  GTEX-ZF28  GTEX-ZF29 
+## [703] GTEX-ZF2S  GTEX-ZF3C  GTEX-ZG7Y  GTEX-ZGAY  GTEX-ZLFU  GTEX-ZLV1 
+## [709] GTEX-ZLWG  GTEX-ZP4G  GTEX-ZPCL  GTEX-ZPIC  GTEX-ZPU1  GTEX-ZQG8 
+## [715] GTEX-ZQUD  GTEX-ZT9W  GTEX-ZT9X  GTEX-ZTPG  GTEX-ZTSS  GTEX-ZTTD 
+## [721] GTEX-ZTX8  GTEX-ZU9S  GTEX-ZUA1  GTEX-ZV68  GTEX-ZV6S  GTEX-ZV7C 
+## [727] GTEX-ZVE1  GTEX-ZVE2  GTEX-ZVP2  GTEX-ZVT2  GTEX-ZVT3  GTEX-ZVT4 
+## [733] GTEX-ZVTK  GTEX-ZVZO  GTEX-ZVZP  GTEX-ZVZQ  GTEX-ZWKS  GTEX-ZXES 
+## [739] GTEX-ZXG5  GTEX-ZY6K  GTEX-ZYFC  GTEX-ZYFD  GTEX-ZYFG  GTEX-ZYT6 
+## [745] GTEX-ZYVF  GTEX-ZYW4  GTEX-ZYWO  GTEX-ZYY3  GTEX-ZZ64  GTEX-ZZPT 
+## [751] GTEX-ZZPU  K-562     
+## 752 Levels: GTEX-1117F GTEX-111CU GTEX-111FC GTEX-111VG ... K-562</code></pre>
+<p>Reading in the person by tissue by genes expression data</p>
+<pre class="r"><code>person_tissue_genes &lt;- get(load(&quot;../output/person_tissue_genes_voom.rda&quot;))</code></pre>
+<p>The sample ids from the expression person tissue and gene.</p>
+<pre class="r"><code>samp_ids &lt;- rownames(person_tissue_genes)</code></pre>
+<p>Filter out these sample IDs from the metadata.</p>
+<pre class="r"><code>sample_attributes_ordered &lt;- sample_attributes[match(samp_ids, sample_attributes$SUBJID),];
+save(sample_attributes_ordered, file=&quot;../output/sample_attributes_filtered.rda&quot;)</code></pre>
+<pre class="r"><code>sample_attributes_filtered &lt;- get(load(&quot;../output/sample_attributes_filtered.rda&quot;))</code></pre>
+<pre class="r"><code>sample_attributes_filtered[1,]</code></pre>
+<pre><code>##       SUBJID            COHORT SEX AGE RACE ETHNCTY HGHT HGHTU WGHT WGHTU
+## 2 GTEX-111CU Organ Donor (OPO)   1  57    3       0   70    in  234    lb
+##     BMI INCEXC                  TRISCH TRISCHD                  TRCHSTIN
+## 2 33.57   True 0 hour(s), 43 minute(s)      43 -2 hour(s), -13 minute(s)
+##   TRCHSTIND                TRCCLMP TRCCLMPD      TRORGNS TRAMP TRCRTMP
+## 2      -133 0 hour(s), 0 minute(s)        0 Liver, Heart           101
+##   TRCRTMPU TRCRTMPL     TRTPTREF TRVNTSR TRDNISCH
+## 2        F  unknown Actual Death               67
+##                    DTHPRNINT    DTHTPTREF DTHATPSY DTHRFG DTHCERT DTHVNT
+## 2 -21 hour(s), -41 minute(s) Actual Death        0      0       1      1
+##       DTHFUCOD DTHHRDY     DTHCOD DTHFUCODDU DTHFUCODD DTHCODDU DTHCODD
+## 2 Blunt Injury       0 Head Trama       hour        45     hour      45
+##   DTHLUCODDU DTHLUCODD DTHLUCOD  DTHMNNR DTHRFGDU DTHRFGD DTHDTRMN
+## 2       hour        45      MVA Accident     hour      NA         
+##              DTHPLCE DTHVNTDU DTHVNTD DTHWTNS DTHCLS DTHTYP DTHCAT
+## 2 Hospital inpatient     hour      45       1     NA     NA     NA
+##   DTHICD10 LBCMVTAB LBEBVGAB LBEBVMAB LBHBCABM LBHBCABT LBHBSAB LBHBSAG
+## 2       NA        1        1        0       97        0      97       0
+##   LBHCV1NT LBHBHCVAB LBHIV1NT LBHIVAB LBHIVO LBPRRVDRL LBRPR MHABNWBC
+## 2        0         0        0       0      0        97     0        1
+##   MHALS MHALZDMT MHALZHMR MHARTHTS MHASCITES MHASTHMA MHBCTINF MHBLDDND
+## 2     0        0        0        0         0        0        0        0
+##   MHBLDDNDR MHBLDOCNT MHCANCER5 MHCANCERC MHCANCERNM MHCLLULTS MHCLRD
+## 2                   0         0         0          0         0      0
+##   MHCOCAINE5 MHCOPD MHCOUGHU MHCVD MHDLYSIS MHDMNTIA MHDPRSSN MHDTND72H
+## 2          0      0        0     0        0        0        0         0
+##   MHENCEPHA MHEURO5 MHFLU MHFNGINF MHFVRU        MHGENCMT MHGNRR12M
+## 2         0       0     0        0      0 #12: WBC = 14.6         0
+##   MHHEPBCT MHHEPCCT MHHEROIN MHHGH MHHIVCT MHHIVNT MHHMPHLIA MHHMPHLIAB
+## 2        0        0        0     0       0       0         0          0
+##   MHHRTATT MHHRTDIS MHHRTDISB MHHTN MHINFLNE MHIVDRG5 MHJAKOB MHLAPTHU
+## 2        0        0         0     0        0        0       0        0
+##   MHLUPUS MHLVRDIS MHMENINA MHMS MHMSXWMA MHMSXWMB MHNEPH MHNGHTSWT
+## 2       0        0        0    0        0        0      0         0
+##   MHNPHYS4W MHNRTHEUR MHOPNWND MHOPPINF MHORGNTP MHOSTMYLTS MHPLLABS
+## 2         0         0        0        0        0          0        0
+##   MHPNMIAB MHPNMNIA MHPRCNP MHPRKNSN MHPSBLDCLT MHRA MHRBSANML MHREYES
+## 2        0        0       0        0          0    0         0       0
+##   MHRNLFLR MHSARS MHSCHZ MHSCLRDRM MHSDRGABS MHSEPSIS MHSKNSPT MHSMLPXCT
+## 2        0      0      0         0         0        0        0         0
+##   MHSMLPXVC         MHSRC MHSRCDSS MHSRGHM MHSTD MHSTRDLT MHSUBABSA
+## 2         0 Family Report        0       0     0        0         0
+##   MHSUBABSB MHSXMDA MHSXMDB MHSYPH12M MHSZRSU MHT1D MHT2D MHTBHX MHTEMPU
+## 2         0       0       0         0       0     0     0      0       0
+##   MHTTCMT MHTTOO12M MHTTOONP MHTXCEXP MHUK8096 MHUREMIA MHWKNSSU MHWNVCT
+## 2                 0        0        0        0        0        0       0
+##   MHWNVHX MHWTLSUA MHWTLSUB DTHSEASON DTHTIME
+## 2       0        0        0    Spring   08:01</code></pre>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

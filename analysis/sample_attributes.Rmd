@@ -1,0 +1,88 @@
+---
+title: "Sample attributes in GTEx"
+author: "Kushal K Dey"
+date: "5/30/2017"
+output: html_document
+---
+
+In this script, we take a look into the sample attributes provided by GTEx for the different samples.
+
+```{r echo = TRUE, eval = FALSE}
+person_label=read.table("../data/GTEX_V6/person_identifier_labels_with_numbers.txt");
+samples_id <- read.table(file = "../data/GTEX_V6/samples_id.txt")[,1]
+
+samples_person <- sapply(samples_id, function(x) return(paste0(strsplit(as.character(x), "-")[[1]][1:2], collapse ="-")))
+tissue_labels <- read.table(file = "../data/GTEX_V6/samples_id.txt")[,3]
+
+xtabs(~ samples_person + tissue_labels)
+
+unique_persons <- unique(samples_person)
+unique_tissues <- unique(tissue_labels)
+
+library(data.table)
+data <- data.frame(fread("../data/GTEX_V6/cis_gene_expression.txt"))
+matdata <- (data[,-c(1,2)])
+voom_matdata <- t(limma::voom(matdata)$E)
+
+gene_names <- as.character(read.table(file = "../data/GTEX_V6/gene_names_GTEX_V6.txt")[,1])
+gene_names_1 <- as.character(sapply(gene_names, function(x) return(strsplit(x, "[.]")[[1]][1])))
+
+mat <- matrix(0, length(unique_persons), length(unique_tissues))
+
+
+person_tissue_genes <- array(NA, c(length(unique_persons), length(unique_tissues), dim(voom_matdata)[2]))
+
+for(u in 1:length(unique_persons)){
+    index_samp <- which(samples_person == unique_persons[u])
+    tissue_lab_samp <- tissue_labels[index_samp]
+    person_tissue_genes[u, match(tissue_lab_samp, unique_tissues), ] = voom_matdata[index_samp, ]
+    cat("We are at person : ", u, "\n")
+}
+
+dimnames(person_tissue_genes)[[1]] <- unique_persons
+dimnames(person_tissue_genes)[[2]] <- unique_tissues
+dimnames(person_tissue_genes)[[3]] <- gene_names_1
+
+
+save(person_tissue_genes, file = "../output/person_tissue_genes_voom.rda")
+
+```
+
+
+```{r}
+sample_attributes <- read.delim("../data/GTEX_V6/GTEx_Analysis_2016-01-15_v7_SubjectPhenotypesDS.txt")
+```
+
+```{r}
+sex_attr <- sample_attributes$SEX
+age_attr <- sample_attributes$AGE
+sample_attributes$SUBJID
+```
+
+Reading in the person by tissue by genes expression data 
+
+```{r}
+person_tissue_genes <- get(load("../output/person_tissue_genes_voom.rda"))
+```
+
+The sample ids from the expression person tissue and gene.
+
+```{r}
+samp_ids <- rownames(person_tissue_genes)
+```
+
+Filter out these sample IDs from the metadata.
+
+```{r}
+sample_attributes_ordered <- sample_attributes[match(samp_ids, sample_attributes$SUBJID),];
+save(sample_attributes_ordered, file="../output/sample_attributes_filtered.rda")
+```
+
+```{r}
+sample_attributes_filtered <- get(load("../output/sample_attributes_filtered.rda"))
+```
+
+```{r}
+sample_attributes_filtered[1,]
+```
+
