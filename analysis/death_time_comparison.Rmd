@@ -1,0 +1,212 @@
+---
+title: "Death time comparison study"
+author: "Kushal K Dey"
+date: "6/4/2017"
+output: html_document
+---
+
+## Death time data reading and t-score calculation
+
+```{r}
+betahat_sebetahat <- get(load("../output/death_time_cor_nonmash.rda"))
+sample_attributes <- get(load("../output/sample_attributes_filtered.rda"))
+person_tissue_genes <- get(load("../output/person_tissue_genes_voom.rda"))
+```
+
+```{r}
+betahat_mat <- betahat_sebetahat$betahat
+sebetahat_mat <- betahat_sebetahat$sebetahat
+pval_mat <- betahat_sebetahat$pval
+rsquare_mat <- betahat_sebetahat$rsquare
+```
+
+```{r}
+tmat <- betahat_mat/sebetahat_mat
+abs_tmat <- abs(tmat)
+column_sum_1 <- apply(abs_tmat, 2, function(x) return(quantile(x, 0.7)))
+```
+
+## Pathway analysis of seemingly significant genes
+
+```{r}
+names <- dimnames(person_tissue_genes)[[3]][which(column_sum_1 > 1.8)]
+write.table(names, file = "../utilities/circadian_genes.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+ensembl = biomaRt::useMart("ensembl", dataset="hsapiens_gene_ensembl", host="www.ensembl.org")
+res = biomaRt::getBM(attributes = c("chromosome_name", "ensembl_gene_id", "external_gene_name", "description"), filters = c("ensembl_gene_id"), values = names,  
+mart = ensembl)
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out[[4]], out[[5]])
+```
+
+```{r}
+names
+```
+
+
+The pathway data we read.
+
+```{r}
+circadian <- read.delim("../utilities/circadian_pathways.tab")
+cbind.data.frame(circadian$q.value, circadian$pathway, circadian$members_input_overlap_geneids)
+```
+
+```{r fig.height = 10}
+pathway2 <- read.delim("../utilities/circadian_pathways.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 1, cexCol = 1, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+## Pathway analysis of genes above quantile threshold 
+
+```{r}
+column_sum_1 <- apply(abs_tmat, 2, function(x) return(quantile(x, 0.7)))
+names <- dimnames(person_tissue_genes)[[3]][order(column_sum_1, decreasing = TRUE)[1:100]]
+write.table(names, file = "../utilities/circadian_genes_2.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+ensembl = biomaRt::useMart("ensembl", dataset="hsapiens_gene_ensembl", host="www.ensembl.org")
+res = biomaRt::getBM(attributes = c("chromosome_name", "ensembl_gene_id", "external_gene_name", "description"), filters = c("ensembl_gene_id"), values = names,  
+mart = ensembl)
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+```
+
+```{r}
+names
+```
+
+
+```{r}
+circadian <- read.delim("../utilities/circadian_pathways_2.tab")
+cbind.data.frame(circadian$q.value, circadian$pathway, circadian$members_input_overlap_geneids)
+```
+
+The pathway heatmap in this case 
+
+```{r fig.height = 10}
+pathway2 <- read.delim("../utilities/circadian_pathways_2.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 1, cexCol = 1, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+## t-score analysis
+
+The plots of the t-scores  for some of the genes which we know are part of the Circadian rthym.
+
+```{r}
+pathways <- read.delim("../utilities/CPDB_pathways_genes.tab")
+pathway_names <- pathways[,1]
+grep("Circadian", pathway_names)
+```
+
+```{r}
+circadian_pathways <- pathways[grep("Circadian", pathway_names),]
+gene_ids <- circadian_pathways[,4]
+circadian_rhythm_genes_pre <- gene_ids[2]
+circadian_clock_genes_pre <- gene_ids[3]
+```
+
+```{r}
+circadian_clock_genes <- strsplit(as.character(circadian_clock_genes_pre), "[,]")[[1]]
+circadian_rhythm_genes <- strsplit(as.character(circadian_rhythm_genes_pre), "[,]")[[1]]
+```
+
+### t-score plots for circadian clock genes
+
+Plots of the t-scores for the circadian clock genes and the circadian rthym genes.
+
+```{r}
+clock_indices <- match(circadian_clock_genes, dimnames(person_tissue_genes)[[3]])
+clock_indices <- clock_indices[!is.na(clock_indices)]
+```
+
+```{r}
+par(mfrow=c(3,3))
+for(j in 1:length(clock_indices)){
+  plot(tmat[,clock_indices[j]], pch=20, cex=1, ylim=c(-3, 3),
+       ylab =paste0(dimnames(person_tissue_genes)[[3]][clock_indices[j]]))
+  abline(0,0)
+}
+```
+
+### t-score plots for circadian rhythm genes
+
+```{r}
+rhythm_indices <- match(circadian_rhythm_genes, dimnames(person_tissue_genes)[[3]])
+rhythm_indices <- rhythm_indices[!is.na(rhythm_indices)]
+```
+
+```{r}
+par(mfrow=c(3,3))
+for(j in 1:length(rhythm_indices)){
+  plot(tmat[,rhythm_indices[j]], pch=20, cex=1, ylim=c(-3, 3),
+       ylab =paste0(dimnames(person_tissue_genes)[[3]][rhythm_indices[j]]))
+  abline(0,0)
+}
+```
+
+### t-score plots for top quantile genes
+
+The top t-score values we checked for out pathway analysis, we see how the scatter plots
+look like for them.
+
+```{r}
+our_indices <- order(column_sum_1, decreasing = TRUE)[1:25]
+dimnames(person_tissue_genes)[[3]][our_indices]
+```
+
+```{r}
+par(mfrow=c(3,3))
+for(j in 1:length(our_indices)){
+  plot(tmat[,our_indices[j]], pch=20, cex=1, ylim=c(-3, 3),
+       ylab =paste0(dimnames(person_tissue_genes)[[3]][our_indices[j]]))
+  abline(0,0)
+}
+```
+
+### t-score plots for random set of genes
+
+How does a random set of 25 genes look like in its patterns across the tissues.
+
+```{r}
+random_indices <- sample(1:16069, 25, replace=FALSE)
+par(mfrow=c(3,3))
+for(j in 1:length(random_indices)){
+  plot(tmat[,random_indices[j]], pch=20, cex=1, ylim=c(-3, 3),
+       ylab =paste0(dimnames(person_tissue_genes)[[3]][random_indices[j]]))
+  abline(0,0)
+}
+```
