@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Kushal K Dey" />
+
+
+<title>Nicotine study genes vs samples</title>
+
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="cosmo.css" type="text/css" />
+
+</head>
+
+<body>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
+    <link href="../docs/cosmo.css" rel="stylesheet">
+    <link href="../docs/cosmo.min.css" rel="stylesheet">
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../docs/bootstrap/js/bootstrap.min.js"></script>
+
+<body>
+
+<div class = "nav" align = "middle">
+<div class= "p1"></div>
+<p>
+  <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "workflow.html">WORKFLOW</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "about.html">METHODS</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "license.html">LICENSE</a> 
+   &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
+ </p>
+</div>  
+<!-- <div class="nav">
+  <a href="index.html">Home page</a> &nbsp &nbsp
+  <a href="musings.html">Musings</a> &nbsp &nbsp
+  <a href="town.html">My town</a> &nbsp &nbsp
+  <a href="links.html">Links</a>
+</div> -->
+
+<!-- Main content -->
+</body>
+</html>
+
+
+<h1 class="title toc-ignore">Nicotine study genes vs samples</h1>
+<h4 class="author"><em>Kushal K Dey</em></h4>
+<h4 class="date"><em>6/4/2017</em></h4>
+
+
+
+<p>Since we do not have information of the smoking status of the individuals in the GTEx analysis, we try to see how the genes which we know are related to nicotine content of the body behave in terms of expression across the samples for the different tissues.</p>
+<pre class="r"><code>betahat_sebetahat &lt;- get(load(&quot;../output/death_time_cor_nonmash.rda&quot;))
+sample_attributes &lt;- get(load(&quot;../output/sample_attributes_filtered.rda&quot;))
+person_tissue_genes &lt;- get(load(&quot;../output/person_tissue_genes_voom.rda&quot;))</code></pre>
+<p>The nicotine pathway genes</p>
+<pre class="r"><code>pathways &lt;- read.delim(&quot;../utilities/CPDB_pathways_genes.tab&quot;)
+pathway_names &lt;- pathways[,1]
+grep(&quot;Nicotine&quot;,pathway_names)</code></pre>
+<pre><code>## [1]  242  274  341  401  674  691 1154 1156 1157</code></pre>
+<pre class="r"><code>nicotine_pathways &lt;- pathways[grep(&quot;Nicotine&quot;, pathway_names),]
+nicotine_genes &lt;- strsplit(as.character(nicotine_pathways[3,4]), &quot;[,]&quot;)[[1]]</code></pre>
+<pre class="r"><code>dimnames(person_tissue_genes)[[2]]</code></pre>
+<pre><code>##  [1] &quot;Adipose - Subcutaneous&quot;                   
+##  [2] &quot;Adipose - Visceral (Omentum)&quot;             
+##  [3] &quot;Adrenal Gland&quot;                            
+##  [4] &quot;Artery - Aorta&quot;                           
+##  [5] &quot;Artery - Coronary&quot;                        
+##  [6] &quot;Artery - Tibial&quot;                          
+##  [7] &quot;Bladder&quot;                                  
+##  [8] &quot;Brain - Amygdala&quot;                         
+##  [9] &quot;Brain - Anterior cingulate cortex (BA24)&quot; 
+## [10] &quot;Brain - Caudate (basal ganglia)&quot;          
+## [11] &quot;Brain - Cerebellar Hemisphere&quot;            
+## [12] &quot;Brain - Cerebellum&quot;                       
+## [13] &quot;Brain - Cortex&quot;                           
+## [14] &quot;Brain - Frontal Cortex (BA9)&quot;             
+## [15] &quot;Brain - Hippocampus&quot;                      
+## [16] &quot;Brain - Hypothalamus&quot;                     
+## [17] &quot;Brain - Nucleus accumbens (basal ganglia)&quot;
+## [18] &quot;Brain - Putamen (basal ganglia)&quot;          
+## [19] &quot;Brain - Spinal cord (cervical c-1)&quot;       
+## [20] &quot;Brain - Substantia nigra&quot;                 
+## [21] &quot;Breast - Mammary Tissue&quot;                  
+## [22] &quot;Cells - EBV-transformed lymphocytes&quot;      
+## [23] &quot;Cells - Transformed fibroblasts&quot;          
+## [24] &quot;Cervix - Ectocervix&quot;                      
+## [25] &quot;Cervix - Endocervix&quot;                      
+## [26] &quot;Colon - Sigmoid&quot;                          
+## [27] &quot;Colon - Transverse&quot;                       
+## [28] &quot;Esophagus - Gastroesophageal Junction&quot;    
+## [29] &quot;Esophagus - Mucosa&quot;                       
+## [30] &quot;Esophagus - Muscularis&quot;                   
+## [31] &quot;Fallopian Tube&quot;                           
+## [32] &quot;Heart - Atrial Appendage&quot;                 
+## [33] &quot;Heart - Left Ventricle&quot;                   
+## [34] &quot;Kidney - Cortex&quot;                          
+## [35] &quot;Liver&quot;                                    
+## [36] &quot;Lung&quot;                                     
+## [37] &quot;Minor Salivary Gland&quot;                     
+## [38] &quot;Muscle - Skeletal&quot;                        
+## [39] &quot;Nerve - Tibial&quot;                           
+## [40] &quot;Ovary&quot;                                    
+## [41] &quot;Pancreas&quot;                                 
+## [42] &quot;Pituitary&quot;                                
+## [43] &quot;Prostate&quot;                                 
+## [44] &quot;Skin - Not Sun Exposed (Suprapubic)&quot;      
+## [45] &quot;Skin - Sun Exposed (Lower leg)&quot;           
+## [46] &quot;Small Intestine - Terminal Ileum&quot;         
+## [47] &quot;Spleen&quot;                                   
+## [48] &quot;Stomach&quot;                                  
+## [49] &quot;Testis&quot;                                   
+## [50] &quot;Thyroid&quot;                                  
+## [51] &quot;Uterus&quot;                                   
+## [52] &quot;Vagina&quot;                                   
+## [53] &quot;Whole Blood&quot;</code></pre>
+<pre class="r"><code>indices &lt;- match(nicotine_genes, dimnames(person_tissue_genes)[[3]])
+indices &lt;- indices[!is.na(indices)]</code></pre>
+<pre class="r"><code>par(mfrow = c(3,3))
+j &lt;- 9
+plot(person_tissue_genes[,36,indices[j]], ylab = &quot;lung&quot;)
+plot(person_tissue_genes[,50,indices[j]], ylab = &quot;thyroid&quot;)
+plot(person_tissue_genes[,53,indices[j]], ylab = &quot;blood&quot;)
+plot(person_tissue_genes[,12,indices[j]], ylab = &quot;cerebellum&quot;)
+plot(person_tissue_genes[,1,indices[j]], ylab = &quot;adipose&quot;)
+plot(person_tissue_genes[,33,indices[j]], ylab = &quot;heart&quot;)
+plot(person_tissue_genes[,35,indices[j]], ylab = &quot;liver&quot;)
+plot(person_tissue_genes[,34,indices[j]], ylab = &quot;kidney&quot;)</code></pre>
+<p><img src="nicotine_study_files/figure-html/unnamed-chunk-5-1.png" width="672" /> We do not see any distinct clusters in the expression patterns of Nicotine pathway genes, which implies that most likely the nicotine information is not something that can create clusters among the samples.</p>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
