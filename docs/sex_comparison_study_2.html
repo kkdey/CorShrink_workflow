@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Kushal K Dey" />
+
+
+<title>Sex comparison study part 2</title>
+
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="cosmo.css" type="text/css" />
+
+</head>
+
+<body>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
+    <link href="../docs/cosmo.css" rel="stylesheet">
+    <link href="../docs/cosmo.min.css" rel="stylesheet">
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../docs/bootstrap/js/bootstrap.min.js"></script>
+
+<body>
+
+<div class = "nav" align = "middle">
+<div class= "p1"></div>
+<p>
+  <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "workflow.html">WORKFLOW</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "about.html">METHODS</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "license.html">LICENSE</a> 
+   &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
+ </p>
+</div>  
+<!-- <div class="nav">
+  <a href="index.html">Home page</a> &nbsp &nbsp
+  <a href="musings.html">Musings</a> &nbsp &nbsp
+  <a href="town.html">My town</a> &nbsp &nbsp
+  <a href="links.html">Links</a>
+</div> -->
+
+<!-- Main content -->
+</body>
+</html>
+
+
+<h1 class="title toc-ignore">Sex comparison study part 2</h1>
+<h4 class="author"><em>Kushal K Dey</em></h4>
+<h4 class="date"><em>6/5/2017</em></h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#positive-and-negative-systemic-genes-by-t-score">Positive and Negative systemic genes (by t-score)</a></li>
+<li><a href="#positive-and-negative-systemic-genes-by-beta-score">Positive and Negative systemic genes (by beta-score)</a></li>
+<li><a href="#sperm-related-genes-scatter-plots">Sperm related genes (scatter plots)</a></li>
+<li><a href="#ensg00000258484">ENSG00000258484</a></li>
+<li><a href="#ensg00000131759">ENSG00000131759</a></li>
+<li><a href="#ensg00000105146">ENSG00000105146</a></li>
+</ul>
+</div>
+
+<p>In this script, we perform additional experiments on the sex specific systemic behavior of genes.</p>
+<div id="positive-and-negative-systemic-genes-by-t-score" class="section level2">
+<h2>Positive and Negative systemic genes (by t-score)</h2>
+<pre class="r"><code>betahat_sebetahat &lt;- get(load(&quot;../output/sex_cor_nonmash.rda&quot;))
+sample_attributes &lt;- get(load(&quot;../output/sample_attributes_filtered.rda&quot;))
+person_tissue_genes &lt;- get(load(&quot;../output/person_tissue_genes_voom.rda&quot;))</code></pre>
+<pre class="r"><code>betahat_mat &lt;- betahat_sebetahat$betahat
+sebetahat_mat &lt;- betahat_sebetahat$sebetahat
+pval_mat &lt;- betahat_sebetahat$pval
+rsquare_mat &lt;- betahat_sebetahat$rsquare</code></pre>
+<pre class="r"><code>tmat &lt;- betahat_mat/sebetahat_mat
+abs_tmat &lt;- abs(tmat)
+column_sum_1 &lt;- apply(tmat, 2, function(x) return(quantile(x, 0.7)))
+sort(column_sum_1, decreasing = FALSE)[1:10]</code></pre>
+<pre><code>##  [1] -4.7290592 -3.4689484 -2.8106260 -2.6650564 -1.7919179 -1.0673274
+##  [7] -0.8577943 -0.8467721 -0.8409380 -0.6923718</code></pre>
+<pre class="r"><code>dimnames(person_tissue_genes)[[3]][order(column_sum_1, decreasing = FALSE)[1:10]]</code></pre>
+<pre><code>##  [1] &quot;ENSG00000225490&quot; &quot;ENSG00000149531&quot; &quot;ENSG00000258484&quot;
+##  [4] &quot;ENSG00000080007&quot; &quot;ENSG00000247516&quot; &quot;ENSG00000175701&quot;
+##  [7] &quot;ENSG00000143429&quot; &quot;ENSG00000105146&quot; &quot;ENSG00000186281&quot;
+## [10] &quot;ENSG00000215548&quot;</code></pre>
+<pre class="r"><code>column_sum_2 &lt;- apply(tmat, 2, function(x) return(quantile(x, 0.7)))
+sort(column_sum_2, decreasing = TRUE)[1:20]</code></pre>
+<pre><code>##  [1] 8.379400 5.890080 4.165169 2.568635 2.412166 2.191699 2.105597
+##  [8] 2.043210 2.040744 2.038594 1.957951 1.955155 1.926796 1.908559
+## [15] 1.880655 1.870780 1.861101 1.839871 1.832399 1.824629</code></pre>
+<pre class="r"><code>dimnames(person_tissue_genes)[[3]][order(column_sum_2, decreasing = TRUE)[1:10]]</code></pre>
+<pre><code>##  [1] &quot;ENSG00000236698&quot; &quot;ENSG00000180574&quot; &quot;ENSG00000172460&quot;
+##  [4] &quot;ENSG00000204837&quot; &quot;ENSG00000198848&quot; &quot;ENSG00000224881&quot;
+##  [7] &quot;ENSG00000115255&quot; &quot;ENSG00000223547&quot; &quot;ENSG00000185304&quot;
+## [10] &quot;ENSG00000165985&quot;</code></pre>
+<pre class="r"><code>names &lt;- dimnames(person_tissue_genes)[[3]][order(column_sum_1, decreasing = FALSE)[1:10]]
+write.table(names, file = &quot;../utilities/sex_negative_genes.txt&quot;, quote = FALSE, row.names = FALSE, col.names = FALSE)</code></pre>
+<pre class="r"><code>out &lt;- mygene::queryMany(names,  scopes=&quot;ensembl.gene&quot;, fields=c(&quot;name&quot;, &quot;summary&quot;), species=&quot;human&quot;);</code></pre>
+<pre><code>## Finished
+## Pass returnall=TRUE to return lists of duplicate or missing query terms.</code></pre>
+<pre class="r"><code>cbind.data.frame(out$name, out$summary)</code></pre>
+<pre><code>##                                                 out$name
+## 1                                                   &lt;NA&gt;
+## 2         FSHD region gene 1 family member B, pseudogene
+## 3                     sperm equatorial segment protein 1
+## 4                                   DEAD-box helicase 43
+## 5                                      MIR4458 host gene
+## 6             long intergenic non-protein coding RNA 116
+## 7               lymphocyte-specific protein 1 pseudogene
+## 8                                        aurora kinase C
+## 9  glycerol-3-phosphate acyltransferase 2, mitochondrial
+## 10        FSHD region gene 1 family member J, pseudogene
+##                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     out$summary
+## 1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          &lt;NA&gt;
+## 2                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          &lt;NA&gt;
+## 3                                                                                                                                                                                                                                                                                                                                                                                                                          The encoded protein is a human alloantigen involved in sperm-egg binding and fusion.
+## 4                                                                                                                                                                                                                                                                                                                                                                              The protein encoded by this gene is an ATP-dependent RNA helicase in the DEAD-box family and displays tumor-specific expression.
+## 5                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          &lt;NA&gt;
+## 6                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          &lt;NA&gt;
+## 7                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          &lt;NA&gt;
+## 8  This gene encodes a member of the Aurora subfamily of serine/threonine protein kinases. The encoded protein is a chromosomal passenger protein that forms complexes with Aurora-B and inner centromere proteins and may play a role in organizing microtubules in relation to centrosome/spindle function during mitosis. This gene is overexpressed in several cancer cell lines, suggesting an involvement in oncogenic signal transduction. Alternative splicing results in multiple transcript variants.
+## 9                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          &lt;NA&gt;
+## 10                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         &lt;NA&gt;</code></pre>
+<pre class="r"><code>sex_paths &lt;- read.delim(&quot;../utilities/sex_pathway_negative_1.tab&quot;)
+cbind.data.frame(sex_paths$q.value, sex_paths$pathway, sex_paths$members_input_overlap_geneids)</code></pre>
+<pre><code>##    sex_paths$q.value
+## 1         0.03804023
+## 2         0.03804023
+## 3         0.03804023
+## 4         0.03804023
+## 5         0.03804023
+## 6         0.03804023
+## 7         0.03804023
+## 8         0.03804023
+## 9         0.03804023
+## 10        0.03804023
+## 11        0.03804023
+## 12        0.04163397
+## 13        0.04163397
+## 14        0.04163397
+## 15        0.04163397
+## 16        0.04163397
+## 17        0.04222630
+## 18        0.04222630
+## 19        0.04222630
+## 20        0.04222630
+## 21        0.04222630
+##                                                        sex_paths$pathway
+## 1                               er associated degradation (erad) pathway
+## 2                                       Signaling events mediated by PRL
+## 3         Transcriptional misregulation in cancer - Homo sapiens (human)
+## 4                                                         IL-7 signaling
+## 5                                                          EPO signaling
+## 6                 N-glycan antennae elongation in the medial/trans-Golgi
+## 7                                                                   VEGF
+## 8                                           triacylglycerol biosynthesis
+## 9                                                             Metabolism
+## 10                                            p38 MAPK signaling pathway
+## 11                                                          IGF1 pathway
+## 12                      Th17 cell differentiation - Homo sapiens (human)
+## 13           Leukocyte transendothelial migration - Homo sapiens (human)
+## 14 Intracellular Signalling Through Adenosine Receptor A2a and Adenosine
+## 15 Intracellular Signalling Through Adenosine Receptor A2b and Adenosine
+## 16                                  Toxoplasmosis - Homo sapiens (human)
+## 17                                              Metabolism of polyamines
+## 18                                                 N-Glycan biosynthesis
+## 19                           Plasma membrane estrogen receptor signaling
+## 20                                     Sphingolipid de novo biosynthesis
+## 21                        Angiopoietin Like Protein 8 Regulatory Pathway
+##                                                   sex_paths$members_input_overlap_geneids
+## 1                                                                              4123; 4122
+## 2                                                                             9564; 11156
+## 3                                                                  7849; 7709; 5914; 5546
+## 4                                                                   572; 5600; 4294; 1455
+## 5                                                                   572; 5600; 4294; 1455
+## 6                                                                              8704; 4122
+## 7                                                                   572; 5600; 4294; 1455
+## 8                                                                            150763; 8612
+## 9  6133; 9394; 150763; 8704; 5443; 1455; 4946; 4833; 57491; 4123; 8612; 9651; 2593; 57128
+## 10                                                                             4294; 5600
+## 11                                                                              9564; 572
+## 12                                                                       3127; 5914; 5600
+## 13                                                                       9564; 7070; 5600
+## 14                                                                              5600; 572
+## 15                                                                              5600; 572
+## 16                                                                        3127; 572; 5600
+## 17                                                                             2593; 4946
+## 18                                                                             8704; 4122
+## 19                                                                             9564; 5600
+## 20                                                                             8612; 1455
+## 21                                                                      10211; 5600; 4294</code></pre>
+<pre class="r"><code>pathway2 &lt;- read.delim(&quot;../utilities/sex_pathway_negative_1.tab&quot;)
+if(length(which(pathway2$q.value &lt; 0.05)) &gt; 2){
+  pathway2 &lt;- pathway2[which(pathway2$q.value &lt; 0.05),]
+}
+maxpath = 75
+pathway &lt;- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes &lt;- pathway$members_input_overlap
+pathway_list_genes &lt;- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), &quot;; &quot;)))
+all_genes &lt;- Reduce(union, pathway_list_genes)
+pathway_mat &lt;- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] &lt;- 1
+}
+
+pathway_bimat &lt;- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop &lt;- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 1, cexCol = 1, col = col, zlim = c(-1,1),
+        scale = &quot;none&quot;, margins = c(5, 5))</code></pre>
+<p><img src="sex_comparison_study_2_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<pre class="r"><code>names &lt;- dimnames(person_tissue_genes)[[3]][order(column_sum_1, decreasing = TRUE)[1:25]]
+write.table(names, file = &quot;../utilities/sex_positive_genes.txt&quot;, quote = FALSE, row.names = FALSE, col.names = FALSE)</code></pre>
+<pre class="r"><code>out &lt;- mygene::queryMany(names,  scopes=&quot;ensembl.gene&quot;, fields=c(&quot;name&quot;, &quot;summary&quot;), species=&quot;human&quot;);</code></pre>
+<pre><code>## Finished</code></pre>
+<pre class="r"><code>cbind.data.frame(out$name, out$summary)</code></pre>
+<pre><code>##                                                                      out$name
+## 1          eukaryotic translation initiation factor 1A, X-linked pseudogene 1
+## 2  Putative eukaryotic translation initiation factor 2 subunit 3-like protein
+## 3                                             protease, serine, 30 pseudogene
+## 4                                     fibroblast growth factor 7 pseudogene 3
+## 5                                                          carboxylesterase 1
+## 6                                                                        &lt;NA&gt;
+## 7                                                receptor accessory protein 6
+## 8                                                     zinc finger protein 844
+## 9                                    RANBP2-like and GRIP domain containing 2
+## 10                                                      complement C1q like 3
+## 11                             BMS1, ribosome biogenesis factor pseudogene 10
+## 12                                 long intergenic non-protein coding RNA 431
+## 13                                  vir like m6A methyltransferase associated
+## 14                                                    zinc finger protein 441
+## 15                                  HLA complex group 11 (non-protein coding)
+## 16                                                   methylmalonyl-CoA mutase
+## 17                                          methylcrotonoyl-CoA carboxylase 1
+## 18                         protein tyrosine phosphatase, non-receptor type 14
+## 19                                             ribonuclease A family member 2
+## 20                                  aldehyde dehydrogenase 6 family member A1
+## 21                                                                   calnexin
+## 22                                       origin recognition complex subunit 3
+## 23                         immunoglobulin heavy constant gamma 1 (G1m marker)
+## 24                                                                 heparanase
+## 25                                                    acyl-CoA thioesterase 1
+##                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  out$summary
+## 1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       &lt;NA&gt;
+## 2                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       &lt;NA&gt;
+## 3                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       &lt;NA&gt;
+## 4                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       &lt;NA&gt;
+## 5                                         This gene encodes a member of the carboxylesterase large family. The family members are responsible for the hydrolysis or transesterification of various xenobiotics, such as cocaine and heroin, and endogenous substrates with ester, thioester, or amide bonds. They may participate in fatty acyl and cholesterol ester metabolism, and may play a role in the blood-brain barrier system. This enzyme is the major liver enzyme and functions in liver drug clearance. Mutations of this gene cause carboxylesterase 1 deficiency. Three transcript variants encoding three different isoforms have been found for this gene.
+## 6                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       &lt;NA&gt;
+## 7                                                                                                                                                                                                                                                                                        The protein encoded by this gene may be involved in the transport of receptors from the endoplasmic reticulum (ER) to the cell surface. The encoded protein may also play a role in regulating ER membrane structure. This gene is required for the proper development of retinal rods and photoreceptors, with defects in this gene being associated with retinitis pigmentosa 77.
+## 8                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       &lt;NA&gt;
+## 9                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       &lt;NA&gt;
+## 10                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      &lt;NA&gt;
+## 11                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      &lt;NA&gt;
+## 12                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      &lt;NA&gt;
+## 13                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      &lt;NA&gt;
+## 14                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      &lt;NA&gt;
+## 15                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      &lt;NA&gt;
+## 16                                                                                                                                                                                                                                                                                                    This gene encodes the mitochondrial enzyme methylmalonyl Coenzyme A mutase. In humans, the product of this gene is a vitamin B12-dependent enzyme which catalyzes the isomerization of methylmalonyl-CoA to succinyl-CoA, while in other species this enzyme may have different functions. Mutations in this gene may lead to various types of methylmalonic aciduria.
+## 17                                                                                                                                                                                                                                                                                                                                     This gene encodes the large subunit of 3-methylcrotonyl-CoA carboxylase. This enzyme functions as a heterodimer and catalyzes the carboxylation of 3-methylcrotonyl-CoA to form 3-methylglutaconyl-CoA. Mutations in this gene are associated with 3-Methylcrotonylglycinuria, an autosomal recessive disorder of leucine catabolism.
+## 18                               The protein encoded by this gene is a member of the protein tyrosine phosphatase (PTP) family. PTPs are known to be signaling molecules that regulate a variety of cellular processes including cell growth, differentiation, mitotic cycle, and oncogenic transformation. This PTP contains an N-terminal noncatalytic domain similar to that of band 4.1 superfamily cytoskeleton-associated proteins, which suggested the membrane or cytoskeleton localization of this protein. It appears to regulate lymphatic development in mammals, and a loss of function mutation has been found in a kindred with a lymphedema-choanal atresia.
+## 19                                                                                                                                                                                                                                                                                                                                                                                                                                                      The protein encoded by this gene is a non-secretory ribonuclease that belongs to the pancreatic ribonuclease family, a subset of the ribonuclease A superfamily. The protein antimicrobial activity against viruses.
+## 20                          This gene encodes a member of the aldehyde dehydrogenase protein family. The encoded protein is a mitochondrial methylmalonate semialdehyde dehydrogenase that plays a role in the valine and pyrimidine catabolic pathways. This protein catalyzes the irreversible oxidative decarboxylation of malonate and methylmalonate semialdehydes to acetyl- and propionyl-CoA. Methylmalonate semialdehyde dehydrogenase deficiency is characterized by elevated beta-alanine, 3-hydroxypropionic acid, and both isomers of 3-amino and 3-hydroxyisobutyric acids in urine organic acids. Alternate splicing results in multiple transcript variants.
+## 21                                                                                                                                This gene encodes a member of the calnexin family of molecular chaperones. The encoded protein is a calcium-binding, endoplasmic reticulum (ER)-associated protein that interacts transiently with newly synthesized N-linked glycoproteins, facilitating protein folding and assembly. It may also play a central role in the quality control of protein folding by retaining incorrectly folded protein subunits within the ER for degradation. Alternatively spliced transcript variants encoding the same protein have been described.
+## 22 The origin recognition complex (ORC) is a highly conserved six subunits protein complex essential for the initiation of the DNA replication in eukaryotic cells. Studies in yeast demonstrated that ORC binds specifically to origins of replication and serves as a platform for the assembly of additional initiation factors such as Cdc6 and Mcm proteins. The protein encoded by this gene is a subunit of the ORC complex. Studies of a similar gene in Drosophila suggested a possible role of this protein in neuronal proliferation and olfactory memory. Alternatively spliced transcript variants encoding distinct isoforms have been reported for this gene.
+## 23                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      &lt;NA&gt;
+## 24                                                                                                                                                                                                                   Heparan sulfate proteoglycans are major components of the basement membrane and extracellular matrix. The protein encoded by this gene is an enzyme that cleaves heparan sulfate proteoglycans to permit cell movement through remodeling of the extracellular matrix. In addition, this cleavage can release bioactive molecules from the extracellular matrix. Several transcript variants encoding different isoforms have been found for this gene.
+## 25                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      &lt;NA&gt;</code></pre>
+<pre class="r"><code>sex_paths &lt;- read.delim(&quot;../utilities/sex_pathway_positive_1.tab&quot;)
+cbind.data.frame(sex_paths$q.value, sex_paths$pathway, sex_paths$members_input_overlap_geneids)</code></pre>
+<pre><code>##    sex_paths$q.value
+## 1       1.043351e-05
+## 2       1.043351e-05
+## 3       1.043351e-05
+## 4       1.043351e-05
+## 5       1.043351e-05
+## 6       1.043351e-05
+## 7       1.043351e-05
+## 8       1.043351e-05
+## 9       1.043351e-05
+## 10      1.043351e-05
+## 11      1.043351e-05
+## 12      1.043351e-05
+## 13      1.043351e-05
+## 14      1.043351e-05
+## 15      1.043351e-05
+## 16      1.043351e-05
+## 17      1.043351e-05
+## 18      4.148307e-05
+## 19      1.905019e-04
+## 20      1.905019e-04
+## 21      1.905019e-04
+## 22      1.905019e-04
+## 23      3.055867e-04
+## 24      4.827174e-04
+## 25      5.487950e-04
+## 26      8.363829e-04
+## 27      8.363829e-04
+## 28      1.891569e-03
+## 29      6.191405e-03
+## 30      8.504469e-03
+##                                                    sex_paths$pathway
+## 1                                 3-Methylglutaconic Aciduria Type I
+## 2                         Valine, Leucine and Isoleucine Degradation
+## 3              2-Methyl-3-Hydroxybutryl CoA Dehydrogenase Deficiency
+## 4                                                Isovaleric Aciduria
+## 5                 3-Methylcrotonyl Coa Carboxylase Deficiency Type I
+## 6                                                 Propionic Acidemia
+## 7                                          Maple Syrup Urine Disease
+## 8                    3-Hydroxy-3-Methylglutaryl-CoA Lyase Deficiency
+## 9                            Isobutyryl-coa dehydrogenase deficiency
+## 10                                      3-hydroxyisobutyric aciduria
+## 11                 3-hydroxyisobutyric acid dehydrogenase deficiency
+## 12                                               Isovaleric acidemia
+## 13              Methylmalonate Semialdehyde Dehydrogenase Deficiency
+## 14                                            Methylmalonic Aciduria
+## 15                               3-Methylglutaconic Aciduria Type IV
+## 16                              3-Methylglutaconic Aciduria Type III
+## 17                                      Beta-Ketothiolase Deficiency
+## 18 Valine, leucine and isoleucine degradation - Homo sapiens (human)
+## 19                              Malonyl-coa decarboxylase deficiency
+## 20                                                  Malonic Aciduria
+## 21                                             Propanoate Metabolism
+## 22         Methylmalonic Aciduria Due to Cobalamin-Related Disorders
+## 23                                             Propanoate metabolism
+## 24                              Branched-chain amino acid catabolism
+## 25                                             Propanoate metabolism
+## 26                      Propanoate metabolism - Homo sapiens (human)
+## 27                             Valine Leucine Isoleucine degradation
+## 28                        Valine, leucine and isoleucine degradation
+## 29                                             Amino Acid metabolism
+## 30                Metabolism of water-soluble vitamins and cofactors
+##    sex_paths$members_input_overlap_geneids
+## 1                        56922; 4329; 4594
+## 2                        56922; 4329; 4594
+## 3                        56922; 4329; 4594
+## 4                        56922; 4329; 4594
+## 5                        56922; 4329; 4594
+## 6                        56922; 4329; 4594
+## 7                        56922; 4329; 4594
+## 8                        56922; 4329; 4594
+## 9                        56922; 4329; 4594
+## 10                       56922; 4329; 4594
+## 11                       56922; 4329; 4594
+## 12                       56922; 4329; 4594
+## 13                       56922; 4329; 4594
+## 14                       56922; 4329; 4594
+## 15                       56922; 4329; 4594
+## 16                       56922; 4329; 4594
+## 17                       56922; 4329; 4594
+## 18                       56922; 4329; 4594
+## 19                              4594; 4329
+## 20                              4594; 4329
+## 21                              4594; 4329
+## 22                              4594; 4329
+## 23                              4594; 4329
+## 24                             56922; 4329
+## 25                              4594; 4329
+## 26                              4329; 4594
+## 27                             56922; 4329
+## 28                             56922; 4329
+## 29                             56922; 4594
+## 30                             4594; 56922</code></pre>
+<pre class="r"><code>pathway2 &lt;- read.delim(&quot;../utilities/sex_pathway_positive_1.tab&quot;)
+if(length(which(pathway2$q.value &lt; 0.05)) &gt; 2){
+  pathway2 &lt;- pathway2[which(pathway2$q.value &lt; 0.05),]
+}
+maxpath = 75
+pathway &lt;- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes &lt;- pathway$members_input_overlap
+pathway_list_genes &lt;- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), &quot;; &quot;)))
+all_genes &lt;- Reduce(union, pathway_list_genes)
+pathway_mat &lt;- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] &lt;- 1
+}
+
+pathway_bimat &lt;- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop &lt;- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 1, cexCol = 1, col = col, zlim = c(-1,1),
+        scale = &quot;none&quot;, margins = c(5, 5))</code></pre>
+<p><img src="sex_comparison_study_2_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+</div>
+<div id="positive-and-negative-systemic-genes-by-beta-score" class="section level2">
+<h2>Positive and Negative systemic genes (by beta-score)</h2>
+<pre class="r"><code>column_sum_3 &lt;- apply(betahat_mat, 2, function(x) return(quantile(x, 0.7)))
+sort(column_sum_3, decreasing = FALSE)[1:10]</code></pre>
+<pre><code>##  [1] -1.23756676 -0.74425191 -0.56752546 -0.34420798 -0.15156325
+##  [6] -0.14668683 -0.14372884 -0.11352953 -0.09872829 -0.09340615</code></pre>
+<pre class="r"><code>order(column_sum_3, decreasing = FALSE)[1:10]</code></pre>
+<pre><code>##  [1] 12236  1093 14426  6533 13721 10842 10476  6906  6021  2206</code></pre>
+<pre class="r"><code>column_sum_4 &lt;- apply(betahat_mat, 2, function(x) return(quantile(x, 0.7)))
+sort(column_sum_4, decreasing = TRUE)[1:10]</code></pre>
+<pre><code>##  [1] 0.7298679 0.6326203 0.5950430 0.5935916 0.5837958 0.5580758 0.5516529
+##  [8] 0.5498268 0.5452434 0.5421567</code></pre>
+<pre class="r"><code>order(column_sum_4, decreasing = TRUE)[1:10]</code></pre>
+<pre><code>##  [1]  9075 12262  8676 11277 13340 13172  4903 13792   278 11666</code></pre>
+<pre class="r"><code>names &lt;- dimnames(person_tissue_genes)[[3]][order(column_sum_3, decreasing = FALSE)[1:40]]
+write.table(names, file = &quot;../utilities/sex_negative_genes_2.txt&quot;, quote = FALSE, row.names = FALSE, col.names = FALSE)</code></pre>
+<pre class="r"><code>out &lt;- mygene::queryMany(names,  scopes=&quot;ensembl.gene&quot;, fields=c(&quot;name&quot;, &quot;summary&quot;), species=&quot;human&quot;);</code></pre>
+<pre><code>## Finished
+## Pass returnall=TRUE to return lists of duplicate or missing query terms.</code></pre>
+<pre class="r"><code>cbind.data.frame(out$name, out$summary)</code></pre>
+<pre><code>##                                                      out$name
+## 1                                                        &lt;NA&gt;
+## 2                                        DEAD-box helicase 43
+## 3                          sperm equatorial segment protein 1
+## 4              FSHD region gene 1 family member B, pseudogene
+## 5                                           MIR4458 host gene
+## 6  nuclear pore complex interacting protein family member B15
+## 7       glycerol-3-phosphate acyltransferase 2, mitochondrial
+## 8             coiled-coil domain containing 144B (pseudogene)
+## 9                    lymphocyte-specific protein 1 pseudogene
+## 10                                            aurora kinase C
+## 11             FSHD region gene 1 family member J, pseudogene
+## 12                                               paired box 8
+## 13      major histocompatibility complex, class II, DR beta 5
+## 14                               uncharacterized LOC100996732
+## 15                 long intergenic non-protein coding RNA 116
+## 16                                                protamine 2
+## 17                                       ribosomal protein L9
+## 18                                                       &lt;NA&gt;
+## 19                        aryl-hydrocarbon receptor repressor
+## 20               ubiquitin specific peptidase 32 pseudogene 1
+## 21                         chromosome 7 open reading frame 13
+## 22          mitogen-activated protein kinase kinase kinase 10
+## 23                                      phospholipase C eta 2
+## 24                    WAS protein family homolog 1 pseudogene
+## 25                                        proopiomelanocortin
+## 26                        mannosidase alpha class 2A member 2
+## 27                       guanidinoacetate N-methyltransferase
+## 28                      BCL2 associated agonist of cell death
+## 29                                                       &lt;NA&gt;
+## 30                                                complexin 1
+## 31                              spermatogenesis associated 33
+## 32                                                       &lt;NA&gt;
+## 33  major histocompatibility complex, class I, J (pseudogene)
+## 34                    O-6-methylguanine-DNA methyltransferase
+## 35                                                       &lt;NA&gt;
+## 36                               retinoic acid receptor alpha
+## 37            abhydrolase domain containing 17A pseudogene P4
+## 38                hydroxysteroid 11-beta dehydrogenase 1 like
+## 39                        mannosidase alpha class 2C member 1
+## 40              beta-1,4-N-acetyl-galactosaminyltransferase 4
+##                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              out$summary
+## 1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   &lt;NA&gt;
+## 2                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       The protein encoded by this gene is an ATP-dependent RNA helicase in the DEAD-box family and displays tumor-specific expression.
+## 3                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   The encoded protein is a human alloantigen involved in sperm-egg binding and fusion.
+## 4                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   &lt;NA&gt;
+## 5                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   &lt;NA&gt;
+## 6                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   &lt;NA&gt;
+## 7                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   &lt;NA&gt;
+## 8                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   &lt;NA&gt;
+## 9                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   &lt;NA&gt;
+## 10                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          This gene encodes a member of the Aurora subfamily of serine/threonine protein kinases. The encoded protein is a chromosomal passenger protein that forms complexes with Aurora-B and inner centromere proteins and may play a role in organizing microtubules in relation to centrosome/spindle function during mitosis. This gene is overexpressed in several cancer cell lines, suggesting an involvement in oncogenic signal transduction. Alternative splicing results in multiple transcript variants.
+## 11                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  &lt;NA&gt;
+## 12                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  This gene encodes a member of the paired box (PAX) family of transcription factors. Members of this gene family typically encode proteins that contain a paired box domain, an octapeptide, and a paired-type homeodomain. This nuclear protein is involved in thyroid follicular cell development and expression of thyroid-specific genes. Mutations in this gene have been associated with thyroid dysgenesis, thyroid follicular carcinomas and atypical follicular thyroid adenomas. Alternatively spliced transcript variants encoding different isoforms have been described.
+## 13                                                                                                                                                                                                                                                                                 HLA-DRB5 belongs to the HLA class II beta chain paralogues. This class II molecule is a heterodimer consisting of an alpha (DRA) and a beta (DRB) chain, both anchored in the membrane. It plays a central role in the immune system by presenting peptides derived from extracellular proteins. Class II molecules are expressed in antigen presenting cells (APC: B lymphocytes, dendritic cells, macrophages). The beta chain is approximately 26-28 kDa and its gene contains 6 exons. Exon one encodes the leader peptide, exons 2 and 3 encode the two extracellular domains, exon 4 encodes the transmembrane domain and exon 5 encodes the cytoplasmic tail. Within the DR molecule the beta chain contains all the polymorphisms specifying the peptide binding specificities. Typing for these polymorphisms is routinely done for bone marrow and kidney transplantation. DRB1 is expressed at a level five times higher than its paralogues DRB3, DRB4 and DRB5. The presence of DRB5 is linked with allelic variants of DRB1, otherwise it is omitted. There are 4 related pseudogenes: DRB2, DRB6, DRB7, DRB8 and DRB9.
+## 14                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  &lt;NA&gt;
+## 15                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  &lt;NA&gt;
+## 16                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               Protamines substitute for histones in the chromatin of sperm during the haploid phase of spermatogenesis, and are the major DNA-binding proteins in the nucleus of sperm in many vertebrates. They package the sperm DNA into a highly condensed complex in a volume less than 5% of a somatic cell nucleus. Many mammalian species have only one protamine (protamine 1); however, a few species, including human and mouse, have two. This gene encodes protamine 2, which is cleaved to give rise to a family of protamine 2 peptides. Alternatively spliced transcript variants have also been found for this gene.
+## 17                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       Ribosomes, the organelles that catalyze protein synthesis, consist of a small 40S subunit and a large 60S subunit. Together these subunits are composed of 4 RNA species and approximately 80 structurally distinct proteins. This gene encodes a ribosomal protein that is a component of the 60S subunit. The protein belongs to the L6P family of ribosomal proteins. It is located in the cytoplasm. As is typical for genes encoding ribosomal proteins, there are multiple processed pseudogenes of this gene dispersed through the genome. Alternative splicing results in multiple transcript variants.
+## 18                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  &lt;NA&gt;
+## 19                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  The protein encoded by this gene participates in the aryl hydrocarbon receptor (AhR) signaling cascade, which mediates dioxin toxicity, and is involved in regulation of cell growth and differentiation. It functions as a feedback modulator by repressing AhR-dependent gene expression. Alternatively spliced transcript variants encoding different isoforms have been described for this gene.
+## 20                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  &lt;NA&gt;
+## 21                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  &lt;NA&gt;
+## 22                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        The protein encoded by this gene is a member of the serine/threonine kinase family. This kinase has been shown to activate MAPK8/JNK and MKK4/SEK1, and this kinase itself can be phoshorylated, and thus activated by JNK kinases. This kinase functions preferentially on the JNK signaling pathway, and is reported to be involved in nerve growth factor (NGF) induced neuronal apoptosis.
+## 23                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 PLCH2 is a member of the PLC-eta family of the phosphoinositide-specific phospholipase C (PLC) superfamily of enzymes that cleave PtdIns(4,5) P2 to generate second messengers inositol 1,4,5-trisphosphate and diacylglycerol (Zhou et al., 2005 [PubMed 16107206]).
+## 24                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  &lt;NA&gt;
+## 25 This gene encodes a preproprotein that undergoes extensive, tissue-specific, post-translational processing via cleavage by subtilisin-like enzymes known as prohormone convertases. There are eight potential cleavage sites within the preproprotein and, depending on tissue type and the available convertases, processing may yield as many as ten biologically active peptides involved in diverse cellular functions. The encoded protein is synthesized mainly in corticotroph cells of the anterior pituitary where four cleavage sites are used; adrenocorticotrophin, essential for normal steroidogenesis and the maintenance of normal adrenal weight, and lipotropin beta are the major end products. In other tissues, including the hypothalamus, placenta, and epithelium, all cleavage sites may be used, giving rise to peptides with roles in pain and energy homeostasis, melanocyte stimulation, and immune modulation. These include several distinct melanotropins, lipotropins, and endorphins that are contained within the adrenocorticotrophin and beta-lipotropin peptides. The antimicrobial melanotropin alpha peptide exhibits antibacterial and antifungal activity. Mutations in this gene have been associated with early onset obesity, adrenal insufficiency, and red hair pigmentation. Alternatively spliced transcript variants encoding the same protein have been described.
+## 26                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  &lt;NA&gt;
+## 27                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         The protein encoded by this gene is a methyltransferase that converts guanidoacetate to creatine, using S-adenosylmethionine as the methyl donor. Defects in this gene have been implicated in neurologic syndromes and muscular hypotonia, probably due to creatine deficiency and accumulation of guanidinoacetate in the brain of affected individuals. Two transcript variants encoding different isoforms have been described for this gene. Pseudogenes of this gene are found on chromosomes 2 and 13.
+## 28                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             The protein encoded by this gene is a member of the BCL-2 family. BCL-2 family members are known to be regulators of programmed cell death. This protein positively regulates cell apoptosis by forming heterodimers with BCL-xL and BCL-2, and reversing their death repressor activity. Proapoptotic activity of this protein is regulated through its phosphorylation. Protein kinases AKT and MAP kinase, as well as protein phosphatase calcineurin were found to be involved in the regulation of this protein. Alternative splicing of this gene results in two transcript variants which encode the same isoform.
+## 29                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  &lt;NA&gt;
+## 30                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              Proteins encoded by the complexin/synaphin gene family are cytosolic proteins that function in synaptic vesicle exocytosis. These proteins bind syntaxin, part of the SNAP receptor.  The protein product of this gene binds to the SNAP receptor complex and disrupts it, allowing transmitter release.
+## 31                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  &lt;NA&gt;
+## 32                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  &lt;NA&gt;
+## 33                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  &lt;NA&gt;
+## 34                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       Alkylating agents are potent carcinogens that can result in cell death, mutation and cancer. The protein encoded by this gene is a DNA repair protein that is involved in cellular defense against mutagenesis and toxicity from alkylating agents. The protein catalyzes transfer of methyl groups from O(6)-alkylguanine and other methylated moieties of the DNA to its own molecule, which repairs the toxic lesions. Methylation of the genes promoter has been associated with several cancer types, including colorectal cancer, lung cancer, lymphoma and glioblastoma.
+## 35                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  &lt;NA&gt;
+## 36                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  This gene represents a nuclear retinoic acid receptor. The encoded protein, retinoic acid receptor alpha, regulates transcription in a ligand-dependent manner. This gene has been implicated in regulation of development, differentiation, apoptosis, granulopoeisis, and transcription of clock genes. Translocations between this locus and several other loci have been associated with acute promyelocytic leukemia. Alternatively spliced transcript variants have been found for this locus.
+## 37                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  &lt;NA&gt;
+## 38                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       This gene is a member of the hydroxysteroid dehydrogenase family. The encoded protein is similar to an enzyme that catalyzes the interconversion of inactive to active glucocorticoids (e.g. cortisone). Alternatively spliced transcript variants encoding multiple isoforms have been observed for this gene.
+## 39                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  &lt;NA&gt;
+## 40                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  &lt;NA&gt;</code></pre>
+<pre class="r"><code>sex_paths &lt;- read.delim(&quot;../utilities/sex_pathway_negative_2.tab&quot;)</code></pre>
+<pre><code>## Warning in read.table(file = file, header = header, sep = sep, quote =
+## quote, : incomplete final line found by readTableHeader on &#39;../utilities/
+## sex_pathway_negative_2.tab&#39;</code></pre>
+<pre class="r"><code>cbind.data.frame(sex_paths$q.value, sex_paths$pathway, sex_paths$members_input_overlap_geneids)</code></pre>
+<pre><code>##   sex_paths$q.value                                sex_paths$pathway
+## 1       0.006435331         er associated degradation (erad) pathway
+## 2       0.029134876    Acute myeloid leukemia - Homo sapiens (human)
+## 3       0.041876235         Phase 1 - Functionalization of compounds
+## 4       0.041876235 Th17 cell differentiation - Homo sapiens (human)
+##   sex_paths$members_input_overlap_geneids
+## 1                              4123; 4122
+## 2                               5914; 572
+## 3                             57491; 5443
+## 4                              3127; 5914</code></pre>
+<pre class="r"><code>pathway2 &lt;- read.delim(&quot;../utilities/sex_pathway_negative_2.tab&quot;)</code></pre>
+<pre><code>## Warning in read.table(file = file, header = header, sep = sep, quote =
+## quote, : incomplete final line found by readTableHeader on &#39;../utilities/
+## sex_pathway_negative_2.tab&#39;</code></pre>
+<pre class="r"><code>if(length(which(pathway2$q.value &lt; 0.05)) &gt; 2){
+  pathway2 &lt;- pathway2[which(pathway2$q.value &lt; 0.05),]
+}
+maxpath = 75
+pathway &lt;- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes &lt;- pathway$members_input_overlap
+pathway_list_genes &lt;- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), &quot;; &quot;)))
+all_genes &lt;- Reduce(union, pathway_list_genes)
+pathway_mat &lt;- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] &lt;- 1
+}
+
+pathway_bimat &lt;- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop &lt;- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 1, cexCol = 1, col = col, zlim = c(-1,1),
+        scale = &quot;none&quot;, margins = c(5, 5))</code></pre>
+<p><img src="sex_comparison_study_2_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<p>The GO annotations table in this case reveal sperm related several GOs.</p>
+<pre class="r"><code>go_tab &lt;- read.delim(&quot;../utilities/GO_negative_2.tab&quot;)
+dat2 &lt;- cbind.data.frame(go_tab$q.value, go_tab$term_name, go_tab$members_input_overlap_geneids)
+dat2</code></pre>
+<pre><code>##    go_tab$q.value
+## 1     0.001628068
+## 2     0.013334454
+## 3     0.036044434
+## 4     0.010293415
+## 5     0.013334454
+## 6     0.025833236
+## 7     0.010293415
+## 8     0.025833236
+## 9     0.013834094
+## 10    0.025833236
+## 11    0.013834094
+## 12    0.055587456
+## 13    0.016436875
+## 14    0.045341351
+## 15    0.049357502
+## 16    0.033030758
+## 17    0.068626045
+## 18    0.035721622
+## 19    0.068626045
+## 20    0.068626045
+## 21    0.062858932
+## 22    0.035174558
+## 23    0.037199496
+## 24    0.035174558
+## 25    0.074602960
+## 26    0.035174558
+## 27    0.035174558
+## 28    0.035174558
+## 29    0.035174558
+## 30    0.125371764
+## 31    0.035174558
+## 32    0.083407720
+## 33    0.035174558
+## 34    0.122116980
+## 35    0.035174558
+## 36    0.035174558
+## 37    0.083407720
+## 38    0.035174558
+## 39    0.083407720
+## 40    0.083407720
+## 41    0.083407720
+## 42    0.138322705
+## 43    0.041260056
+##                                                       go_tab$term_name
+## 1                                                 mannosidase activity
+## 2                                             hexose metabolic process
+## 3  cellular process involved in reproduction in multicellular organism
+## 4                                                  sexual reproduction
+## 5                                                      spermatogenesis
+## 6                                               male gamete generation
+## 7                                  multicellular organism reproduction
+## 8                                     monosaccharide metabolic process
+## 9                                                    hormone secretion
+## 10                                                   hormone transport
+## 11                                                 response to ethanol
+## 12                                                   gamete generation
+## 13                                 multi-organism reproductive process
+## 14                                                 response to alcohol
+## 15                                                      signal release
+## 16                       columnar/cuboidal epithelial cell development
+## 17                                               germ cell development
+## 18                       multicellular organismal reproductive process
+## 19                      single-organism carbohydrate metabolic process
+## 20                                        regulation of hormone levels
+## 21                                   oligosaccharide metabolic process
+## 22                           positive regulation of cell-cell adhesion
+## 23                                single organism reproductive process
+## 24                                                   peptide secretion
+## 25                                     regulation of hormone secretion
+## 26                                                   peptide transport
+## 27                                     epithelial cell differentiation
+## 28                                                     amide transport
+## 29                          regulation of leukocyte cell-cell adhesion
+## 30                                      carbohydrate metabolic process
+## 31                                            ureteric bud development
+## 32                                      mesonephric tubule development
+## 33                         positive regulation of leukocyte activation
+## 34                hydrolase activity, hydrolyzing O-glycosyl compounds
+## 35                                    tumor necrosis factor production
+## 36                              positive regulation of cell activation
+## 37                                             mesonephros development
+## 38 regulation of tumor necrosis factor superfamily cytokine production
+## 39               tumor necrosis factor superfamily cytokine production
+## 40                                     regulation of secretion by cell
+## 41                                                 response to vitamin
+## 42                                           response to acid chemical
+## 43                                 embryonic epithelial tube formation
+##                                                                    go_tab$members_input_overlap_geneids
+## 1                                                                      ENSG00000196547; ENSG00000140400
+## 2                                    ENSG00000002330; ENSG00000115138; ENSG00000196547; ENSG00000140400
+## 3                                    ENSG00000131759; ENSG00000105146; ENSG00000122304; ENSG00000258484
+## 4  ENSG00000258484; ENSG00000130005; ENSG00000105146; ENSG00000002330; ENSG00000131759; ENSG00000122304
+## 5                   ENSG00000002330; ENSG00000130005; ENSG00000131759; ENSG00000105146; ENSG00000122304
+## 6                   ENSG00000002330; ENSG00000130005; ENSG00000131759; ENSG00000105146; ENSG00000122304
+## 7  ENSG00000258484; ENSG00000130005; ENSG00000105146; ENSG00000002330; ENSG00000131759; ENSG00000122304
+## 8                                    ENSG00000002330; ENSG00000115138; ENSG00000196547; ENSG00000140400
+## 9                                    ENSG00000125618; ENSG00000002330; ENSG00000115138; ENSG00000168993
+## 10                                   ENSG00000125618; ENSG00000002330; ENSG00000115138; ENSG00000168993
+## 11                                                    ENSG00000002330; ENSG00000131759; ENSG00000170430
+## 12                  ENSG00000002330; ENSG00000130005; ENSG00000131759; ENSG00000105146; ENSG00000122304
+## 13 ENSG00000258484; ENSG00000130005; ENSG00000105146; ENSG00000002330; ENSG00000131759; ENSG00000122304
+## 14                                                    ENSG00000002330; ENSG00000131759; ENSG00000170430
+## 15                                   ENSG00000125618; ENSG00000002330; ENSG00000115138; ENSG00000168993
+## 16                                                                     ENSG00000002330; ENSG00000131759
+## 17                                                    ENSG00000131759; ENSG00000105146; ENSG00000122304
+## 18                  ENSG00000002330; ENSG00000130005; ENSG00000131759; ENSG00000105146; ENSG00000122304
+## 19                                   ENSG00000002330; ENSG00000115138; ENSG00000196547; ENSG00000140400
+## 20                                   ENSG00000125618; ENSG00000002330; ENSG00000115138; ENSG00000168993
+## 21                                                                     ENSG00000196547; ENSG00000140400
+## 22                                                    ENSG00000002330; ENSG00000198502; ENSG00000131759
+## 23 ENSG00000258484; ENSG00000130005; ENSG00000105146; ENSG00000002330; ENSG00000131759; ENSG00000122304
+## 24                                                    ENSG00000125618; ENSG00000002330; ENSG00000168993
+## 25                                                    ENSG00000125618; ENSG00000002330; ENSG00000115138
+## 26                                                    ENSG00000125618; ENSG00000002330; ENSG00000168993
+## 27                                   ENSG00000125618; ENSG00000002330; ENSG00000131759; ENSG00000170430
+## 28                                                    ENSG00000125618; ENSG00000002330; ENSG00000168993
+## 29                                                    ENSG00000002330; ENSG00000198502; ENSG00000131759
+## 30                                   ENSG00000002330; ENSG00000115138; ENSG00000196547; ENSG00000140400
+## 31                                                                     ENSG00000125618; ENSG00000131759
+## 32                                                                     ENSG00000125618; ENSG00000131759
+## 33                                                    ENSG00000002330; ENSG00000198502; ENSG00000131759
+## 34                                                                     ENSG00000196547; ENSG00000140400
+## 35                                                                     ENSG00000115138; ENSG00000131759
+## 36                                                    ENSG00000002330; ENSG00000198502; ENSG00000131759
+## 37                                                                     ENSG00000125618; ENSG00000131759
+## 38                                                                     ENSG00000115138; ENSG00000131759
+## 39                                                                     ENSG00000115138; ENSG00000131759
+## 40                                   ENSG00000125618; ENSG00000002330; ENSG00000115138; ENSG00000168993
+## 41                                                                     ENSG00000131759; ENSG00000170430
+## 42                                                    ENSG00000002330; ENSG00000131759; ENSG00000170430
+## 43                                                                     ENSG00000125618; ENSG00000131759</code></pre>
+<pre class="r"><code>names &lt;- dimnames(person_tissue_genes)[[3]][order(column_sum_4, decreasing = TRUE)[1:25]]
+write.table(names, file = &quot;../utilities/sex_positive_genes_2.txt&quot;, quote = FALSE, row.names = FALSE, col.names = FALSE)</code></pre>
+<pre class="r"><code>out &lt;- mygene::queryMany(names,  scopes=&quot;ensembl.gene&quot;, fields=c(&quot;name&quot;, &quot;summary&quot;), species=&quot;human&quot;);</code></pre>
+<pre><code>## Finished</code></pre>
+<pre class="r"><code>cbind.data.frame(out$name, out$summary)</code></pre>
+<pre><code>##                                                                              out$name
+## 1                                                     protease, serine, 30 pseudogene
+## 2                                          long intergenic non-protein coding RNA 431
+## 3                                                      ribonuclease A family member 2
+## 4                                                                  carboxylesterase 1
+## 5                                                                    defensin alpha 3
+## 6                  eukaryotic translation initiation factor 1A, X-linked pseudogene 1
+## 7                                                      glutathione S-transferase mu 1
+## 8  mitochondrially encoded NADH:ubiquinone oxidoreductase core subunit 6 pseudogene 4
+## 9                                      macrophage receptor with collagenous structure
+## 10                                 immunoglobulin heavy constant gamma 3 (G3m marker)
+## 11                                           RANBP2-like and GRIP domain containing 2
+## 12                                 immunoglobulin heavy constant gamma 1 (G1m marker)
+## 13                                                                     MT-RNR2-like 8
+## 14                                                                               &lt;NA&gt;
+## 15                                                                               &lt;NA&gt;
+## 16                                 immunoglobulin lambda constant 3 (Kern-Oz+ marker)
+## 17                                                 small integral membrane protein 24
+## 18                                                   immunoglobulin heavy constant mu
+## 19                                                                   serum amyloid A2
+## 20                                                   Fc fragment of IgG receptor IIIb
+## 21                                                              SAA2-SAA4 readthrough
+## 22                                                   immunoglobulin lambda constant 1
+## 23                                                                               &lt;NA&gt;
+## 24                                                              complement C1q like 3
+## 25         Putative eukaryotic translation initiation factor 2 subunit 3-like protein
+##                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       out$summary
+## 1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            &lt;NA&gt;
+## 2                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            &lt;NA&gt;
+## 3                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            The protein encoded by this gene is a non-secretory ribonuclease that belongs to the pancreatic ribonuclease family, a subset of the ribonuclease A superfamily. The protein antimicrobial activity against viruses.
+## 4                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              This gene encodes a member of the carboxylesterase large family. The family members are responsible for the hydrolysis or transesterification of various xenobiotics, such as cocaine and heroin, and endogenous substrates with ester, thioester, or amide bonds. They may participate in fatty acyl and cholesterol ester metabolism, and may play a role in the blood-brain barrier system. This enzyme is the major liver enzyme and functions in liver drug clearance. Mutations of this gene cause carboxylesterase 1 deficiency. Three transcript variants encoding three different isoforms have been found for this gene.
+## 5                                                                                                                                                                                                                                                                                                                                                Defensins are a family of antimicrobial and cytotoxic peptides thought to be involved in host defense. They are abundant in the granules of neutrophils and also found in the epithelia of mucosal surfaces such as those of the intestine, respiratory tract, urinary tract, and vagina. Members of the defensin family are highly similar in protein sequence and distinguished by a conserved cysteine motif. The protein encoded by this gene, defensin, alpha 3, is found in the microbicidal granules of neutrophils and likely plays a role in phagocyte-mediated host defense. Several alpha defensin genes are clustered on chromosome 8. This gene differs from defensin, alpha 1 by only one amino acid. This gene and the gene encoding defensin, alpha 1 are both subject to copy number variation.
+## 6                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            &lt;NA&gt;
+## 7  Cytosolic and membrane-bound forms of glutathione S-transferase are encoded by two distinct supergene families. At present, eight distinct classes of the soluble cytoplasmic mammalian glutathione S-transferases have been identified: alpha, kappa, mu, omega, pi, sigma, theta and zeta. This gene encodes a glutathione S-transferase that belongs to the mu class. The mu class of enzymes functions in the detoxification of electrophilic compounds, including carcinogens, therapeutic drugs, environmental toxins and products of oxidative stress, by conjugation with glutathione. The genes encoding the mu class of enzymes are organized in a gene cluster on chromosome 1p13.3 and are known to be highly polymorphic. These genetic variations can change an individual&#39;s susceptibility to carcinogens and toxins as well as affect the toxicity and efficacy of certain drugs. Null mutations of this class mu gene have been linked with an increase in a number of cancers, likely due to an increased susceptibility to environmental toxins and carcinogens. Multiple protein isoforms are encoded by transcript variants of this gene.
+## 8                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            &lt;NA&gt;
+## 9                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               The protein encoded by this gene is a member of the class A scavenger receptor family and is part of the innate antimicrobial immune system. The protein may bind both Gram-negative and Gram-positive bacteria via an extracellular, C-terminal, scavenger receptor cysteine-rich (SRCR) domain. In addition to short cytoplasmic and transmembrane domains, there is an extracellular spacer domain and a long, extracellular collagenous domain. The protein may form a trimeric molecule by the association of the collagenous domains of three identical polypeptide chains.
+## 10                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           &lt;NA&gt;
+## 11                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           &lt;NA&gt;
+## 12                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           &lt;NA&gt;
+## 13                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           &lt;NA&gt;
+## 14                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           &lt;NA&gt;
+## 15                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           &lt;NA&gt;
+## 16                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           &lt;NA&gt;
+## 17                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           &lt;NA&gt;
+## 18                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           &lt;NA&gt;
+## 19                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           &lt;NA&gt;
+## 20                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  The protein encoded by this gene is a low affinity receptor for the Fc region of gamma immunoglobulins (IgG). The encoded protein acts as a monomer and can bind either monomeric or aggregated IgG. This gene may function to capture immune complexes in the peripheral circulation. Several transcript variants encoding different isoforms have been found for this gene. A highly-similar gene encoding a related protein is also found on chromosome 1.
+## 21                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              This locus represents naturally occurring read-through transcription between the neighboring serum amyloid A2 and serum amyloid A4 genes on chromosome 11. The read-through transcript produces a fusion protein that shares sequence identity with each individual gene product.
+## 22                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           &lt;NA&gt;
+## 23                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           &lt;NA&gt;
+## 24                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           &lt;NA&gt;
+## 25                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           &lt;NA&gt;</code></pre>
+<pre class="r"><code>sex_paths &lt;- read.delim(&quot;../utilities/sex_pathway_positive_2.tab&quot;)
+cbind.data.frame(sex_paths$q.value, sex_paths$pathway, sex_paths$members_input_overlap_geneids)</code></pre>
+<pre><code>##    sex_paths$q.value
+## 1       0.0009742678
+## 2       0.0009742678
+## 3       0.0009742678
+## 4       0.0009742678
+## 5       0.0009742678
+## 6       0.0013263983
+## 7       0.0015237152
+## 8       0.0019129182
+## 9       0.0044806458
+## 10      0.0052790840
+## 11      0.0052790840
+## 12      0.0052790840
+## 13      0.0095818606
+## 14      0.0169709537
+##                                                                     sex_paths$pathway
+## 1                                   Classical antibody-mediated complement activation
+## 2                                                                     FCGR activation
+## 3                                                    Creation of C4 and C2 activators
+## 4                                                    Initial triggering of complement
+## 5                                               Role of phospholipids in phagocytosis
+## 6                                                                  Complement cascade
+## 7                           Regulation of actin dynamics for phagocytic cup formation
+## 8                                      Fcgamma receptor (FCGR) dependent phagocytosis
+## 9                                                                Innate Immune System
+## 10                                                      IL4-mediated signaling events
+## 11                                                                      Immune System
+## 12                                                       CD22 mediated BCR regulation
+## 13 Antigen activates B Cell Receptor (BCR) leading to generation of second messengers
+## 14                                                          B cell receptor signaling
+##     sex_paths$members_input_overlap_geneids
+## 1                          3502; 3539; 3500
+## 2                          3502; 3539; 3500
+## 3                          3502; 3539; 3500
+## 4                          3502; 3539; 3500
+## 5                          3502; 3539; 3500
+## 6                          3502; 3539; 3500
+## 7                          3502; 3539; 3500
+## 8                          3502; 3539; 3500
+## 9        3502; 6036; 1668; 2215; 3539; 3500
+## 10                               3502; 3500
+## 11 3507; 3539; 2215; 3500; 1668; 3502; 6036
+## 12                               3539; 3507
+## 13                               3539; 3507
+## 14                               3537; 3507</code></pre>
+<pre class="r"><code>pathway2 &lt;- read.delim(&quot;../utilities/sex_pathway_positive_2.tab&quot;)
+if(length(which(pathway2$q.value &lt; 0.05)) &gt; 2){
+  pathway2 &lt;- pathway2[which(pathway2$q.value &lt; 0.05),]
+}
+maxpath = 75
+pathway &lt;- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes &lt;- pathway$members_input_overlap
+pathway_list_genes &lt;- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), &quot;; &quot;)))
+all_genes &lt;- Reduce(union, pathway_list_genes)
+pathway_mat &lt;- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] &lt;- 1
+}
+
+pathway_bimat &lt;- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop &lt;- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 1, cexCol = 1, col = col, zlim = c(-1,1),
+        scale = &quot;none&quot;, margins = c(5, 5))</code></pre>
+<p><img src="sex_comparison_study_2_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
+</div>
+<div id="sperm-related-genes-scatter-plots" class="section level2">
+<h2>Sperm related genes (scatter plots)</h2>
+<p>We look at the scatter plot analysis of the sperm related genes.</p>
+<pre class="r"><code>sperm_genes &lt;- c(&quot;ENSG00000258484&quot;, &quot;ENSG00000131759&quot;, &quot;ENSG00000105146&quot;,
+                 &quot;ENSG00000130005&quot;)
+indices &lt;- match(sperm_genes, dimnames(person_tissue_genes)[[3]])</code></pre>
+</div>
+<div id="ensg00000258484" class="section level2">
+<h2>ENSG00000258484</h2>
+<pre class="r"><code>tmat[,indices[1]]</code></pre>
+<pre><code>##  [1] -10.2118460  -7.7420850  -3.8308095  -6.5271970  -4.1739110
+##  [6]  -6.1029570  -1.4855607  -2.3936257  -4.0103480  -2.8166979
+## [11]  -4.5352496  -4.9026179  -2.0603992  -3.3660219  -3.9919969
+## [16]  -7.0391043  -2.8015182  -4.0922368  -4.1962517  -3.1417650
+## [21]  -5.0209579  -0.7768561  -5.3601130   0.0000000   0.0000000
+## [26]  -5.4382263  -5.3923620  -5.0928089  -5.4166317  -6.5762663
+## [31]   0.0000000  -5.7841609  -4.2768549  -2.4893132  -3.8411087
+## [36]  -6.5713380  -1.4949712  -9.3370882  -8.0673370   0.0000000
+## [41]  -5.3064044  -3.4809459   0.0000000  -6.2226794  -7.4725106
+## [46]  -1.9104317  -4.0206757  -5.4992914   0.0000000  -8.4990666
+## [51]   0.0000000   0.0000000  -4.0288208</code></pre>
+<pre class="r"><code>library(vioplot)</code></pre>
+<pre><code>## Loading required package: sm</code></pre>
+<pre><code>## Package &#39;sm&#39;, version 2.2-5.4: type help(sm) for summary information</code></pre>
+<pre class="r"><code>par(mfrow = c(3,3))
+for(j in 1:53){
+  ll &lt;-lm(person_tissue_genes[,j,indices[1]] ~ sample_attributes$SEX)
+  temp1 &lt;- person_tissue_genes[,j,indices[1]]
+  temp2 &lt;- sample_attributes$SEX
+  temp11 &lt;- temp1[which(!is.na(temp1))]
+  temp21 &lt;- temp2[which(!is.na(temp1))]
+  temp1_M  &lt;- temp11[which(temp21 == 1)]
+  temp1_F  &lt;- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}</code></pre>
+<p><img src="sex_comparison_study_2_files/figure-html/unnamed-chunk-26-1.png" width="672" /><img src="sex_comparison_study_2_files/figure-html/unnamed-chunk-26-2.png" width="672" /><img src="sex_comparison_study_2_files/figure-html/unnamed-chunk-26-3.png" width="672" /><img src="sex_comparison_study_2_files/figure-html/unnamed-chunk-26-4.png" width="672" /><img src="sex_comparison_study_2_files/figure-html/unnamed-chunk-26-5.png" width="672" /><img src="sex_comparison_study_2_files/figure-html/unnamed-chunk-26-6.png" width="672" /></p>
+</div>
+<div id="ensg00000131759" class="section level2">
+<h2>ENSG00000131759</h2>
+<pre class="r"><code>tmat[,indices[2]]</code></pre>
+<pre><code>##  [1] -3.03741529 -1.13465624 -1.93364117 -2.32805235 -2.67572608
+##  [6] -1.37553299 -0.18017948  0.33247214 -1.79278889 -1.07466195
+## [11] -0.33167453 -1.65988498 -1.18495657 -0.59155614 -1.66860827
+## [16] -0.28502836  0.05671428 -0.49022168 -0.40669365 -0.17727063
+## [21] -0.42329331 -0.26826412  0.12581379  0.00000000  0.00000000
+## [26] -1.54327529 -1.13139898 -1.12588815 -0.38947799 -1.19450678
+## [31]  0.00000000 -1.04336156 -1.19492717  0.54144503  0.16988781
+## [36] -1.14097449 -0.27224843 -0.59929470 -2.74063659  0.00000000
+## [41] -0.09122260  0.33519848  0.00000000 -1.48945334 -1.91822790
+## [46] -3.30020245 -1.53505610 -0.65619672  0.00000000 -1.25253827
+## [51]  0.00000000  0.00000000  0.76639346</code></pre>
+<pre class="r"><code>library(vioplot)
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll &lt;-lm(person_tissue_genes[,j,indices[2]] ~ sample_attributes$SEX)
+  temp1 &lt;- person_tissue_genes[,j,indices[2]]
+  temp2 &lt;- sample_attributes$SEX
+  temp11 &lt;- temp1[which(!is.na(temp1))]
+  temp21 &lt;- temp2[which(!is.na(temp1))]
+  temp1_M  &lt;- temp11[which(temp21 == 1)]
+  temp1_F  &lt;- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}</code></pre>
+<p><img src="sex_comparison_study_2_files/figure-html/unnamed-chunk-28-1.png" width="672" /><img src="sex_comparison_study_2_files/figure-html/unnamed-chunk-28-2.png" width="672" /><img src="sex_comparison_study_2_files/figure-html/unnamed-chunk-28-3.png" width="672" /><img src="sex_comparison_study_2_files/figure-html/unnamed-chunk-28-4.png" width="672" /><img src="sex_comparison_study_2_files/figure-html/unnamed-chunk-28-5.png" width="672" /><img src="sex_comparison_study_2_files/figure-html/unnamed-chunk-28-6.png" width="672" /></p>
+</div>
+<div id="ensg00000105146" class="section level2">
+<h2>ENSG00000105146</h2>
+<pre class="r"><code>tmat[,indices[3]]</code></pre>
+<pre><code>##  [1] -0.9444997 -3.6432296 -3.2072813 -2.4098156 -4.3141872 -2.6405128
+##  [7] -1.9396304 -1.6615164 -1.5477088 -1.1947727 -1.0992848 -1.1837837
+## [13] -1.3653917 -0.9045914 -1.6228712  0.0389261 -0.7428696 -0.9866609
+## [19] -3.0391735 -2.1841463 -0.3970442  1.0715573 -2.6522969  0.0000000
+## [25]  0.0000000 -3.5717505 -2.5144838 -3.2035474 -4.1977879 -6.3416333
+## [31]  0.0000000 -3.9354304 -4.2828638 -0.9077764 -0.7600432 -2.7949024
+## [37] -0.1801722 -1.2036336 -1.5482064  0.0000000 -2.2965283 -1.8886692
+## [43]  0.0000000 -4.7216080 -3.4267913 -0.7201210 -3.5757672 -1.7555251
+## [49]  0.0000000 -3.5078616  0.0000000  0.0000000  0.5081775</code></pre>
+<pre class="r"><code>library(vioplot)
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll &lt;-lm(person_tissue_genes[,j,indices[3]] ~ sample_attributes$SEX)
+  temp1 &lt;- person_tissue_genes[,j,indices[3]]
+  temp2 &lt;- sample_attributes$SEX
+  temp11 &lt;- temp1[which(!is.na(temp1))]
+  temp21 &lt;- temp2[which(!is.na(temp1))]
+  temp1_M  &lt;- temp11[which(temp21 == 1)]
+  temp1_F  &lt;- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}</code></pre>
+<p><img src="sex_comparison_study_2_files/figure-html/unnamed-chunk-30-1.png" width="672" /><img src="sex_comparison_study_2_files/figure-html/unnamed-chunk-30-2.png" width="672" /><img src="sex_comparison_study_2_files/figure-html/unnamed-chunk-30-3.png" width="672" /><img src="sex_comparison_study_2_files/figure-html/unnamed-chunk-30-4.png" width="672" /><img src="sex_comparison_study_2_files/figure-html/unnamed-chunk-30-5.png" width="672" /><img src="sex_comparison_study_2_files/figure-html/unnamed-chunk-30-6.png" width="672" /></p>
+</div>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

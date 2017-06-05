@@ -1,0 +1,5 @@
+p-value	q-value	pathway	source	external_id	members_input_overlap	members_input_overlap_geneids	size	effective_size
+0.000292515044011	0.00643533096825	er associated degradation (erad) pathway	BioCarta	eradpathway	ENSG00000196547; ENSG00000140400	4123; 4122	19	19
+0.00264862506242	0.0291348756866	Acute myeloid leukemia - Homo sapiens (human)	KEGG	path:hsa05221	ENSG00000002330; ENSG00000131759	5914; 572	57	57
+0.00888195752265	0.041876234813	Phase 1 - Functionalization of compounds	Reactome	R-HSA-211945	ENSG00000063438; ENSG00000115138	57491; 5443	110	106
+0.00904394158501	0.041876234813	Th17 cell differentiation - Homo sapiens (human)	KEGG	path:hsa04659	ENSG00000198502; ENSG00000131759	3127; 5914	107	107

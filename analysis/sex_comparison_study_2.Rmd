@@ -1,0 +1,294 @@
+---
+title: "Sex comparison study part 2"
+author: "Kushal K Dey"
+date: "6/5/2017"
+output: html_document
+---
+
+In this script, we perform additional experiments on the sex specific systemic behavior of genes.
+
+## Positive and Negative systemic genes (by t-score)
+
+```{r}
+betahat_sebetahat <- get(load("../output/sex_cor_nonmash.rda"))
+sample_attributes <- get(load("../output/sample_attributes_filtered.rda"))
+person_tissue_genes <- get(load("../output/person_tissue_genes_voom.rda"))
+```
+
+```{r}
+betahat_mat <- betahat_sebetahat$betahat
+sebetahat_mat <- betahat_sebetahat$sebetahat
+pval_mat <- betahat_sebetahat$pval
+rsquare_mat <- betahat_sebetahat$rsquare
+```
+
+```{r}
+tmat <- betahat_mat/sebetahat_mat
+abs_tmat <- abs(tmat)
+column_sum_1 <- apply(tmat, 2, function(x) return(quantile(x, 0.7)))
+sort(column_sum_1, decreasing = FALSE)[1:10]
+dimnames(person_tissue_genes)[[3]][order(column_sum_1, decreasing = FALSE)[1:10]]
+```
+
+```{r}
+column_sum_2 <- apply(tmat, 2, function(x) return(quantile(x, 0.7)))
+sort(column_sum_2, decreasing = TRUE)[1:20]
+dimnames(person_tissue_genes)[[3]][order(column_sum_2, decreasing = TRUE)[1:10]]
+```
+
+```{r}
+names <- dimnames(person_tissue_genes)[[3]][order(column_sum_1, decreasing = FALSE)[1:10]]
+write.table(names, file = "../utilities/sex_negative_genes.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+```{r}
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+```{r}
+sex_paths <- read.delim("../utilities/sex_pathway_negative_1.tab")
+cbind.data.frame(sex_paths$q.value, sex_paths$pathway, sex_paths$members_input_overlap_geneids)
+```
+
+
+```{r fig.height = 10}
+pathway2 <- read.delim("../utilities/sex_pathway_negative_1.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 1, cexCol = 1, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+```{r}
+names <- dimnames(person_tissue_genes)[[3]][order(column_sum_1, decreasing = TRUE)[1:25]]
+write.table(names, file = "../utilities/sex_positive_genes.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+```{r}
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+```{r}
+sex_paths <- read.delim("../utilities/sex_pathway_positive_1.tab")
+cbind.data.frame(sex_paths$q.value, sex_paths$pathway, sex_paths$members_input_overlap_geneids)
+```
+
+```{r fig.height = 10}
+pathway2 <- read.delim("../utilities/sex_pathway_positive_1.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 1, cexCol = 1, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+## Positive and Negative systemic genes (by beta-score)
+
+```{r}
+column_sum_3 <- apply(betahat_mat, 2, function(x) return(quantile(x, 0.7)))
+sort(column_sum_3, decreasing = FALSE)[1:10]
+order(column_sum_3, decreasing = FALSE)[1:10]
+```
+
+```{r}
+column_sum_4 <- apply(betahat_mat, 2, function(x) return(quantile(x, 0.7)))
+sort(column_sum_4, decreasing = TRUE)[1:10]
+order(column_sum_4, decreasing = TRUE)[1:10]
+```
+
+
+```{r}
+names <- dimnames(person_tissue_genes)[[3]][order(column_sum_3, decreasing = FALSE)[1:40]]
+write.table(names, file = "../utilities/sex_negative_genes_2.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+```{r}
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+```{r}
+sex_paths <- read.delim("../utilities/sex_pathway_negative_2.tab")
+cbind.data.frame(sex_paths$q.value, sex_paths$pathway, sex_paths$members_input_overlap_geneids)
+```
+
+```{r fig.height = 10}
+pathway2 <- read.delim("../utilities/sex_pathway_negative_2.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 1, cexCol = 1, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+The GO annotations table in this case reveal sperm related several GOs.
+
+```{r}
+go_tab <- read.delim("../utilities/GO_negative_2.tab")
+dat2 <- cbind.data.frame(go_tab$q.value, go_tab$term_name, go_tab$members_input_overlap_geneids)
+dat2
+```
+
+
+```{r}
+names <- dimnames(person_tissue_genes)[[3]][order(column_sum_4, decreasing = TRUE)[1:25]]
+write.table(names, file = "../utilities/sex_positive_genes_2.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+```{r}
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+```{r}
+sex_paths <- read.delim("../utilities/sex_pathway_positive_2.tab")
+cbind.data.frame(sex_paths$q.value, sex_paths$pathway, sex_paths$members_input_overlap_geneids)
+```
+
+```{r fig.height = 10}
+pathway2 <- read.delim("../utilities/sex_pathway_positive_2.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 1, cexCol = 1, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+
+
+## Sperm related genes (scatter plots)
+
+We look at the scatter plot analysis of the sperm related genes.
+
+```{r}
+sperm_genes <- c("ENSG00000258484", "ENSG00000131759", "ENSG00000105146",
+                 "ENSG00000130005")
+indices <- match(sperm_genes, dimnames(person_tissue_genes)[[3]])
+```
+
+## ENSG00000258484
+
+```{r}
+tmat[,indices[1]]
+```
+
+```{r}
+library(vioplot)
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices[1]] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices[1]]
+  temp2 <- sample_attributes$SEX
+  temp11 <- temp1[which(!is.na(temp1))]
+  temp21 <- temp2[which(!is.na(temp1))]
+  temp1_M  <- temp11[which(temp21 == 1)]
+  temp1_F  <- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+## ENSG00000131759
+
+```{r}
+tmat[,indices[2]]
+```
+
+```{r}
+library(vioplot)
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices[2]] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices[2]]
+  temp2 <- sample_attributes$SEX
+  temp11 <- temp1[which(!is.na(temp1))]
+  temp21 <- temp2[which(!is.na(temp1))]
+  temp1_M  <- temp11[which(temp21 == 1)]
+  temp1_F  <- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+## ENSG00000105146
+
+```{r}
+tmat[,indices[3]]
+```
+
+```{r}
+library(vioplot)
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices[3]] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices[3]]
+  temp2 <- sample_attributes$SEX
+  temp11 <- temp1[which(!is.na(temp1))]
+  temp21 <- temp2[which(!is.na(temp1))]
+  temp1_M  <- temp11[which(temp21 == 1)]
+  temp1_F  <- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+

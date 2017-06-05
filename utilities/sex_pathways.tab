@@ -1,0 +1,7 @@
+p-value	q-value	pathway	source	external_id	members_input_overlap	members_input_overlap_geneids	size	effective_size
+0.000184487320567	0.0010867521541	Nephrin/Neph1 signaling in the kidney podocyte	PID	nephrin_neph1_pathway	ENSG00000071051; ENSG00000002330	8440; 572	29	29
+0.000197591300745	0.0010867521541	IGF1 pathway	PID	igf1_pathway	ENSG00000071051; ENSG00000002330	8440; 572	30	30
+0.000467334456363	0.00171355967333	BDNF	NetPath	Pathway_BDNF	ENSG00000071051; ENSG00000002330	8440; 572	46	46
+0.00144398457985	0.00365978605753	Signaling events mediated by Hepatocyte Growth Factor Receptor (c-Met)	PID	met_pathway	ENSG00000071051; ENSG00000002330	8440; 572	82	81
+0.00166353911706	0.00365978605753	ErbB signaling pathway - Homo sapiens (human)	KEGG	path:hsa04012	ENSG00000071051; ENSG00000002330	572; 8440	88	87
+0.00448202232451	0.00821704092826	Brain-Derived Neurotrophic Factor (BDNF) signaling pathway	Wikipathways	WP2380	ENSG00000071051; ENSG00000002330	8440; 572	144	144
