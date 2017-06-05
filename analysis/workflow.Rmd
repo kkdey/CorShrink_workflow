@@ -33,7 +33,7 @@ a low dimensional structure representation to impute the values.
 - [CorShrink vs PDSCE](PDSCE_vs_CorShrink.html)
 - [CorShrink vs Sparse Cov Estimation (SPCOV)](spcov_CorShrink.html)
 
-### CorShrink and CountClust clusters on GTEx data
+### CorShrink and tissues/CountClust clusters on GTEx data
 
 [Dey et al 2017](http://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1006599)
 obtained clusters of GTEx tissue samples from the gene expression data using a Grade of Membership approach. Here we try to relate the clusters obtained there and the genes that were found to drive these clusters with their tissue-tissue correlation structure patterns. Also of 
@@ -85,6 +85,27 @@ In this section, we check how the reads expression of the genes in the GTEx data
 
 - [Reads expression and CorShrink](reads_expression_CorShrink.html)
 - [Reads data for Muscle and Heart genes that show low overall correlation](muscle_heart_genes_reads_expression.html)
+
+
+### Systemic effects analysis in GTEx
+
+CorShrink identifies genes that show high correlation across all tissues, 
+both brain and non brain. In this section, we try to dig deeper into learning
+more about systemic effects. 
+
+The idea is to compute the gene and tissue specific correlation across samples with respect to sample meta-characteristics such as age, sex, time of death, body temperature etc. We then check if there are genes that show significant effect in regression coefficient across most tissues an whether they can be traced back to the pathways we obtained from tissue-tissue correlations in CorShrink.
+
+- [BMI systemic effects analysis](bmi_compare_study.html)
+- [Circadian rhythm/clock trajectories](circadian_rhythm_analysis.html)
+- [Circadian rhythm/clock effects analysis](death_time_comparison.html)
+- [Age specific systemic analysis](age_comparison_study.html)
+- [Sex specific systemic analysis](sex_comparison_study.html)
+- [Sex specific systemic analysis - part 2](sex_comparison_study_2.html)
+- [Is there visible effect of Nicotine pathways](nicotine_study.html)
+
+
+
+
 
 
 ### Dimension Reduction and CorShrink

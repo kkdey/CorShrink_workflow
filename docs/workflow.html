@@ -106,8 +106,8 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <li><a href="spcov_CorShrink.html">CorShrink vs Sparse Cov Estimation (SPCOV)</a></li>
 </ul>
 </div>
-<div id="corshrink-and-countclust-clusters-on-gtex-data" class="section level3">
-<h3>CorShrink and CountClust clusters on GTEx data</h3>
+<div id="corshrink-and-tissuescountclust-clusters-on-gtex-data" class="section level3">
+<h3>CorShrink and tissues/CountClust clusters on GTEx data</h3>
 <p><a href="http://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1006599">Dey et al 2017</a> obtained clusters of GTEx tissue samples from the gene expression data using a Grade of Membership approach. Here we try to relate the clusters obtained there and the genes that were found to drive these clusters with their tissue-tissue correlation structure patterns. Also of interest is how this correlation structure depends on the expression patterns of the genes.</p>
 <ul>
 <li><a href="one_gene_correlation.html">CorShrink demo on one gene in GTEx</a></li>
@@ -156,6 +156,20 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <ul>
 <li><a href="reads_expression_CorShrink.html">Reads expression and CorShrink</a></li>
 <li><a href="muscle_heart_genes_reads_expression.html">Reads data for Muscle and Heart genes that show low overall correlation</a></li>
+</ul>
+</div>
+<div id="systemic-effects-analysis-in-gtex" class="section level3">
+<h3>Systemic effects analysis in GTEx</h3>
+<p>CorShrink identifies genes that show high correlation across all tissues, both brain and non brain. In this section, we try to dig deeper into learning more about systemic effects.</p>
+<p>The idea is to compute the gene and tissue specific correlation across samples with respect to sample meta-characteristics such as age, sex, time of death, body temperature etc. We then check if there are genes that show significant effect in regression coefficient across most tissues an whether they can be traced back to the pathways we obtained from tissue-tissue correlations in CorShrink.</p>
+<ul>
+<li><a href="bmi_compare_study.html">BMI systemic effects analysis</a></li>
+<li><a href="circadian_rhythm_analysis.html">Circadian rhythm/clock trajectories</a></li>
+<li><a href="death_time_comparison.html">Circadian rhythm/clock effects analysis</a></li>
+<li><a href="age_comparison_study.html">Age specific systemic analysis</a></li>
+<li><a href="sex_comparison_study.html">Sex specific systemic analysis</a></li>
+<li><a href="sex_comparison_study_2.html">Sex specific systemic analysis - part 2</a></li>
+<li><a href="nicotine_study.html">Is there visible effect of Nicotine pathways</a></li>
 </ul>
 </div>
 <div id="dimension-reduction-and-corshrink" class="section level3">
