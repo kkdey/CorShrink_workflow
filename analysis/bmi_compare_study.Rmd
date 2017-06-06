@@ -1,0 +1,169 @@
+---
+title: "BMI comparison study"
+author: "Kushal K Dey"
+date: "6/3/2017"
+output: html_document
+---
+
+## BMI study
+
+```{r}
+betahat_sebetahat <- get(load("../output/bmi_cor_nonmash.rda"))
+sample_attributes <- get(load("../output/sample_attributes_filtered.rda"))
+person_tissue_genes <- get(load("../output/person_tissue_genes_voom.rda"))
+```
+
+```{r}
+betahat_mat <- betahat_sebetahat$betahat
+sebetahat_mat <- betahat_sebetahat$sebetahat
+pval_mat <- betahat_sebetahat$pval
+rsquare_mat <- betahat_sebetahat$rsquare
+```
+
+```{r}
+tmat <- betahat_mat/sebetahat_mat
+abs_tmat <- abs(tmat)
+column_sum <- apply(abs_tmat, 2, function(x) return(quantile(x, 0.7)))
+sort(column_sum, decreasing = TRUE)[1:10]
+indices <- order(column_sum, decreasing = TRUE)[1:10]
+```
+
+```{r}
+names <- dimnames(person_tissue_genes)[[3]][order(column_sum, decreasing = TRUE)[1:10]]
+names
+```
+
+## ENSG00000172236
+
+```{r}
+tmat[,indices[2]]
+```
+## ENSG00000166896
+
+```{r}
+tmat[,indices[1]]
+```
+
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+#  ll <-lm(person_tissue_genes[,j,indices[3]] ~ sample_attributes$AGE)
+  temp1 <- person_tissue_genes[,j,indices[1]]
+  plot(sample_attributes$BMI, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$BMI, temp1, family = "gaussian"), 
+        col="red", lty=2, lwd=2)
+}
+```
+
+```{r}
+dimnames(person_tissue_genes)[[3]][10283]
+```
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+#  ll <-lm(person_tissue_genes[,j,indices[3]] ~ sample_attributes$AGE)
+  temp1 <- person_tissue_genes[,j,indices[2]]
+  plot(sample_attributes$BMI, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$BMI, temp1, family = "gaussian"), 
+        col="red", lty=2, lwd=2)
+}
+```
+
+
+## Pathway analysis of Genes with high t-scores
+
+```{r}
+names <- dimnames(person_tissue_genes)[[3]][which(column_sum > 1.5)]
+write.table(names, file = "../utilities/bmi_genes.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+ensembl = biomaRt::useMart("ensembl", dataset="hsapiens_gene_ensembl", host="www.ensembl.org")
+res = biomaRt::getBM(attributes = c("chromosome_name", "ensembl_gene_id", "external_gene_name", "description"), filters = c("ensembl_gene_id"), values = names,  
+mart = ensembl)
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+
+```{r}
+names
+```
+
+```{r}
+bmi_paths <- read.delim("../utilities/bmi_pathways.tab")
+cbind.data.frame(bmi_paths$q.value, bmi_paths$pathway, bmi_paths$members_input_overlap_geneids)
+```
+
+```{r fig.height = 10}
+pathway2 <- read.delim("../utilities/bmi_pathways.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 1, cexCol = 1, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+
+
+## Pathway analysis of top genes beyond quantile threshold
+
+```{r}
+column_sum_1 <- apply(abs_tmat, 2, function(x) return(quantile(x, 0.7)))
+names <- dimnames(person_tissue_genes)[[3]][order(column_sum_1, decreasing = TRUE)[1:50]]
+write.table(names, file = "../utilities/bmi_genes_2.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+ensembl = biomaRt::useMart("ensembl", dataset="hsapiens_gene_ensembl", host="www.ensembl.org")
+res = biomaRt::getBM(attributes = c("chromosome_name", "ensembl_gene_id", "external_gene_name", "description"), filters = c("ensembl_gene_id"), values = names,  
+mart = ensembl)
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+```{r}
+names
+```
+
+```{r}
+bmi_paths <- read.delim("../utilities/bmi_pathways_2.tab")
+cbind.data.frame(bmi_paths$q.value, bmi_paths$pathway, bmi_paths$members_input_overlap_geneids)
+```
+
+```{r fig.height = 10}
+pathway2 <- read.delim("../utilities/bmi_pathways_2.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 1, cexCol = 1, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+

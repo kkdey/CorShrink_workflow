@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Kushal K Dey" />
+
+
+<title>BMI genes analysis</title>
+
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="cosmo.css" type="text/css" />
+
+</head>
+
+<body>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
+    <link href="../docs/cosmo.css" rel="stylesheet">
+    <link href="../docs/cosmo.min.css" rel="stylesheet">
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../docs/bootstrap/js/bootstrap.min.js"></script>
+
+<body>
+
+<div class = "nav" align = "middle">
+<div class= "p1"></div>
+<p>
+  <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "workflow.html">WORKFLOW</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "about.html">METHODS</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "license.html">LICENSE</a> 
+   &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
+ </p>
+</div>  
+<!-- <div class="nav">
+  <a href="index.html">Home page</a> &nbsp &nbsp
+  <a href="musings.html">Musings</a> &nbsp &nbsp
+  <a href="town.html">My town</a> &nbsp &nbsp
+  <a href="links.html">Links</a>
+</div> -->
+
+<!-- Main content -->
+</body>
+</html>
+
+
+<h1 class="title toc-ignore">BMI genes analysis</h1>
+<h4 class="author"><em>Kushal K Dey</em></h4>
+<h4 class="date"><em>6/6/2017</em></h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#getting-to-know-these-genes">Getting to know these genes</a></li>
+<li><a href="#ensg00000174125">ENSG00000174125</a></li>
+<li><a href="#ensg00000187796">ENSG00000187796</a></li>
+<li><a href="#ensg00000160255">ENSG00000160255</a></li>
+<li><a href="#ensg00000129007">ENSG00000129007</a></li>
+<li><a href="#ensg00000096968">ENSG00000096968</a></li>
+<li><a href="#corshrink-matrices">CorShrink matrices</a></li>
+</ul>
+</div>
+
+<div id="getting-to-know-these-genes" class="section level2">
+<h2>Getting to know these genes</h2>
+<p>The genes we obtained as part of the tuberculosis pathway as seen from the BMI study are as follows <em>ENSG00000174125</em>, <em>ENSG00000187796</em>, <em>ENSG00000160255</em>, <em>ENSG00000129007</em>, <em>ENSG00000096968</em></p>
+<p><a href="https://gtexportal.org/home/gene/ENSG00000174125">ENSG00000174125</a> <a href="https://gtexportal.org/home/gene/ENSG00000187796">ENSG00000187796</a> <a href="https://gtexportal.org/home/gene/ENSG00000160255">ENSG00000160255</a> <a href="https://gtexportal.org/home/gene/ENSG00000129007">ENSG00000129007</a> <a href="https://gtexportal.org/home/gene/ENSG00000096968">ENSG00000096968</a></p>
+<pre class="r"><code>sample_attributes &lt;- get(load(&quot;../output/sample_attributes_filtered.rda&quot;))
+person_tissue_genes &lt;- get(load(&quot;../output/person_tissue_genes_voom.rda&quot;))</code></pre>
+<pre class="r"><code>indices &lt;- match(c(&quot;ENSG00000174125&quot;, &quot;ENSG00000187796&quot;,
+                   &quot;ENSG00000160255&quot;, &quot;ENSG00000129007&quot;,
+                   &quot;ENSG00000096968&quot;), dimnames(person_tissue_genes)[[3]])</code></pre>
+</div>
+<div id="ensg00000174125" class="section level2">
+<h2>ENSG00000174125</h2>
+<pre class="r"><code>par(mfrow = c(3,3))
+for(j in 1:53){
+  temp1 &lt;- person_tissue_genes[,j,indices[1]]
+  plot(sample_attributes$BMI, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$BMI, temp1,  family = &quot;gaussian&quot;), 
+        col=&quot;red&quot;, lty=2, lwd=2)
+}</code></pre>
+<p><img src="bmi_analysis_files/figure-html/unnamed-chunk-3-1.png" width="672" /><img src="bmi_analysis_files/figure-html/unnamed-chunk-3-2.png" width="672" /><img src="bmi_analysis_files/figure-html/unnamed-chunk-3-3.png" width="672" /><img src="bmi_analysis_files/figure-html/unnamed-chunk-3-4.png" width="672" /><img src="bmi_analysis_files/figure-html/unnamed-chunk-3-5.png" width="672" /><img src="bmi_analysis_files/figure-html/unnamed-chunk-3-6.png" width="672" /></p>
+</div>
+<div id="ensg00000187796" class="section level2">
+<h2>ENSG00000187796</h2>
+<pre class="r"><code>par(mfrow = c(3,3))
+for(j in 1:53){
+  temp1 &lt;- person_tissue_genes[,j,indices[2]]
+  plot(sample_attributes$BMI, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$BMI, temp1, family = &quot;gaussian&quot;), 
+        col=&quot;red&quot;, lty=2, lwd=2)
+}</code></pre>
+<p><img src="bmi_analysis_files/figure-html/unnamed-chunk-4-1.png" width="672" /><img src="bmi_analysis_files/figure-html/unnamed-chunk-4-2.png" width="672" /><img src="bmi_analysis_files/figure-html/unnamed-chunk-4-3.png" width="672" /><img src="bmi_analysis_files/figure-html/unnamed-chunk-4-4.png" width="672" /><img src="bmi_analysis_files/figure-html/unnamed-chunk-4-5.png" width="672" /><img src="bmi_analysis_files/figure-html/unnamed-chunk-4-6.png" width="672" /></p>
+</div>
+<div id="ensg00000160255" class="section level2">
+<h2>ENSG00000160255</h2>
+<pre class="r"><code>par(mfrow = c(3,3))
+for(j in 1:53){
+  temp1 &lt;- person_tissue_genes[,j,indices[3]]
+  plot(sample_attributes$BMI, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$BMI, temp1, family = &quot;gaussian&quot;), 
+        col=&quot;red&quot;, lty=2, lwd=2)
+}</code></pre>
+<p><img src="bmi_analysis_files/figure-html/unnamed-chunk-5-1.png" width="672" /><img src="bmi_analysis_files/figure-html/unnamed-chunk-5-2.png" width="672" /><img src="bmi_analysis_files/figure-html/unnamed-chunk-5-3.png" width="672" /><img src="bmi_analysis_files/figure-html/unnamed-chunk-5-4.png" width="672" /><img src="bmi_analysis_files/figure-html/unnamed-chunk-5-5.png" width="672" /><img src="bmi_analysis_files/figure-html/unnamed-chunk-5-6.png" width="672" /></p>
+</div>
+<div id="ensg00000129007" class="section level2">
+<h2>ENSG00000129007</h2>
+<pre class="r"><code>par(mfrow = c(3,3))
+for(j in 1:53){
+  temp1 &lt;- person_tissue_genes[,j,indices[4]]
+  plot(sample_attributes$BMI, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$BMI, temp1, family = &quot;gaussian&quot;), 
+        col=&quot;red&quot;, lty=2, lwd=2)
+}</code></pre>
+<p><img src="bmi_analysis_files/figure-html/unnamed-chunk-6-1.png" width="672" /><img src="bmi_analysis_files/figure-html/unnamed-chunk-6-2.png" width="672" /><img src="bmi_analysis_files/figure-html/unnamed-chunk-6-3.png" width="672" /><img src="bmi_analysis_files/figure-html/unnamed-chunk-6-4.png" width="672" /><img src="bmi_analysis_files/figure-html/unnamed-chunk-6-5.png" width="672" /><img src="bmi_analysis_files/figure-html/unnamed-chunk-6-6.png" width="672" /></p>
+</div>
+<div id="ensg00000096968" class="section level2">
+<h2>ENSG00000096968</h2>
+<pre class="r"><code>par(mfrow = c(3,3))
+for(j in 1:53){
+  temp1 &lt;- person_tissue_genes[,j,indices[5]]
+  plot(sample_attributes$BMI, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$BMI, temp1, family = &quot;gaussian&quot;), 
+        col=&quot;red&quot;, lty=2, lwd=2)
+}</code></pre>
+<p><img src="bmi_analysis_files/figure-html/unnamed-chunk-7-1.png" width="672" /><img src="bmi_analysis_files/figure-html/unnamed-chunk-7-2.png" width="672" /><img src="bmi_analysis_files/figure-html/unnamed-chunk-7-3.png" width="672" /><img src="bmi_analysis_files/figure-html/unnamed-chunk-7-4.png" width="672" /><img src="bmi_analysis_files/figure-html/unnamed-chunk-7-5.png" width="672" /><img src="bmi_analysis_files/figure-html/unnamed-chunk-7-6.png" width="672" /></p>
+</div>
+<div id="corshrink-matrices" class="section level2">
+<h2>CorShrink matrices</h2>
+<p>Now we check how the CorShrink matrices look like for these genes.</p>
+<pre class="r"><code>ash_cor_mat &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_halfuniform_gtex_tissues.rda&quot;))</code></pre>
+<pre class="r"><code>common_samples &lt;- get(load(&quot;../output/common_samples.rda&quot;))
+tissue_labels &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;)[,3]
+
+#library(data.table)
+#data &lt;- data.frame(fread(&quot;../data/GTEX_V6/cis_gene_expression.txt&quot;))
+#matdata &lt;- t(data[,-c(1,2)])
+
+gene_names &lt;- as.character(read.table(file = &quot;../data/GTEX_V6/gene_names_GTEX_V6.txt&quot;)[,1])
+gene_names_1 &lt;- as.character(sapply(gene_names, function(x) return(strsplit(x, &quot;[.]&quot;)[[1]][1])))
+
+
+U &lt;- unique(tissue_labels)</code></pre>
+<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices[1]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="bmi_analysis_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices[2]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="bmi_analysis_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices[3]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="bmi_analysis_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices[4]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="bmi_analysis_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices[5]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="bmi_analysis_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+</div>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
