@@ -1,0 +1,331 @@
+---
+title: "Circadian genes analysis"
+author: "Kushal K Dey"
+date: "6/6/2017"
+output: html_document
+---
+
+## Getting to know these genes 
+
+The Circadian rhythm/clock related genes that are detected by our methods include
+*ENSG00000126368*, *ENSG00000049246*, *ENSG00000132326*, *ENSG00000213923*, *ENSG00000179094*, *ENSG00000008405*.
+
+We take a breif look into these genes.
+
+*ENSG00000126368* or **NR1D1** is an important circadian pathway regulatory gene which is suppressed by cigarette smoke in murine lungs. It is a member of the clock gene family. It regulates cell proliferation, lipid metabolism, and inflammation and is also touted as a tumor suppressor. [Article](https://www.ncbi.nlm.nih.gov/pubmed/19926613).
+
+*ENSG00000132326* or **PER2** is PER2 is a member of the Period family of genes and is expressed in a circadian pattern in the suprachiasmatic nucleus, the primary circadian pacemaker in the mammalian brain. Genes in this family encode components of the circadian clock, which regulates the daily rhythms of locomotor activity, metabolism, and behavior.
+
+*ENSG00000049246* or **PER3** is also a circadian gene, which belongs to the **PER** family along with **PER1** and **PER2**. Screening of Clock Gene Polymorphisms Demonstrates Association of a PER3 Polymorphism with Morningness–Eveningness Preference and Circadian Rhythm Sleep Disorder. [Article](https://www.nature.com/articles/srep06309).
+
+*ENSG00000213923* or (Casein kinase I isoform epsilon). The circadian clock gene Csnk1e regulates rapid eye movement sleep amount, and nonrapid eye movement sleep architecture in mice. this causes cat eye syndrome.
+
+*ENSG00000179094* or **PER1** is again from the period family of circadian clock genes. Circadian Clock Genes Per1 and Per2 Regulate the Response of Metabolism-Associated Transcripts to Sleep Disruption. [Article](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0052983).
+
+*ENSG00000008405* is a Circadian clock gene. Mammalian Cry1 and Cry2 are essential for maintenance of circadian rhythms. [Article](http://www.nature.com/nature/journal/v398/n6728/full/398627a0.html) and mutations in these genes can cause sleep phase disorder. [Article](http://www.cell.com/cell/abstract/S0092-8674(17)30346-X).
+
+## Reads expression profile
+
+We take these genes one by one and look for the reads expression across the 
+tissues. Here are the plots from the GTEx portal site.
+
+[ENSG00000132326](https://gtexportal.org/home/gene/ENSG00000132326)
+[ENSG00000126368](https://gtexportal.org/home/gene/ENSG00000126368)
+[ENSG00000049246](https://gtexportal.org/home/gene/ENSG00000049246)
+[ENSG00000213923](https://gtexportal.org/home/gene/ENSG00000213923)
+[ENSG00000179094](https://gtexportal.org/home/gene/ENSG00000179094)
+[ENSG00000008405](https://gtexportal.org/home/gene/ENSG00000008405)
+
+
+PER3 and CRY1 have high expression in brain cerebellum which is natural as it is related to sleep rhythms. 
+
+```{r}
+sample_attributes <- get(load("../output/sample_attributes_filtered.rda"))
+person_tissue_genes <- get(load("../output/person_tissue_genes_voom.rda"))
+```
+
+```{r}
+times <- strsplit(as.character(sample_attributes$DTHTIME), "[:]")
+time_stamp <- unlist(lapply(times, function(x){
+  y <- as.numeric(x[1])
+  z <- as.numeric(x[2])
+  w <- y*60+z
+  return(w)
+}))/(24*60)
+
+cos_times <- cos(2*pi*time_stamp)
+uncos_times <- 2*pi*time_stamp
+na_indices <- which(is.na(cos_times))
+
+person_tissue_genes_1 <- person_tissue_genes[-na_indices,,]
+cos_times_1 <- cos_times[-na_indices]
+uncos_times_1 <- uncos_times[-na_indices]
+```
+
+
+```{r}
+indices <- match(c("ENSG00000132326", "ENSG00000126368",
+                   "ENSG00000049246", "ENSG00000213923",
+                   "ENSG00000179094", "ENSG00000008405"), dimnames(person_tissue_genes)[[3]])
+```
+
+## ENSG00000132326
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  plot(uncos_times_1, person_tissue_genes_1[,j, indices[1]],
+       ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(uncos_times_1,person_tissue_genes_1[,j, indices[1]]), 
+        col="red", lty=2, lwd=2)
+}
+```
+
+
+## ENSG000001263683
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  plot(uncos_times_1, person_tissue_genes_1[,j, indices[2]],
+       ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(uncos_times_1,person_tissue_genes_1[,j, indices[2]]), 
+        col="red", lty=2, lwd=2)
+}
+```
+
+## ENSG00000049246
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  plot(uncos_times_1, person_tissue_genes_1[,j, indices[3]],
+       ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(uncos_times_1,person_tissue_genes_1[,j, indices[3]]), 
+        col="red", lty=2, lwd=2)
+}
+```
+
+## ENSG00000213923
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  plot(uncos_times_1, person_tissue_genes_1[,j, indices[4]],
+       ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(uncos_times_1,person_tissue_genes_1[,j, indices[4]]), 
+        col="red", lty=2, lwd=2)
+}
+```
+
+## ENSG00000179094
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  plot(uncos_times_1, person_tissue_genes_1[,j, indices[5]],
+       ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(uncos_times_1,person_tissue_genes_1[,j, indices[5]]), 
+        col="red", lty=2, lwd=2)
+}
+```
+
+## ENSG00000008405
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  plot(uncos_times_1, person_tissue_genes_1[,j, indices[6]],
+       ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+
+
+## CorShrink matrices
+
+Now we check how the CorShrink matrices look like for these genes.
+
+```{r}
+ash_cor_mat <- get(load("../output/ash_cor_only_voom_pearson_halfuniform_gtex_tissues.rda"))
+```
+
+```{r}
+common_samples <- get(load("../output/common_samples.rda"))
+tissue_labels <- read.table(file = "../data/GTEX_V6/samples_id.txt")[,3]
+
+#library(data.table)
+#data <- data.frame(fread("../data/GTEX_V6/cis_gene_expression.txt"))
+#matdata <- t(data[,-c(1,2)])
+
+gene_names <- as.character(read.table(file = "../data/GTEX_V6/gene_names_GTEX_V6.txt")[,1])
+gene_names_1 <- as.character(sapply(gene_names, function(x) return(strsplit(x, "[.]")[[1]][1])))
+
+
+U <- unique(tissue_labels)
+```
+
+```{r echo=FALSE, eval=TRUE}
+order_index <- c();
+order_index <- c(order_index, grep("Brain", U))
+order_index <- c(order_index, grep("fibroblast", U))
+order_index <- c(order_index, grep("EBV", U))
+order_index <- c(order_index, grep("Spleen", U))
+order_index <- c(order_index, grep("Whole Blood", U))
+order_index <- c(order_index, grep("Muscle - Skeletal", U))
+order_index <- c(order_index, grep("Liver", U))
+order_index <- c(order_index, grep("Pancreas", U))
+order_index <- c(order_index, grep("Stomach", U))
+order_index <- c(order_index, grep("Kidney - Cortex", U))
+order_index <- c(order_index, grep("Adrenal Gland", U))
+order_index <- c(order_index, grep("Colon - Transverse", U))
+order_index <- c(order_index, grep("Small Intestine - Terminal Ileum", U))
+order_index <- c(order_index, grep("Heart - Atrial Appendage", U))
+order_index <- c(order_index, grep("Heart - Left Ventricle", U))
+order_index <- c(order_index, grep("Minor Salivary Gland", U))
+order_index <- c(order_index, grep("Skin - Sun Exposed", U))
+order_index <- c(order_index, grep("Skin - Not Sun Exposed", U))
+order_index <- c(order_index, grep("Lung", U))
+order_index <- c(order_index, grep("Ovary", U))
+order_index <- c(order_index, grep("Thyroid", U))
+order_index <- c(order_index, grep("Pituitary", U))
+order_index <- c(order_index, grep("Testis", U))
+order_index <- c(order_index, grep("Nerve - Tibial", U))
+order_index <- c(order_index, grep("Breast - Mammary Tissue", U))
+order_index <- c(order_index, grep("Adipose - Visceral", U))
+order_index <- c(order_index, grep("Adipose - Subcutaneous", U))
+order_index <- c(order_index, grep("Artery - Coronary", U))
+order_index <- c(order_index, grep("Artery - Tibial", U))
+order_index <- c(order_index, grep("Artery - Aorta", U))
+order_index <- c(order_index, grep("Esophagus - Mucosa", U))
+order_index <- c(order_index, grep("Vagina", U))
+order_index <- c(order_index, grep("Cervix - Endocervix", U))
+order_index <- c(order_index, grep("Esophagus - Gastroesophageal Junction", U))
+order_index <- c(order_index, grep("Colon - Sigmoid", U))
+order_index <- c(order_index, grep("Esophagus - Muscularis", U))
+order_index <- c(order_index, grep("Cervix - Ectocervix", U))
+order_index <- c(order_index, grep("Fallopian", U))
+order_index <- c(order_index, grep("Prostate", U))
+order_index <- c(order_index, grep("Uterus", U))
+order_index <- c(order_index, grep("Bladder", U))
+```
+
+
+```{r}
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices[1]]),
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+```
+
+
+```{r}
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices[2]]),
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+```
+
+```{r}
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices[3]]),
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+```
+
+
+
+```{r}
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices[4]]),
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+```
+
+
+```{r}
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices[5]]),
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+```
+
+
+```{r}
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices[6]]),
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+```
+
+It seems the CorShrink plots for these genes are much denser than the ones for the p53/p63 analysis, suggesting tissue sharing of circadian effects. Also, 
+we see the very weak correlation between lymphocytes and fibroblasts with other tissues, which we validated through gene set enrichment analysis.
+
+## Correlation scatter plot (Fibroblasts)
+
+### ENSG00000130513
+
+```{r}
+##  23 is the index for fibroblasts in person_tissue_genes tissue labels
+par(mfrow=c(3,3))
+for(j in 1:53){
+  plot(person_tissue_genes[,23, indices[2]], person_tissue_genes[,j, indices[2]], col="red", pch=20, cex=1, xlab = "Fibroblasts",
+     ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+### ENSG00000185088
+
+```{r}
+##  23 is the index for fibroblasts in person_tissue_genes tissue labels
+par(mfrow=c(3,3))
+for(j in 1:53){
+  plot(person_tissue_genes[,23, indices[2]], person_tissue_genes[,j, indices[2]], col="red", pch=20, cex=1, xlab = "Fibroblasts",
+     ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+
+## Correlation scatter plot (Lymphoblasts)
+
+### ENSG00000132326
+
+```{r}
+##  22 is the index for lymphoblasts in person_tissue_genes tissue labels
+par(mfrow=c(3,3))
+for(j in 1:53){
+  plot(person_tissue_genes[,22, indices[2]], person_tissue_genes[,j, indices[2]], col="red", pch=20, cex=1, xlab = dimnames(person_tissue_genes)[[2]][22],
+     ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+### ENSG00000185088
+
+```{r}
+##  23 is the index for fibroblasts in person_tissue_genes tissue labels
+par(mfrow=c(3,3))
+for(j in 1:53){
+  plot(person_tissue_genes[,22, indices[4]], person_tissue_genes[,j, indices[2]], col="red", pch=20, cex=1, xlab = dimnames(person_tissue_genes)[[2]][22],
+     ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+

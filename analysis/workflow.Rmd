@@ -64,6 +64,8 @@ We dig deeper into the enrichment analysis
     - [Enrichment analysis of high correlation in Skin vs other tissues](enrichment_skin_nonskin.html)
     - [Enrichment analysis of high correlation in Stomach and Pancreas](enrichment_stomach_pancreas.html)
     - [Enrichment analysis of high correlation in Pituitary and Testis](enrichment_pituitary_testis.html)
+    - [Enrichment analysis of high,low correlation genes in Fibroblasts and Lymphoblasts](enrichment_fibroblast_lymphoblast.html)
+    
 
 
 
@@ -76,6 +78,7 @@ We dig deeper into the enrichment analysis
     - [Enrichment analysis in Stomach and Pancreas](enrichment_stomach_pancreas_2.html)
     - [Enrichment analysis in Arteries](enrichment_arteries_2.html)
     - [Enrichment analysis in Blood and Spleen](enrichment_blood_spleen_2.html)
+    - [Enrichment analysis of high,low correlation genes in Fibroblasts and Lymphoblasts](enrichment_fibroblast_lymphocyte_2.html)
     
 
 
@@ -102,6 +105,7 @@ The idea is to compute the gene and tissue specific correlation across samples w
 - [Sex specific systemic analysis](sex_comparison_study.html)
 - [Sex specific systemic analysis - part 2](sex_comparison_study_2.html)
 - [Is there visible effect of Nicotine pathways](nicotine_study.html)
+- [p53 and p63 gene studies](p53_p63_analysis.html)
 
 
 

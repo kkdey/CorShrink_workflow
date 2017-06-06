@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Kushal K Dey" />
+
+
+<title>Circadian genes analysis</title>
+
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="cosmo.css" type="text/css" />
+
+</head>
+
+<body>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
+    <link href="../docs/cosmo.css" rel="stylesheet">
+    <link href="../docs/cosmo.min.css" rel="stylesheet">
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../docs/bootstrap/js/bootstrap.min.js"></script>
+
+<body>
+
+<div class = "nav" align = "middle">
+<div class= "p1"></div>
+<p>
+  <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "workflow.html">WORKFLOW</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "about.html">METHODS</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "license.html">LICENSE</a> 
+   &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
+ </p>
+</div>  
+<!-- <div class="nav">
+  <a href="index.html">Home page</a> &nbsp &nbsp
+  <a href="musings.html">Musings</a> &nbsp &nbsp
+  <a href="town.html">My town</a> &nbsp &nbsp
+  <a href="links.html">Links</a>
+</div> -->
+
+<!-- Main content -->
+</body>
+</html>
+
+
+<h1 class="title toc-ignore">Circadian genes analysis</h1>
+<h4 class="author"><em>Kushal K Dey</em></h4>
+<h4 class="date"><em>6/6/2017</em></h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#getting-to-know-these-genes">Getting to know these genes</a></li>
+<li><a href="#reads-expression-profile">Reads expression profile</a></li>
+<li><a href="#ensg00000132326">ENSG00000132326</a></li>
+<li><a href="#ensg000001263683">ENSG000001263683</a></li>
+<li><a href="#ensg00000049246">ENSG00000049246</a></li>
+<li><a href="#ensg00000213923">ENSG00000213923</a></li>
+<li><a href="#ensg00000179094">ENSG00000179094</a></li>
+<li><a href="#ensg00000008405">ENSG00000008405</a></li>
+<li><a href="#corshrink-matrices">CorShrink matrices</a></li>
+<li><a href="#correlation-scatter-plot-fibroblasts">Correlation scatter plot (Fibroblasts)</a><ul>
+<li><a href="#ensg00000130513">ENSG00000130513</a></li>
+<li><a href="#ensg00000185088">ENSG00000185088</a></li>
+</ul></li>
+<li><a href="#correlation-scatter-plot-lymphoblasts">Correlation scatter plot (Lymphoblasts)</a><ul>
+<li><a href="#ensg00000132326-1">ENSG00000132326</a></li>
+<li><a href="#ensg00000185088-1">ENSG00000185088</a></li>
+</ul></li>
+</ul>
+</div>
+
+<div id="getting-to-know-these-genes" class="section level2">
+<h2>Getting to know these genes</h2>
+<p>The Circadian rhythm/clock related genes that are detected by our methods include <em>ENSG00000126368</em>, <em>ENSG00000049246</em>, <em>ENSG00000132326</em>, <em>ENSG00000213923</em>, <em>ENSG00000179094</em>, <em>ENSG00000008405</em>.</p>
+<p>We take a breif look into these genes.</p>
+<p><em>ENSG00000126368</em> or <strong>NR1D1</strong> is an important circadian pathway regulatory gene which is suppressed by cigarette smoke in murine lungs. It is a member of the clock gene family. It regulates cell proliferation, lipid metabolism, and inflammation and is also touted as a tumor suppressor. <a href="https://www.ncbi.nlm.nih.gov/pubmed/19926613">Article</a>.</p>
+<p><em>ENSG00000132326</em> or <strong>PER2</strong> is PER2 is a member of the Period family of genes and is expressed in a circadian pattern in the suprachiasmatic nucleus, the primary circadian pacemaker in the mammalian brain. Genes in this family encode components of the circadian clock, which regulates the daily rhythms of locomotor activity, metabolism, and behavior.</p>
+<p><em>ENSG00000049246</em> or <strong>PER3</strong> is also a circadian gene, which belongs to the <strong>PER</strong> family along with <strong>PER1</strong> and <strong>PER2</strong>. Screening of Clock Gene Polymorphisms Demonstrates Association of a PER3 Polymorphism with Morningness–Eveningness Preference and Circadian Rhythm Sleep Disorder. <a href="https://www.nature.com/articles/srep06309">Article</a>.</p>
+<p><em>ENSG00000213923</em> or (Casein kinase I isoform epsilon). The circadian clock gene Csnk1e regulates rapid eye movement sleep amount, and nonrapid eye movement sleep architecture in mice. this causes cat eye syndrome.</p>
+<p><em>ENSG00000179094</em> or <strong>PER1</strong> is again from the period family of circadian clock genes. Circadian Clock Genes Per1 and Per2 Regulate the Response of Metabolism-Associated Transcripts to Sleep Disruption. <a href="http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0052983">Article</a>.</p>
+<p><em>ENSG00000008405</em> is a Circadian clock gene. Mammalian Cry1 and Cry2 are essential for maintenance of circadian rhythms. <a href="http://www.nature.com/nature/journal/v398/n6728/full/398627a0.html">Article</a> and mutations in these genes can cause sleep phase disorder. <a href="http://www.cell.com/cell/abstract/S0092-8674(17)30346-X">Article</a>.</p>
+</div>
+<div id="reads-expression-profile" class="section level2">
+<h2>Reads expression profile</h2>
+<p>We take these genes one by one and look for the reads expression across the tissues. Here are the plots from the GTEx portal site.</p>
+<p><a href="https://gtexportal.org/home/gene/ENSG00000132326">ENSG00000132326</a> <a href="https://gtexportal.org/home/gene/ENSG00000126368">ENSG00000126368</a> <a href="https://gtexportal.org/home/gene/ENSG00000049246">ENSG00000049246</a> <a href="https://gtexportal.org/home/gene/ENSG00000213923">ENSG00000213923</a> <a href="https://gtexportal.org/home/gene/ENSG00000179094">ENSG00000179094</a> <a href="https://gtexportal.org/home/gene/ENSG00000008405">ENSG00000008405</a></p>
+<p>PER3 and CRY1 have high expression in brain cerebellum which is natural as it is related to sleep rhythms.</p>
+<pre class="r"><code>sample_attributes &lt;- get(load(&quot;../output/sample_attributes_filtered.rda&quot;))
+person_tissue_genes &lt;- get(load(&quot;../output/person_tissue_genes_voom.rda&quot;))</code></pre>
+<pre class="r"><code>times &lt;- strsplit(as.character(sample_attributes$DTHTIME), &quot;[:]&quot;)
+time_stamp &lt;- unlist(lapply(times, function(x){
+  y &lt;- as.numeric(x[1])
+  z &lt;- as.numeric(x[2])
+  w &lt;- y*60+z
+  return(w)
+}))/(24*60)
+
+cos_times &lt;- cos(2*pi*time_stamp)
+uncos_times &lt;- 2*pi*time_stamp
+na_indices &lt;- which(is.na(cos_times))
+
+person_tissue_genes_1 &lt;- person_tissue_genes[-na_indices,,]
+cos_times_1 &lt;- cos_times[-na_indices]
+uncos_times_1 &lt;- uncos_times[-na_indices]</code></pre>
+<pre class="r"><code>indices &lt;- match(c(&quot;ENSG00000132326&quot;, &quot;ENSG00000126368&quot;,
+                   &quot;ENSG00000049246&quot;, &quot;ENSG00000213923&quot;,
+                   &quot;ENSG00000179094&quot;, &quot;ENSG00000008405&quot;), dimnames(person_tissue_genes)[[3]])</code></pre>
+</div>
+<div id="ensg00000132326" class="section level2">
+<h2>ENSG00000132326</h2>
+<pre class="r"><code>par(mfrow = c(3,3))
+for(j in 1:53){
+  plot(uncos_times_1, person_tissue_genes_1[,j, indices[1]],
+       ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(uncos_times_1,person_tissue_genes_1[,j, indices[1]]), 
+        col=&quot;red&quot;, lty=2, lwd=2)
+}</code></pre>
+<p><img src="circadian_analysis_files/figure-html/unnamed-chunk-4-1.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-4-2.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-4-3.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-4-4.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-4-5.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-4-6.png" width="672" /></p>
+</div>
+<div id="ensg000001263683" class="section level2">
+<h2>ENSG000001263683</h2>
+<pre class="r"><code>par(mfrow = c(3,3))
+for(j in 1:53){
+  plot(uncos_times_1, person_tissue_genes_1[,j, indices[2]],
+       ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(uncos_times_1,person_tissue_genes_1[,j, indices[2]]), 
+        col=&quot;red&quot;, lty=2, lwd=2)
+}</code></pre>
+<p><img src="circadian_analysis_files/figure-html/unnamed-chunk-5-1.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-5-2.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-5-3.png" width="672" /></p>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : pseudoinverse used at 3.7088</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : neighborhood radius 1.0472</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : reciprocal condition number 0</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : There are other near singularities as well. 2.6064</code></pre>
+<p><img src="circadian_analysis_files/figure-html/unnamed-chunk-5-4.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-5-5.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-5-6.png" width="672" /></p>
+</div>
+<div id="ensg00000049246" class="section level2">
+<h2>ENSG00000049246</h2>
+<pre class="r"><code>par(mfrow = c(3,3))
+for(j in 1:53){
+  plot(uncos_times_1, person_tissue_genes_1[,j, indices[3]],
+       ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(uncos_times_1,person_tissue_genes_1[,j, indices[3]]), 
+        col=&quot;red&quot;, lty=2, lwd=2)
+}</code></pre>
+<p><img src="circadian_analysis_files/figure-html/unnamed-chunk-6-1.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-6-2.png" width="672" /></p>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : pseudoinverse used at 6.1116</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : neighborhood radius 1.3556</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : reciprocal condition number 0</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : There are other near singularities as well. 1.6011</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : pseudoinverse used at 6.1116</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : neighborhood radius 1.3556</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : reciprocal condition number 0</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : There are other near singularities as well. 1.6011</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : pseudoinverse used at 6.1116</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : neighborhood radius 1.3556</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : reciprocal condition number 0</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : There are other near singularities as well. 1.6011</code></pre>
+<p><img src="circadian_analysis_files/figure-html/unnamed-chunk-6-3.png" width="672" /></p>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : pseudoinverse used at 3.7088</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : neighborhood radius 1.0472</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : reciprocal condition number 0</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : There are other near singularities as well. 2.6064</code></pre>
+<p><img src="circadian_analysis_files/figure-html/unnamed-chunk-6-4.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-6-5.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-6-6.png" width="672" /></p>
+</div>
+<div id="ensg00000213923" class="section level2">
+<h2>ENSG00000213923</h2>
+<pre class="r"><code>par(mfrow = c(3,3))
+for(j in 1:53){
+  plot(uncos_times_1, person_tissue_genes_1[,j, indices[4]],
+       ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(uncos_times_1,person_tissue_genes_1[,j, indices[4]]), 
+        col=&quot;red&quot;, lty=2, lwd=2)
+}</code></pre>
+<p><img src="circadian_analysis_files/figure-html/unnamed-chunk-7-1.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-7-2.png" width="672" /></p>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : pseudoinverse used at 6.1116</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : neighborhood radius 1.3556</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : reciprocal condition number 0</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : There are other near singularities as well. 1.6011</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : pseudoinverse used at 6.1116</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : neighborhood radius 1.3556</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : reciprocal condition number 0</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : There are other near singularities as well. 1.6011</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : pseudoinverse used at 6.1116</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : neighborhood radius 1.3556</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : reciprocal condition number 0</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : There are other near singularities as well. 1.6011</code></pre>
+<p><img src="circadian_analysis_files/figure-html/unnamed-chunk-7-3.png" width="672" /></p>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : pseudoinverse used at 3.7088</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : neighborhood radius 1.0472</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : reciprocal condition number 0</code></pre>
+<pre><code>## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
+## FALSE, : There are other near singularities as well. 2.6064</code></pre>
+<p><img src="circadian_analysis_files/figure-html/unnamed-chunk-7-4.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-7-5.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-7-6.png" width="672" /></p>
+</div>
+<div id="ensg00000179094" class="section level2">
+<h2>ENSG00000179094</h2>
+<pre class="r"><code>par(mfrow = c(3,3))
+for(j in 1:53){
+  plot(uncos_times_1, person_tissue_genes_1[,j, indices[5]],
+       ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(uncos_times_1,person_tissue_genes_1[,j, indices[5]]), 
+        col=&quot;red&quot;, lty=2, lwd=2)
+}</code></pre>
+<p><img src="circadian_analysis_files/figure-html/unnamed-chunk-8-1.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-8-2.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-8-3.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-8-4.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-8-5.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-8-6.png" width="672" /></p>
+</div>
+<div id="ensg00000008405" class="section level2">
+<h2>ENSG00000008405</h2>
+<pre class="r"><code>par(mfrow = c(3,3))
+for(j in 1:53){
+  plot(uncos_times_1, person_tissue_genes_1[,j, indices[6]],
+       ylab = dimnames(person_tissue_genes)[[2]][j])
+}</code></pre>
+<p><img src="circadian_analysis_files/figure-html/unnamed-chunk-9-1.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-9-2.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-9-3.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-9-4.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-9-5.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-9-6.png" width="672" /></p>
+</div>
+<div id="corshrink-matrices" class="section level2">
+<h2>CorShrink matrices</h2>
+<p>Now we check how the CorShrink matrices look like for these genes.</p>
+<pre class="r"><code>ash_cor_mat &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_halfuniform_gtex_tissues.rda&quot;))</code></pre>
+<pre class="r"><code>common_samples &lt;- get(load(&quot;../output/common_samples.rda&quot;))
+tissue_labels &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;)[,3]
+
+#library(data.table)
+#data &lt;- data.frame(fread(&quot;../data/GTEX_V6/cis_gene_expression.txt&quot;))
+#matdata &lt;- t(data[,-c(1,2)])
+
+gene_names &lt;- as.character(read.table(file = &quot;../data/GTEX_V6/gene_names_GTEX_V6.txt&quot;)[,1])
+gene_names_1 &lt;- as.character(sapply(gene_names, function(x) return(strsplit(x, &quot;[.]&quot;)[[1]][1])))
+
+
+U &lt;- unique(tissue_labels)</code></pre>
+<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices[1]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="circadian_analysis_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices[2]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="circadian_analysis_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices[3]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="circadian_analysis_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices[4]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="circadian_analysis_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices[5]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="circadian_analysis_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices[6]]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="circadian_analysis_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<p>It seems the CorShrink plots for these genes are much denser than the ones for the p53/p63 analysis, suggesting tissue sharing of circadian effects. Also, we see the very weak correlation between lymphocytes and fibroblasts with other tissues, which we validated through gene set enrichment analysis.</p>
+</div>
+<div id="correlation-scatter-plot-fibroblasts" class="section level2">
+<h2>Correlation scatter plot (Fibroblasts)</h2>
+<div id="ensg00000130513" class="section level3">
+<h3>ENSG00000130513</h3>
+<pre class="r"><code>##  23 is the index for fibroblasts in person_tissue_genes tissue labels
+par(mfrow=c(3,3))
+for(j in 1:53){
+  plot(person_tissue_genes[,23, indices[2]], person_tissue_genes[,j, indices[2]], col=&quot;red&quot;, pch=20, cex=1, xlab = &quot;Fibroblasts&quot;,
+     ylab = dimnames(person_tissue_genes)[[2]][j])
+}</code></pre>
+<p><img src="circadian_analysis_files/figure-html/unnamed-chunk-19-1.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-19-2.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-19-3.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-19-4.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-19-5.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-19-6.png" width="672" /></p>
+</div>
+<div id="ensg00000185088" class="section level3">
+<h3>ENSG00000185088</h3>
+<pre class="r"><code>##  23 is the index for fibroblasts in person_tissue_genes tissue labels
+par(mfrow=c(3,3))
+for(j in 1:53){
+  plot(person_tissue_genes[,23, indices[2]], person_tissue_genes[,j, indices[2]], col=&quot;red&quot;, pch=20, cex=1, xlab = &quot;Fibroblasts&quot;,
+     ylab = dimnames(person_tissue_genes)[[2]][j])
+}</code></pre>
+<p><img src="circadian_analysis_files/figure-html/unnamed-chunk-20-1.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-20-2.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-20-3.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-20-4.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-20-5.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-20-6.png" width="672" /></p>
+</div>
+</div>
+<div id="correlation-scatter-plot-lymphoblasts" class="section level2">
+<h2>Correlation scatter plot (Lymphoblasts)</h2>
+<div id="ensg00000132326-1" class="section level3">
+<h3>ENSG00000132326</h3>
+<pre class="r"><code>##  22 is the index for lymphoblasts in person_tissue_genes tissue labels
+par(mfrow=c(3,3))
+for(j in 1:53){
+  plot(person_tissue_genes[,22, indices[2]], person_tissue_genes[,j, indices[2]], col=&quot;red&quot;, pch=20, cex=1, xlab = dimnames(person_tissue_genes)[[2]][22],
+     ylab = dimnames(person_tissue_genes)[[2]][j])
+}</code></pre>
+<p><img src="circadian_analysis_files/figure-html/unnamed-chunk-21-1.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-21-2.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-21-3.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-21-4.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-21-5.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-21-6.png" width="672" /></p>
+</div>
+<div id="ensg00000185088-1" class="section level3">
+<h3>ENSG00000185088</h3>
+<pre class="r"><code>##  23 is the index for fibroblasts in person_tissue_genes tissue labels
+par(mfrow=c(3,3))
+for(j in 1:53){
+  plot(person_tissue_genes[,22, indices[4]], person_tissue_genes[,j, indices[2]], col=&quot;red&quot;, pch=20, cex=1, xlab = dimnames(person_tissue_genes)[[2]][22],
+     ylab = dimnames(person_tissue_genes)[[2]][j])
+}</code></pre>
+<p><img src="circadian_analysis_files/figure-html/unnamed-chunk-22-1.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-22-2.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-22-3.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-22-4.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-22-5.png" width="672" /><img src="circadian_analysis_files/figure-html/unnamed-chunk-22-6.png" width="672" /></p>
+</div>
+</div>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
