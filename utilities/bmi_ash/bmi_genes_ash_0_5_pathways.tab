@@ -1,0 +1,2 @@
+p-value	q-value	pathway	source	external_id	members_input_overlap	members_input_overlap_geneids	size	effective_size
+0.00984648330676	0.0895848929774	SRP-dependent cotranslational protein targeting to membrane	Reactome	R-HSA-1799339	ENSG00000174444; ENSG00000067167	6124; 23471	126	119

@@ -1,0 +1,321 @@
+---
+title: "Age comparison with ash"
+author: "Kushal K Dey"
+date: "6/7/2017"
+output: html_document
+---
+
+In this script, we look at the BMI comparison problem in the context of using lfsr for the adaptive shrinkage on the tissues for each gene. Adaptive shrinkage is performed using a normal distribution centered about 0. 
+
+```{r}
+person_tissue_genes <- get(load("../output/person_tissue_genes_voom.rda"))
+betahat_sebetahat <- get(load("../output/age_cor_ash.rda"))
+sample_attributes <- get(load("../output/sample_attributes_filtered.rda"))
+person_tissue_genes <- get(load("../output/person_tissue_genes_voom.rda"))
+```
+
+```{r}
+betahat_mat <- betahat_sebetahat$post.mean
+sebetahat_mat <- betahat_sebetahat$post.sd
+lfsr_mat <- betahat_sebetahat$post.lfsr
+```
+
+##  lfsr threshold 0.05
+
+We look at which genes have the most number of lfsr values below a chosen threshold.
+
+```{r}
+num_lfsr_below_thresh <- apply(lfsr_mat, 2, function(x) return(length(which(x < 0.05))))
+
+imp_genes <- order(num_lfsr_below_thresh, decreasing = TRUE)[1:10]
+num_lfsr_below_thresh[imp_genes]
+
+names <- colnames(betahat_mat)[imp_genes]
+```
+```{r}
+write.table(names, file = "../utilities/age_ash/age_genes_ash_0_05.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+```{r}
+pathway2 <- read.delim("../utilities/age_ash/age_genes_ash_0_05_pathways_1.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 1, cexCol = 1, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+```{r}
+num_lfsr_below_thresh <- apply(lfsr_mat, 2, function(x) return(length(which(x < 0.05))))
+
+imp_genes <- order(num_lfsr_below_thresh, decreasing = TRUE)[1:25]
+num_lfsr_below_thresh[imp_genes]
+
+names <- colnames(betahat_mat)[imp_genes]
+```
+
+```{r}
+write.table(names, file = "../utilities/age_ash/age_genes_ash_0_05_2.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+```{r}
+pathway2 <- read.delim("../utilities/age_ash/age_genes_ash_0_05_pathways.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 1, cexCol = 1, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+
+
+
+##  lfsr threshold 0.1
+
+We look at which genes have the most number of lfsr values below a chosen threshold.
+
+```{r}
+num_lfsr_below_thresh <- apply(lfsr_mat, 2, function(x) return(length(which(x < 0.1))))
+
+imp_genes <- order(num_lfsr_below_thresh, decreasing = TRUE)[1:25]
+num_lfsr_below_thresh[imp_genes]
+
+names <- colnames(betahat_mat)[imp_genes]
+```
+
+```{r}
+write.table(names, file = "../utilities/age_ash/age_genes_ash_0_1.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+```{r}
+pathway2 <- read.delim("../utilities/age_ash/age_genes_ash_0_1_pathways.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+## Review of genes 
+
+The important genes are **ENSG00000147889** or **CDKN2A**,  **ENSG00000172667** or **ZMAT3**,  **ENSG00000185088** or **RPS27L**, **ENSG00000176871**  and  **ENSG00000179335** or **CLK3**.
+
+A number of these genes are associated with p53 and p63 which are important for aging. [Article 1](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2190721/), [Article 2](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3151427/), [Article 3](http://www.pnas.org/content/104/42/16633.full), [Article 4](http://www.aging-us.com/article/100179/text).
+
+CDKN2A gene expression acts as an on/off switch for cell proliferation and the prevention of spread of cells with damaged genetic material that could otherwise lead to cancers. However, the more CDKN2A expressed in a tissue, the less function it has. 
+Tracking CDKN2A transcripts is an important component of Age Analytics’ assessment of ageing. Measuring CDKN2A expression in blood cells  can be used to assess general frailty. The brief scientific overview below shows  that CDKN2A expression is a good marker for biological ageing, and that the accumulation of cells driven into senescence by increased CDKN2A expression is important in reducing organ health with age. [Page](http://www.age-analytics.com/cdnk2a-a-biomarker-of-ageing.html) [Article](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2987737/).
+
+
+
+ZMAT3 encodes a protein containing three zinc finger domains and a nuclear localization signal. The mRNA and the protein of this gene are upregulated by wildtype p53 and overexpression of this gene inhibits tumor cell growth, suggesting that this gene may have a role in the p53-dependent growth regulatory pathway. Alternative splicing of this gene results in two transcript variants encoding two isoforms differing in only one amino acid.
+p53 is associated heavily with aging. [Page](http://genomics.senescence.info/cells/gene.php?gene_name=ZMAT3).
+The genes in the p53 developmental pathway – ZMAT3, a zinc finger protein involved in the mRNA stability whose overexpression suppresses tumour growth [Article](https://www.nature.com/articles/srep09512).
+
+
+RPS27L : Ribosomal protein S27L is a direct p53 target that regulates apoptosis.Ribosomal proteins were recently shown to regulate p53 activity by abrogating Mdm2-induced p53 degradation (L23, L11, L5) or by enhancing p53 translation (L26). Here, we report that a novel ribosomal protein, RPS27L (S27-like protein), is a direct p53 target. RPS27L, but not its family member RPS27, was identified as a p53 inducible gene in a genome-wide chip-profiling study.
+
+
+## ENSG00000147889 or CDKN2
+
+Check the read expression profile in GTEx here 
+
+[ENSG00000147889 or CDKN2](https://gtexportal.org/home/gene/ENSG00000147889)
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/age_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+```
+
+```{r}
+indices <- match("ENSG00000147889", colnames(betahat_mat))
+```
+
+
+```{r}
+plot(tmat[, indices], col="red")
+abline(0,0)
+```
+
+
+Which are the tissues with lowest lfsr 
+
+```{r}
+sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]
+```
+
+```{r}
+par(new=TRUE)
+par(mfrow = c(3,3))
+for(j in 1:53){
+  temp1 <- person_tissue_genes[,j,indices]
+  plot(sample_attributes$AGE, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$AGE, temp1, family = "gaussian"), 
+        col="red", lty=2, lwd=2)
+}
+```
+
+## ENSG00000172667 or ZMAT3
+
+Check the read expression profile in GTEx here 
+
+[ENSG00000172667 or ZMAT3](https://gtexportal.org/home/gene/ENSG00000172667)
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/age_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+```
+
+```{r}
+indices <- match("ENSG00000172667", colnames(betahat_mat))
+```
+
+
+```{r}
+plot(tmat[, indices], col="red")
+abline(0,0)
+```
+
+Which are the tissues with lowest lfsr 
+
+```{r}
+sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]
+```
+
+```{r}
+par(new=TRUE)
+par(mfrow = c(3,3))
+for(j in 1:53){
+  temp1 <- person_tissue_genes[,j,indices]
+  plot(sample_attributes$AGE, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$AGE, temp1, family = "gaussian"), 
+        col="red", lty=2, lwd=2)
+}
+```
+
+## ENSG00000185088 or RPS27
+
+Check the read expression profile in GTEx here 
+
+[ENSG00000185088 or RPS27](https://gtexportal.org/home/gene/ENSG00000185088)
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/age_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+```
+
+```{r}
+indices <- match("ENSG00000185088", colnames(betahat_mat))
+```
+
+
+```{r}
+plot(tmat[, indices], col="red")
+abline(0,0)
+```
+
+Which are the tissues with lowest lfsr 
+
+```{r}
+sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]
+```
+
+```{r}
+par(new=TRUE)
+par(mfrow = c(3,3))
+for(j in 1:53){
+  temp1 <- person_tissue_genes[,j,indices]
+  plot(sample_attributes$AGE, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$AGE, temp1, family = "gaussian"), 
+        col="red", lty=2, lwd=2)
+}
+```
+
+## ENSG00000179335 or CLK3
+
+Check the read expression profile in GTEx here 
+
+[ENSG00000179335 or CLK3](https://gtexportal.org/home/gene/ENSG00000179335)
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/age_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+```
+
+```{r}
+indices <- match("ENSG00000179335", colnames(betahat_mat))
+```
+
+
+```{r}
+plot(tmat[, indices], col="red")
+abline(0,0)
+```
+
+Which are the tissues with lowest lfsr 
+
+```{r}
+sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]
+```
+
+```{r}
+par(new=TRUE)
+par(mfrow = c(3,3))
+for(j in 1:53){
+  temp1 <- person_tissue_genes[,j,indices]
+  plot(sample_attributes$AGE, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$AGE, temp1, family = "gaussian"), 
+        col="red", lty=2, lwd=2)
+}
+```
+
+

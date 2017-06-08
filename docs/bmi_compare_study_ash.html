@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Kushal K Dey" />
+
+
+<title>BMI comparison with ash</title>
+
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="cosmo.css" type="text/css" />
+
+</head>
+
+<body>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
+    <link href="../docs/cosmo.css" rel="stylesheet">
+    <link href="../docs/cosmo.min.css" rel="stylesheet">
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../docs/bootstrap/js/bootstrap.min.js"></script>
+
+<body>
+
+<div class = "nav" align = "middle">
+<div class= "p1"></div>
+<p>
+  <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "workflow.html">WORKFLOW</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "about.html">METHODS</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "license.html">LICENSE</a> 
+   &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
+ </p>
+</div>  
+<!-- <div class="nav">
+  <a href="index.html">Home page</a> &nbsp &nbsp
+  <a href="musings.html">Musings</a> &nbsp &nbsp
+  <a href="town.html">My town</a> &nbsp &nbsp
+  <a href="links.html">Links</a>
+</div> -->
+
+<!-- Main content -->
+</body>
+</html>
+
+
+<h1 class="title toc-ignore">BMI comparison with ash</h1>
+<h4 class="author"><em>Kushal K Dey</em></h4>
+<h4 class="date"><em>6/7/2017</em></h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#lfsr-threshold-0.1">lfsr threshold 0.1</a></li>
+<li><a href="#lfsr-threshold-0.30">lfsr threshold 0.30</a></li>
+<li><a href="#lfsr-threshold-0.50">lfsr threshold 0.50</a></li>
+<li><a href="#review---important-genes">Review - Important genes</a></li>
+<li><a href="#ensg00000070159-or-ptpn3">ENSG00000070159 or PTPN3</a></li>
+<li><a href="#ensg00000138678-or-gpat3">ENSG00000138678 or GPAT3</a></li>
+<li><a href="#ensg00000064205-or-wisp2">ENSG00000064205 or WISP2</a></li>
+<li><a href="#ensg00000113119-or-tmc06">ENSG00000113119 or TMC06</a></li>
+<li><a href="#ensg00000172236-or-tpsab1">ENSG00000172236 or TPSAB1</a></li>
+</ul>
+</div>
+
+<p>In this script, we look at the BMI comparison problem in the context of using lfsr for the adaptive shrinkage on the tissues for each gene. Adaptive shrinkage is performed using a normal distribution centered about 0.</p>
+<pre class="r"><code>person_tissue_genes &lt;- get(load(&quot;../output/person_tissue_genes_voom.rda&quot;))
+betahat_sebetahat &lt;- get(load(&quot;../output/bmi_cor_ash.rda&quot;))
+sample_attributes &lt;- get(load(&quot;../output/sample_attributes_filtered.rda&quot;))
+person_tissue_genes &lt;- get(load(&quot;../output/person_tissue_genes_voom.rda&quot;))</code></pre>
+<pre class="r"><code>betahat_mat &lt;- betahat_sebetahat$post.mean
+sebetahat_mat &lt;- betahat_sebetahat$post.sd
+lfsr_mat &lt;- betahat_sebetahat$post.lfsr</code></pre>
+<div id="lfsr-threshold-0.1" class="section level2">
+<h2>lfsr threshold 0.1</h2>
+<p>We look at which genes have the most number of lfsr values below a chosen threshold.</p>
+<pre class="r"><code>num_lfsr_below_thresh &lt;- apply(lfsr_mat, 2, function(x) return(length(which(x &lt; 0.1))))
+
+imp_genes &lt;- order(num_lfsr_below_thresh, decreasing = TRUE)[1:25]
+num_lfsr_below_thresh[imp_genes]</code></pre>
+<pre><code>## ENSG00000070159 ENSG00000138678 ENSG00000064205 ENSG00000069424 
+##               4               4               3               3 
+## ENSG00000096080 ENSG00000100417 ENSG00000101265 ENSG00000108379 
+##               3               3               3               3 
+## ENSG00000113119 ENSG00000120053 ENSG00000125648 ENSG00000133805 
+##               3               3               3               3 
+## ENSG00000135677 ENSG00000138615 ENSG00000140678 ENSG00000151500 
+##               3               3               3               3 
+## ENSG00000162433 ENSG00000164181 ENSG00000166582 ENSG00000171530 
+##               3               3               3               3 
+## ENSG00000173267 ENSG00000174136 ENSG00000204262 ENSG00000204568 
+##               3               3               3               3 
+## ENSG00000213971 
+##               3</code></pre>
+<pre class="r"><code>names &lt;- colnames(betahat_mat)[imp_genes]</code></pre>
+<p>We see that no genes are shared across all tissues and there are many genes that are significant with this threshold in 3 tissues and two genes in 4 tissues.</p>
+<p>We increase a threshold to <span class="math inline">\(0.25\)</span>.</p>
+</div>
+<div id="lfsr-threshold-0.30" class="section level2">
+<h2>lfsr threshold 0.30</h2>
+<p>We look at which genes have the most number of lfsr values below a chosen threshold.</p>
+<pre class="r"><code>num_lfsr_below_thresh &lt;- apply(lfsr_mat, 2, function(x) return(length(which(x &lt; 0.25))))
+
+imp_genes &lt;- order(num_lfsr_below_thresh, decreasing = TRUE)[1:25]
+num_lfsr_below_thresh[imp_genes]</code></pre>
+<pre><code>## ENSG00000064205 ENSG00000113119 ENSG00000172236 ENSG00000087589 
+##               6               6               6               5 
+## ENSG00000101265 ENSG00000138615 ENSG00000166582 ENSG00000070159 
+##               5               5               5               4 
+## ENSG00000100417 ENSG00000125648 ENSG00000135677 ENSG00000138678 
+##               4               4               4               4 
+## ENSG00000139239 ENSG00000141424 ENSG00000164305 ENSG00000165282 
+##               4               4               4               4 
+## ENSG00000166896 ENSG00000204568 ENSG00000233426 ENSG00000010803 
+##               4               4               4               3 
+## ENSG00000067167 ENSG00000069424 ENSG00000096080 ENSG00000102967 
+##               3               3               3               3 
+## ENSG00000105767 
+##               3</code></pre>
+<pre class="r"><code>names &lt;- colnames(betahat_mat)[imp_genes]</code></pre>
+<p>We take the first 10 genes and perform look which pathways are they enriched for.</p>
+<pre class="r"><code>write.table(names, file = &quot;../utilities/bmi_ash/bmi_genes_ash_0_3.txt&quot;, quote = FALSE, row.names = FALSE, col.names = FALSE)
+out &lt;- mygene::queryMany(names,  scopes=&quot;ensembl.gene&quot;, fields=c(&quot;name&quot;, &quot;summary&quot;), species=&quot;human&quot;);</code></pre>
+<pre><code>## Finished</code></pre>
+<pre class="r"><code>cbind.data.frame(out$name, out$summary)</code></pre>
+<pre><code>##                                                                 out$name
+## 1                             WNT1 inducible signaling pathway protein 2
+## 2                                transmembrane and coiled-coil domains 6
+## 3                                                  tryptase alpha/beta 1
+## 4                                Cas scaffolding protein family member 4
+## 5                                 Ras association domain family member 2
+## 6                                   cartilage intermediate layer protein
+## 7                                                   centromere protein V
+## 8                      protein tyrosine phosphatase, non-receptor type 3
+## 9                                                   phosphomannomutase 1
+## 10                                    solute carrier family 25 member 23
+## 11                                    glucosamine (N-acetyl)-6-sulfatase
+## 12                                glycerol-3-phosphate acyltransferase 3
+## 13                                    ribosomal protein L14 pseudogene 1
+## 14                                     solute carrier family 39 member 6
+## 15                                                             caspase 3
+## 16               phosphatidylinositol glycan anchor biosynthesis class O
+## 17       ATP23 metallopeptidase and ATP synthase assembly factor homolog
+## 18                                  mitochondrial ribosomal protein S18B
+## 19     eukaryotic translation initiation factor 3 subunit F pseudogene 3
+## 20                             sex comb on midleg homolog 1 (Drosophila)
+## 21                           translocation associated membrane protein 1
+## 22 potassium voltage-gated channel subfamily A regulatory beta subunit 2
+## 23                                  mitochondrial ribosomal protein S18A
+## 24                                dihydroorotate dehydrogenase (quinone)
+## 25                                              cell adhesion molecule 4
+##                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   out$summary
+## 1                                                                                                                                                                    This gene encodes a member of the WNT1 inducible signaling pathway (WISP) protein subfamily, which belongs to the connective tissue growth factor (CTGF) family. WNT1 is a member of a family of cysteine-rich, glycosylated signaling proteins that mediate diverse developmental processes. The CTGF family members are characterized by four conserved cysteine-rich domains: insulin-like growth factor-binding domain, von Willebrand factor type C module, thrombospondin domain and C-terminal cystine knot-like (CT) domain. The encoded protein lacks the CT domain which is implicated in dimerization and heparin binding. It is 72% identical to the mouse protein at the amino acid level. This gene may be downstream in the WNT1 signaling pathway that is relevant to malignant transformation. Its expression in colon tumors is reduced while the other two WISP members are overexpressed in colon tumors. It is expressed at high levels in bone tissue, and may play an important role in modulating bone turnover.
+## 2                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        &lt;NA&gt;
+## 3  Tryptases comprise a family of trypsin-like serine proteases, the peptidase family S1. Tryptases are enzymatically active only as heparin-stabilized tetramers, and they are resistant to all known endogenous proteinase inhibitors. Several tryptase genes are clustered on chromosome 16p13.3. These genes are characterized by several distinct features. They have a highly conserved 3&#39; UTR and contain tandem repeat sequences at the 5&#39; flank and 3&#39; UTR which are thought to play a role in regulation of the mRNA stability. These genes have an intron immediately upstream of the initiator Met codon, which separates the site of transcription initiation from protein coding sequence. This feature is characteristic of tryptases but is unusual in other genes. The alleles of this gene exhibit an unusual amount of sequence variation, such that the alleles were once thought to represent two separate genes, alpha and beta 1. Beta tryptases appear to be the main isoenzymes expressed in mast cells; whereas in basophils, alpha tryptases predominate. Tryptases have been implicated as mediators in the pathogenesis of asthma and other allergic and inflammatory disorders.
+## 4                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        &lt;NA&gt;
+## 5                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             This gene encodes a protein that contains a Ras association domain. Similar to its cattle and sheep counterparts, this gene is located near the prion gene. Two alternatively spliced transcripts encoding the same isoform have been reported.
+## 6                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 Major alterations in the composition of the cartilage extracellular matrix occur in joint disease, such as osteoarthrosis. This gene encodes the cartilage intermediate layer protein (CILP), which increases in early osteoarthrosis cartilage. The encoded protein was thought to encode a protein precursor for two different proteins; an N-terminal CILP and a C-terminal homolog of NTPPHase, however, later studies identified no nucleotide pyrophosphatase phosphodiesterase (NPP) activity. The full-length and the N-terminal domain of this protein was shown to function as an IGF-1 antagonist. An allelic variant of this gene has been associated with lumbar disc disease.
+## 7                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        &lt;NA&gt;
+## 8                                                                                                                                                                                                                                                                                                                                                                                                                                        The protein encoded by this gene is a member of the protein tyrosine phosphatase (PTP) family. PTPs are known to be signaling molecules that regulate a variety of cellular processes including cell growth, differentiation, mitotic cycle, and oncogenic transformation. This protein contains a C-terminal PTP domain and an N-terminal domain homologous to the band 4.1 superfamily of cytoskeletal-associated proteins. P97, a cell cycle regulator involved in a variety of membrane related functions, has been shown to be a substrate of this PTP. This PTP was also found to interact with, and be regulated by adaptor protein 14-3-3 beta. Several alternatively spliced transcript variants encoding different isoforms have been found for this gene.
+## 9                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  Phosphomannomutase catalyzes the conversion between D-mannose 6-phosphate and D-mannose 1-phosphate which is a substrate for GDP-mannose synthesis. GDP-mannose is used for synthesis of dolichol-phosphate-mannose, which is essential for N-linked glycosylation and thus the secretion of several glycoproteins as well as for the synthesis of glycosyl-phosphatidyl-inositol (GPI) anchored proteins.
+## 10                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       &lt;NA&gt;
+## 11                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         The product of this gene is a lysosomal enzyme found in all cells. It is involved in the catabolism of heparin, heparan sulphate, and keratan sulphate. Deficiency of this enzyme results in the accumulation of undegraded substrate and the lysosomal storage disorder mucopolysaccharidosis type IIID (Sanfilippo D syndrome). Mucopolysaccharidosis type IIID is the least common of the four subtypes of Sanfilippo syndrome.
+## 12                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    This gene encodes a member of the lysophosphatidic acid acyltransferase protein family. The encoded protein is an enzyme which catalyzes the conversion of glycerol-3-phosphate to lysophosphatidic acid in the synthesis of triacylglycerol. Multiple alternatively spliced variants, encoding the same protein, have been identified.
+## 13                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       &lt;NA&gt;
+## 14                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        Zinc is an essential cofactor for hundreds of enzymes. It is involved in protein, nucleic acid, carbohydrate, and lipid metabolism, as well as in the control of gene transcription, growth, development, and differentiation. SLC39A6 belongs to a subfamily of proteins that show structural characteristics of zinc transporters (Taylor and Nicholson, 2003 [PubMed 12659941]).
+## 15                                                                                                                                                                                                                                                                                                                                                                                                                  This gene encodes a protein which is a member of the cysteine-aspartic acid protease (caspase) family. Sequential activation of caspases plays a central role in the execution-phase of cell apoptosis. Caspases exist as inactive proenzymes which undergo proteolytic processing at conserved aspartic residues to produce two subunits, large and small, that dimerize to form the active enzyme. This protein cleaves and activates caspases 6, 7 and 9, and the protein itself is processed by caspases 8, 9 and 10. It is the predominant caspase involved in the cleavage of amyloid-beta 4A precursor protein, which is associated with neuronal death in Alzheimer&#39;s disease. Alternative splicing of this gene results in two transcript variants that encode the same protein.
+## 16                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    This gene encodes a protein that is involved in glycosylphosphatidylinositol (GPI)-anchor biosynthesis. The GPI-anchor is a glycolipid which contains three mannose molecules in its core backbone. The GPI-anchor is found on many blood cells and serves to anchor proteins to the cell surface. This protein is involved in the transfer of ethanolaminephosphate (EtNP) to the third mannose in GPI. At least three alternatively spliced transcripts encoding two distinct isoforms have been found for this gene.
+## 17                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               The protein encoded by this gene is amplified in glioblastomas and interacts with the DNA binding subunit of DNA-dependent protein kinase. This kinase is involved in double-strand break repair (DSB), and higher expression of the encoded protein increases the efficiency of DSB. In addition, comparison to orthologous proteins strongly suggests that this protein is a metalloprotease important in the biosynthesis of mitochondrial ATPase. Several transcript variants encoding different isoforms have been found for this gene.
+## 18                                                                                         Mammalian mitochondrial ribosomal proteins are encoded by nuclear genes and help in protein synthesis within the mitochondrion. Mitochondrial ribosomes (mitoribosomes) consist of a small 28S subunit and a large 39S subunit. They have an estimated 75% protein to rRNA composition compared to prokaryotic ribosomes, where this ratio is reversed. Another difference between mammalian mitoribosomes and prokaryotic ribosomes is that the latter contain a 5S rRNA. Among different species, the proteins comprising the mitoribosome differ greatly in sequence, and sometimes in biochemical properties, which prevents easy recognition by sequence homology. This gene encodes a 28S subunit protein that belongs to the ribosomal protein S18P family. The encoded protein is one of three that has significant sequence similarity to bacterial S18 proteins. The primary sequences of the three human mitochondrial S18 proteins are no more closely related to each other than they are to the prokaryotic S18 proteins. Pseudogenes corresponding to this gene are found on chromosomes 1q and 2q.
+## 19                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       &lt;NA&gt;
+## 20                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       &lt;NA&gt;
+## 21                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                This gene encodes a multi-pass membrane protein that is part of the mammalian endoplasmic reticulum. The encoded protein influences glycosylation and facilitates the translocation of secretory proteins across the endoplasmic reticulum membrane by regulating which domains of the nascent polypeptide chain are visible to the cytosol during a translocational pause.
+## 22                                                                                                                                                                                                                                                                           Voltage-gated potassium (Kv) channels represent the most complex class of voltage-gated ion channels from both functional and structural standpoints. Their diverse functions include regulating neurotransmitter release, heart rate, insulin secretion, neuronal excitability, epithelial electrolyte transport, smooth muscle contraction, and cell volume. Four sequence-related potassium channel genes - shaker, shaw, shab, and shal - have been identified in Drosophila, and each has been shown to have human homolog(s). This gene encodes a member of the potassium channel, voltage-gated, shaker-related subfamily. This member is one of the beta subunits, which are auxiliary proteins associating with functional Kv-alpha subunits. This member alters functional properties of the KCNA4 gene product. Alternative splicing of this gene results in multiple transcript variants encoding distinct isoforms.
+## 23                                   Mammalian mitochondrial ribosomal proteins are encoded by nuclear genes and help in protein synthesis within the mitochondrion. Mitochondrial ribosomes (mitoribosomes) consist of a small 28S subunit and a large 39S subunit. They have an estimated 75% protein to rRNA composition compared to prokaryotic ribosomes, where this ratio is reversed. Another difference between mammalian mitoribosomes and prokaryotic ribosomes is that the latter contain a 5S rRNA. Among different species, the proteins comprising the mitoribosome differ greatly in sequence, and sometimes in biochemical properties, which prevents easy recognition by sequence homology. This gene encodes a 28S subunit protein that belongs to the ribosomal protein S18P family. The encoded protein is one of three that has significant sequence similarity to bacterial S18 proteins. The primary sequences of the three human mitochondrial S18 proteins are no more closely related to each other than they are to the prokaryotic S18 proteins. A pseudogene corresponding to this gene is found on chromosome 3p. Alternative splicing results in multiple transcript variants.
+## 24                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        The protein encoded by this gene catalyzes the fourth enzymatic step, the ubiquinone-mediated oxidation of dihydroorotate to orotate, in de novo pyrimidine biosynthesis. This protein is a mitochondrial protein located on the outer surface of the inner mitochondrial membrane.
+## 25                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       &lt;NA&gt;</code></pre>
+<pre class="r"><code>pathway2 &lt;- read.delim(&quot;../utilities/bmi_ash/bmi_genes_ash_0_3_pathways.tab&quot;)
+if(length(which(pathway2$q.value &lt; 0.05)) &gt; 2){
+  pathway2 &lt;- pathway2[which(pathway2$q.value &lt; 0.05),]
+}
+maxpath = 75
+pathway &lt;- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes &lt;- pathway$members_input_overlap
+pathway_list_genes &lt;- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), &quot;; &quot;)))
+all_genes &lt;- Reduce(union, pathway_list_genes)
+pathway_mat &lt;- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] &lt;- 1
+}
+
+pathway_bimat &lt;- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop &lt;- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 1, cexCol = 1, col = col, zlim = c(-1,1),
+        scale = &quot;none&quot;, margins = c(5, 5))</code></pre>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+</div>
+<div id="lfsr-threshold-0.50" class="section level2">
+<h2>lfsr threshold 0.50</h2>
+<pre class="r"><code>num_lfsr_below_thresh &lt;- apply(lfsr_mat, 2, function(x) return(length(which(x &lt; 0.5))))
+
+imp_genes &lt;- order(num_lfsr_below_thresh, decreasing = TRUE)[1:25]
+num_lfsr_below_thresh[imp_genes]</code></pre>
+<pre><code>## ENSG00000064205 ENSG00000113119 ENSG00000166896 ENSG00000166582 
+##               8               8               8               7 
+## ENSG00000172236 ENSG00000233426 ENSG00000082781 ENSG00000101265 
+##               7               7               6               6 
+## ENSG00000020922 ENSG00000070159 ENSG00000087589 ENSG00000105767 
+##               5               5               5               5 
+## ENSG00000115129 ENSG00000120942 ENSG00000138615 ENSG00000138678 
+##               5               5               5               5 
+## ENSG00000160233 ENSG00000165282 ENSG00000174444 ENSG00000184489 
+##               5               5               5               5 
+## ENSG00000204568 ENSG00000215030 ENSG00000000938 ENSG00000010803 
+##               5               5               4               4 
+## ENSG00000067167 
+##               4</code></pre>
+<pre class="r"><code>names &lt;- colnames(betahat_mat)[imp_genes]</code></pre>
+<pre class="r"><code>write.table(names, file = &quot;../utilities/bmi_ash/bmi_genes_ash_0_5.txt&quot;, quote = FALSE, row.names = FALSE, col.names = FALSE)
+out &lt;- mygene::queryMany(names,  scopes=&quot;ensembl.gene&quot;, fields=c(&quot;name&quot;, &quot;summary&quot;), species=&quot;human&quot;);</code></pre>
+<pre><code>## Finished</code></pre>
+<pre class="r"><code>cbind.data.frame(out$name, out$summary)</code></pre>
+<pre><code>##                                                             out$name
+## 1                         WNT1 inducible signaling pathway protein 2
+## 2                            transmembrane and coiled-coil domains 6
+## 3    ATP23 metallopeptidase and ATP synthase assembly factor homolog
+## 4                                               centromere protein V
+## 5                                              tryptase alpha/beta 1
+## 6  eukaryotic translation initiation factor 3 subunit F pseudogene 3
+## 7                                            integrin subunit beta 5
+## 8                             Ras association domain family member 2
+## 9                 MRE11 homolog, double strand break repair nuclease
+## 10                 protein tyrosine phosphatase, non-receptor type 3
+## 11                           Cas scaffolding protein family member 4
+## 12                                          cell adhesion molecule 4
+## 13                             tumor protein p53 inducible protein 3
+## 14                        UbiA prenyltransferase domain containing 1
+## 15                              cartilage intermediate layer protein
+## 16                            glycerol-3-phosphate acyltransferase 3
+## 17                                  leucine rich repeat containing 3
+## 18           phosphatidylinositol glycan anchor biosynthesis class O
+## 19                                              ribosomal protein L4
+## 20                   protein tyrosine phosphatase type IVA, member 3
+## 21                              mitochondrial ribosomal protein S18B
+## 22                               ribosomal protein L13 pseudogene 12
+## 23                    FGR proto-oncogene, Src family tyrosine kinase
+## 24                         sex comb on midleg homolog 1 (Drosophila)
+## 25                       translocation associated membrane protein 1
+##                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   out$summary
+## 1                                                                                                                                                                    This gene encodes a member of the WNT1 inducible signaling pathway (WISP) protein subfamily, which belongs to the connective tissue growth factor (CTGF) family. WNT1 is a member of a family of cysteine-rich, glycosylated signaling proteins that mediate diverse developmental processes. The CTGF family members are characterized by four conserved cysteine-rich domains: insulin-like growth factor-binding domain, von Willebrand factor type C module, thrombospondin domain and C-terminal cystine knot-like (CT) domain. The encoded protein lacks the CT domain which is implicated in dimerization and heparin binding. It is 72% identical to the mouse protein at the amino acid level. This gene may be downstream in the WNT1 signaling pathway that is relevant to malignant transformation. Its expression in colon tumors is reduced while the other two WISP members are overexpressed in colon tumors. It is expressed at high levels in bone tissue, and may play an important role in modulating bone turnover.
+## 2                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        &lt;NA&gt;
+## 3                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                The protein encoded by this gene is amplified in glioblastomas and interacts with the DNA binding subunit of DNA-dependent protein kinase. This kinase is involved in double-strand break repair (DSB), and higher expression of the encoded protein increases the efficiency of DSB. In addition, comparison to orthologous proteins strongly suggests that this protein is a metalloprotease important in the biosynthesis of mitochondrial ATPase. Several transcript variants encoding different isoforms have been found for this gene.
+## 4                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        &lt;NA&gt;
+## 5  Tryptases comprise a family of trypsin-like serine proteases, the peptidase family S1. Tryptases are enzymatically active only as heparin-stabilized tetramers, and they are resistant to all known endogenous proteinase inhibitors. Several tryptase genes are clustered on chromosome 16p13.3. These genes are characterized by several distinct features. They have a highly conserved 3&#39; UTR and contain tandem repeat sequences at the 5&#39; flank and 3&#39; UTR which are thought to play a role in regulation of the mRNA stability. These genes have an intron immediately upstream of the initiator Met codon, which separates the site of transcription initiation from protein coding sequence. This feature is characteristic of tryptases but is unusual in other genes. The alleles of this gene exhibit an unusual amount of sequence variation, such that the alleles were once thought to represent two separate genes, alpha and beta 1. Beta tryptases appear to be the main isoenzymes expressed in mast cells; whereas in basophils, alpha tryptases predominate. Tryptases have been implicated as mediators in the pathogenesis of asthma and other allergic and inflammatory disorders.
+## 6                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        &lt;NA&gt;
+## 7                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        &lt;NA&gt;
+## 8                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             This gene encodes a protein that contains a Ras association domain. Similar to its cattle and sheep counterparts, this gene is located near the prion gene. Two alternatively spliced transcripts encoding the same isoform have been reported.
+## 9                                                                                                                                                                                                                                                                                                                                                                                                                                              This gene encodes a nuclear protein involved in homologous recombination, telomere length maintenance, and DNA double-strand break repair. By itself, the protein has 3&#39; to 5&#39; exonuclease activity and endonuclease activity. The protein forms a complex with the RAD50 homolog; this complex is required for nonhomologous joining of DNA ends and possesses increased single-stranded DNA endonuclease and 3&#39; to 5&#39; exonuclease activities. In conjunction with a DNA ligase, this protein promotes the joining of noncomplementary ends in vitro using short homologies near the ends of the DNA fragments. This gene has a pseudogene on chromosome 3. Alternative splicing of this gene results in two transcript variants encoding different isoforms.
+## 10                                                                                                                                                                                                                                                                                                                                                                                                                                       The protein encoded by this gene is a member of the protein tyrosine phosphatase (PTP) family. PTPs are known to be signaling molecules that regulate a variety of cellular processes including cell growth, differentiation, mitotic cycle, and oncogenic transformation. This protein contains a C-terminal PTP domain and an N-terminal domain homologous to the band 4.1 superfamily of cytoskeletal-associated proteins. P97, a cell cycle regulator involved in a variety of membrane related functions, has been shown to be a substrate of this PTP. This PTP was also found to interact with, and be regulated by adaptor protein 14-3-3 beta. Several alternatively spliced transcript variants encoding different isoforms have been found for this gene.
+## 11                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       &lt;NA&gt;
+## 12                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       &lt;NA&gt;
+## 13                                                                                                                                                                                                                                                                            The protein encoded by this gene is similar to oxidoreductases, which are enzymes involved in cellular responses to oxidative stresses and irradiation. This gene is induced by the tumor suppressor p53 and is thought to be involved in p53-mediated cell death. It contains a p53 consensus binding site in its promoter region and a downstream pentanucleotide microsatellite sequence. P53 has been shown to transcriptionally activate this gene by interacting with the downstream pentanucleotide microsatellite sequence. The microsatellite is polymorphic, with a varying number of pentanucleotide repeats directly correlated with the extent of transcriptional activation by p53. It has been suggested that the microsatellite polymorphism may be associated with differential susceptibility to cancer. Alternatively spliced transcript variants encoding different isoforms have been found for this gene.
+## 14                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          This gene encodes a protein thought to be involved in cholesterol and phospholipid metabolism. Mutations in this gene are associated with Schnyder crystalline corneal dystrophy.
+## 15                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                Major alterations in the composition of the cartilage extracellular matrix occur in joint disease, such as osteoarthrosis. This gene encodes the cartilage intermediate layer protein (CILP), which increases in early osteoarthrosis cartilage. The encoded protein was thought to encode a protein precursor for two different proteins; an N-terminal CILP and a C-terminal homolog of NTPPHase, however, later studies identified no nucleotide pyrophosphatase phosphodiesterase (NPP) activity. The full-length and the N-terminal domain of this protein was shown to function as an IGF-1 antagonist. An allelic variant of this gene has been associated with lumbar disc disease.
+## 16                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    This gene encodes a member of the lysophosphatidic acid acyltransferase protein family. The encoded protein is an enzyme which catalyzes the conversion of glycerol-3-phosphate to lysophosphatidic acid in the synthesis of triacylglycerol. Multiple alternatively spliced variants, encoding the same protein, have been identified.
+## 17                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       &lt;NA&gt;
+## 18                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    This gene encodes a protein that is involved in glycosylphosphatidylinositol (GPI)-anchor biosynthesis. The GPI-anchor is a glycolipid which contains three mannose molecules in its core backbone. The GPI-anchor is found on many blood cells and serves to anchor proteins to the cell surface. This protein is involved in the transfer of ethanolaminephosphate (EtNP) to the third mannose in GPI. At least three alternatively spliced transcripts encoding two distinct isoforms have been found for this gene.
+## 19                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          Ribosomes, the organelles that catalyze protein synthesis, consist of a small 40S subunit and a large 60S subunit. Together these subunits are composed of 4 RNA species and approximately 80 structurally distinct proteins. This gene encodes a ribosomal protein that is a component of the 60S subunit. The protein belongs to the L4E family of ribosomal proteins. It is located in the cytoplasm. As is typical for genes encoding ribosomal proteins, there are multiple processed pseudogenes of this gene dispersed through the genome.
+## 20                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           This gene encodes a member of the protein-tyrosine phosphatase family. Protein tyrosine phosphatases are cell signaling molecules that play regulatory roles in a variety of cellular processes. Studies of this class of protein tyrosine phosphatase in mice demonstrates that they are prenylated in vivo, suggesting their association with cell plasma membrane. The encoded protein may enhance cell proliferation, and overexpression of this gene has been implicated in tumor metastasis. Alternative splicing results in multiple transcript variants.
+## 21                                                                                         Mammalian mitochondrial ribosomal proteins are encoded by nuclear genes and help in protein synthesis within the mitochondrion. Mitochondrial ribosomes (mitoribosomes) consist of a small 28S subunit and a large 39S subunit. They have an estimated 75% protein to rRNA composition compared to prokaryotic ribosomes, where this ratio is reversed. Another difference between mammalian mitoribosomes and prokaryotic ribosomes is that the latter contain a 5S rRNA. Among different species, the proteins comprising the mitoribosome differ greatly in sequence, and sometimes in biochemical properties, which prevents easy recognition by sequence homology. This gene encodes a 28S subunit protein that belongs to the ribosomal protein S18P family. The encoded protein is one of three that has significant sequence similarity to bacterial S18 proteins. The primary sequences of the three human mitochondrial S18 proteins are no more closely related to each other than they are to the prokaryotic S18 proteins. Pseudogenes corresponding to this gene are found on chromosomes 1q and 2q.
+## 22                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       &lt;NA&gt;
+## 23                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      This gene is a member of the Src family of protein tyrosine kinases (PTKs). The encoded protein contains N-terminal sites for myristylation and palmitylation, a PTK domain, and SH2 and SH3 domains which are involved in mediating protein-protein interactions with phosphotyrosine-containing and proline-rich motifs, respectively. The protein localizes to plasma membrane ruffles, and functions as a negative regulator of cell migration and adhesion triggered by the beta-2 integrin signal transduction pathway. Infection with Epstein-Barr virus results in the overexpression of this gene. Multiple alternatively spliced variants, encoding the same protein, have been identified.
+## 24                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       &lt;NA&gt;
+## 25                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                This gene encodes a multi-pass membrane protein that is part of the mammalian endoplasmic reticulum. The encoded protein influences glycosylation and facilitates the translocation of secretory proteins across the endoplasmic reticulum membrane by regulating which domains of the nascent polypeptide chain are visible to the cytosol during a translocational pause.</code></pre>
+<pre class="r"><code>pathway2 &lt;- read.delim(&quot;../utilities/bmi_ash/bmi_genes_ash_0_5_pathways.tab&quot;)</code></pre>
+<pre><code>## Warning in read.table(file = file, header = header, sep = sep, quote =
+## quote, : incomplete final line found by readTableHeader on &#39;../utilities/
+## bmi_ash/bmi_genes_ash_0_5_pathways.tab&#39;</code></pre>
+<pre class="r"><code>cbind.data.frame(pathway2$q.value, pathway2$pathway, pathway2$members_input_overlap_geneids)</code></pre>
+<pre><code>##   pathway2$q.value
+## 1       0.08958489
+##                                              pathway2$pathway
+## 1 SRP-dependent cotranslational protein targeting to membrane
+##   pathway2$members_input_overlap_geneids
+## 1                            6124; 23471</code></pre>
+</div>
+<div id="review---important-genes" class="section level2">
+<h2>Review - Important genes</h2>
+<p>We look at the 5 genes that seemingly looked slightly interesting, they are <strong>ENSG00000070159</strong> or <strong>PTPN3</strong>, <strong>ENSG00000138678</strong> or <strong>GPAT3</strong>, <strong>ENSG00000064205</strong> or <strong>WISP2</strong>, <strong>ENSG00000113119</strong> or <strong>TMC06</strong> and <strong>ENSG00000172236</strong> or <strong>TPSAB1</strong>.</p>
+<p>I did not find anything interesting about PTPN3.</p>
+<p>GPAT3: Epidemiological evidence indicates that thyrotropin (TSH) is positively correlated with the severity of obesity. TSH promoted triglyceride (TG) synthesis in differentiated adipocytes in a thyroid hormone-independent manner. TSH could directly induce the activity of glycerol-3-phosphate-acyltransferase 3 (GPAT3), the rate-limiting enzyme in TG synthesis, in differentiated 3T3-L1 adipocytes. However, following either the knockdown of Tshr and PPARγ or the constitutive activation of AMPK, the changes to TSH-triggered GPAT3 activity and adipogenesis disappeared. <a href="https://www.nature.com/articles/srep07633">Article</a>.</p>
+<p>Hypertrophic obesity is associated with an inability to recruit and differentiate new subcutaneous adipose cells. This is not due to lack of precursor cells but to an inability to induce their commitment and differentiation through inactivation of canonical WNT signaling and allowing bone morphogenetic protein 4 (BMP4) to initiate commitment of precursor cells. The WNT-inducible secreted protein 2 (WISP2) links WNT and BMP4 signaling. It is highly expressed in early adipogenic precursor cells and inhibits adipogenesis through dual mechanisms; cytosolic WISP2 forms a complex with ZNF423, a transcriptional activator of peroxisome proliferator–activated receptor γ (PPARγ), and this complex is dissociated by BMP4 allowing ZNF423 to enter the nucleus and initiate PPARγ activation. However, WISP2 is also a secreted protein that, through unclear mechanisms, directly inhibits PPARγ activation. WISP2 expression in human subcutaneous adipose tissue is associated with hypertrophic obesity, markers of ectopic fat accumulation, and degree of insulin resistance. <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3749334/">Article</a>.</p>
+<p>Mast cells participate in atherogenesis by releasing cytokines to induce vascular cell protease expression. Tryptase is expressed highly in human atherosclerotic lesions and the inhibition of tryptase activity hampers its capacity to maintain cholesterol inside macrophague foam cells. TPSAB1 tryptase alpha/beta 1 is related to tryptase expression.</p>
+<p>We plot the t-scores for these genes.</p>
+</div>
+<div id="ensg00000070159-or-ptpn3" class="section level2">
+<h2>ENSG00000070159 or PTPN3</h2>
+<p>Check the read expression profile in GTEx here</p>
+<p><a href="https://gtexportal.org/home/gene/ENSG00000070159">ENSG00000070159 or PTPN3</a></p>
+<pre class="r"><code>betahat_sebetahat_2 &lt;- get(load(&quot;../output/bmi_cor_nonmash.rda&quot;))
+tmat &lt;- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat</code></pre>
+<pre class="r"><code>indices &lt;- match(&quot;ENSG00000070159&quot;, colnames(betahat_mat))</code></pre>
+<pre class="r"><code>plot(tmat[, indices], col=&quot;red&quot;)
+abline(0,0)</code></pre>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p>Which are the tissues with lowest lfsr</p>
+<pre class="r"><code>sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]</code></pre>
+<pre><code>##       Adipose - Subcutaneous Adipose - Visceral (Omentum) 
+##                 2.207915e-10                 2.334670e-04 
+##               Nerve - Tibial      Breast - Mammary Tissue 
+##                 2.480382e-03                 4.902126e-02 
+##            Muscle - Skeletal 
+##                 2.677552e-01</code></pre>
+<p>See that the minimum lfsr occurs in the Adipose tissues and Breast, all fatty tissues and muscle skeletal, all of which are related to increasing weight and obesity.</p>
+<p>We plot the gene expression of this gene with respect to weight for each of the tissues of interest.</p>
+<pre class="r"><code>par(new=TRUE)</code></pre>
+<pre><code>## Warning in par(new = TRUE): calling par(new=TRUE) with no plot</code></pre>
+<pre class="r"><code>par(mfrow = c(3,3))
+for(j in 1:53){
+  temp1 &lt;- person_tissue_genes[,j,indices]
+  plot(sample_attributes$BMI, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$BMI, temp1, family = &quot;gaussian&quot;), 
+        col=&quot;red&quot;, lty=2, lwd=2)
+}</code></pre>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-14-1.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-14-2.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-14-3.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-14-4.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-14-5.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-14-6.png" width="672" /></p>
+<p>It does seem that PTPN3 has got something to do with weight that may not be well recorded.</p>
+</div>
+<div id="ensg00000138678-or-gpat3" class="section level2">
+<h2>ENSG00000138678 or GPAT3</h2>
+<p>Check the read expression profile in GTEx here</p>
+<p><a href="https://gtexportal.org/home/gene/ENSG00000138678">ENSG00000138678 or GPAT3</a></p>
+<pre class="r"><code>betahat_sebetahat_2 &lt;- get(load(&quot;../output/bmi_cor_nonmash.rda&quot;))
+tmat &lt;- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat</code></pre>
+<pre class="r"><code>indices &lt;- match(&quot;ENSG00000138678&quot;, colnames(betahat_mat))</code></pre>
+<pre class="r"><code>plot(tmat[, indices], col=&quot;red&quot;)
+abline(0,0)</code></pre>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p>Which are the tissues with lowest lfsr</p>
+<pre class="r"><code>sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]</code></pre>
+<pre><code>##       Adipose - Subcutaneous Adipose - Visceral (Omentum) 
+##                 3.508671e-05                 1.951873e-02 
+##      Breast - Mammary Tissue       Heart - Left Ventricle 
+##                 2.910720e-02                 3.819407e-02 
+##                Adrenal Gland 
+##                 4.843884e-01</code></pre>
+<pre class="r"><code>par(new=TRUE)</code></pre>
+<pre><code>## Warning in par(new = TRUE): calling par(new=TRUE) with no plot</code></pre>
+<pre class="r"><code>par(mfrow = c(3,3))
+for(j in 1:53){
+  temp1 &lt;- person_tissue_genes[,j,indices]
+  plot(sample_attributes$BMI, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$BMI, temp1, family = &quot;gaussian&quot;), 
+        col=&quot;red&quot;, lty=2, lwd=2)
+}</code></pre>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-19-1.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-19-2.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-19-3.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-19-4.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-19-5.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-19-6.png" width="672" /></p>
+</div>
+<div id="ensg00000064205-or-wisp2" class="section level2">
+<h2>ENSG00000064205 or WISP2</h2>
+<p>Check the read expression profile in GTEx here</p>
+<p><a href="https://gtexportal.org/home/gene/ENSG00000064205">ENSG00000064205 or WISP2</a></p>
+<pre class="r"><code>betahat_sebetahat_2 &lt;- get(load(&quot;../output/bmi_cor_nonmash.rda&quot;))
+tmat &lt;- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat</code></pre>
+<pre class="r"><code>indices &lt;- match(&quot;ENSG00000064205&quot;, colnames(betahat_mat))</code></pre>
+<pre class="r"><code>plot(tmat[, indices], col=&quot;red&quot;)
+abline(0,0)</code></pre>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<p>Which are the tissues with lowest lfsr</p>
+<pre class="r"><code>sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]</code></pre>
+<pre><code>##              Adipose - Subcutaneous Skin - Not Sun Exposed (Suprapubic) 
+##                        4.275677e-05                        4.521244e-02 
+##                      Artery - Aorta                                Lung 
+##                        7.294094e-02                        2.080651e-01 
+##                     Artery - Tibial 
+##                        2.123075e-01</code></pre>
+<pre class="r"><code>par(new=TRUE)</code></pre>
+<pre><code>## Warning in par(new = TRUE): calling par(new=TRUE) with no plot</code></pre>
+<pre class="r"><code>par(mfrow = c(3,3))
+for(j in 1:53){
+  temp1 &lt;- person_tissue_genes[,j,indices]
+  plot(sample_attributes$BMI, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$BMI, temp1, family = &quot;gaussian&quot;), 
+        col=&quot;red&quot;, lty=2, lwd=2)
+}</code></pre>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-24-1.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-24-2.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-24-3.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-24-4.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-24-5.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-24-6.png" width="672" /></p>
+</div>
+<div id="ensg00000113119-or-tmc06" class="section level2">
+<h2>ENSG00000113119 or TMC06</h2>
+<p>Check the read expression profile in GTEx here</p>
+<p><a href="https://gtexportal.org/home/gene/ENSG00000113119">ENSG00000113119 or TMC06</a></p>
+<pre class="r"><code>betahat_sebetahat_2 &lt;- get(load(&quot;../output/bmi_cor_nonmash.rda&quot;))
+tmat &lt;- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat</code></pre>
+<pre class="r"><code>indices &lt;- match(&quot;ENSG00000113119&quot;, colnames(betahat_mat))</code></pre>
+<pre class="r"><code>plot(tmat[, indices], col=&quot;red&quot;)
+abline(0,0)</code></pre>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-27-1.png" width="672" /></p>
+<p>Which are the tissues with lowest lfsr</p>
+<pre class="r"><code>sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]</code></pre>
+<pre><code>##      Breast - Mammary Tissue          Brain - Hippocampus 
+##                   0.02849368                   0.07657969 
+##                        Liver Adipose - Visceral (Omentum) 
+##                   0.08963795                   0.11891557 
+##             Brain - Amygdala 
+##                   0.14394875</code></pre>
+<pre class="r"><code>par(new=TRUE)</code></pre>
+<pre><code>## Warning in par(new = TRUE): calling par(new=TRUE) with no plot</code></pre>
+<pre class="r"><code>par(mfrow = c(3,3))
+for(j in 1:53){
+  temp1 &lt;- person_tissue_genes[,j,indices]
+  plot(sample_attributes$BMI, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$BMI, temp1, family = &quot;gaussian&quot;), 
+        col=&quot;red&quot;, lty=2, lwd=2)
+}</code></pre>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-29-1.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-29-2.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-29-3.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-29-4.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-29-5.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-29-6.png" width="672" /></p>
+</div>
+<div id="ensg00000172236-or-tpsab1" class="section level2">
+<h2>ENSG00000172236 or TPSAB1</h2>
+<p>Check the read expression profile in GTEx here</p>
+<p><a href="https://gtexportal.org/home/gene/ENSG00000172236">ENSG00000172236 or TPSAB1</a></p>
+<pre class="r"><code>betahat_sebetahat_2 &lt;- get(load(&quot;../output/bmi_cor_nonmash.rda&quot;))
+tmat &lt;- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat</code></pre>
+<pre class="r"><code>indices &lt;- match(&quot;ENSG00000172236&quot;, colnames(betahat_mat))</code></pre>
+<pre class="r"><code>plot(tmat[, indices], col=&quot;red&quot;)
+abline(0,0)</code></pre>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-32-1.png" width="672" /></p>
+<p>Which are the tissues with lowest lfsr</p>
+<pre class="r"><code>sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]</code></pre>
+<pre><code>##              Esophagus - Muscularis                               Liver 
+##                          0.02622255                          0.05681412 
+## Skin - Not Sun Exposed (Suprapubic)            Brain - Substantia nigra 
+##                          0.14385696                          0.16005582 
+##            Heart - Atrial Appendage 
+##                          0.22238841</code></pre>
+<pre class="r"><code>par(new=TRUE)</code></pre>
+<pre><code>## Warning in par(new = TRUE): calling par(new=TRUE) with no plot</code></pre>
+<pre class="r"><code>par(mfrow = c(3,3))
+for(j in 1:53){
+  temp1 &lt;- person_tissue_genes[,j,indices]
+  plot(sample_attributes$BMI, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$BMI, temp1, family = &quot;gaussian&quot;), 
+        col=&quot;red&quot;, lty=2, lwd=2)
+}</code></pre>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-34-1.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-34-2.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-34-3.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-34-4.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-34-5.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-34-6.png" width="672" /></p>
+</div>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

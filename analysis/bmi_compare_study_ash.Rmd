@@ -1,0 +1,319 @@
+---
+title: "BMI comparison with ash"
+author: "Kushal K Dey"
+date: "6/7/2017"
+output: html_document
+---
+
+In this script, we look at the BMI comparison problem in the context of using lfsr for the adaptive shrinkage on the tissues for each gene. Adaptive shrinkage is performed using a normal distribution centered about 0. 
+
+```{r}
+person_tissue_genes <- get(load("../output/person_tissue_genes_voom.rda"))
+betahat_sebetahat <- get(load("../output/bmi_cor_ash.rda"))
+sample_attributes <- get(load("../output/sample_attributes_filtered.rda"))
+person_tissue_genes <- get(load("../output/person_tissue_genes_voom.rda"))
+```
+
+```{r}
+betahat_mat <- betahat_sebetahat$post.mean
+sebetahat_mat <- betahat_sebetahat$post.sd
+lfsr_mat <- betahat_sebetahat$post.lfsr
+```
+
+##  lfsr threshold 0.1
+
+We look at which genes have the most number of lfsr values below a chosen threshold.
+
+```{r}
+num_lfsr_below_thresh <- apply(lfsr_mat, 2, function(x) return(length(which(x < 0.1))))
+
+imp_genes <- order(num_lfsr_below_thresh, decreasing = TRUE)[1:25]
+num_lfsr_below_thresh[imp_genes]
+
+names <- colnames(betahat_mat)[imp_genes]
+```
+
+We see that no genes are shared across all tissues and there are many genes that are significant with this threshold in 3 tissues and two genes in 4 tissues.
+
+We increase a threshold to $0.25$.
+
+##  lfsr threshold 0.30
+
+We look at which genes have the most number of lfsr values below a chosen threshold.
+
+```{r}
+num_lfsr_below_thresh <- apply(lfsr_mat, 2, function(x) return(length(which(x < 0.25))))
+
+imp_genes <- order(num_lfsr_below_thresh, decreasing = TRUE)[1:25]
+num_lfsr_below_thresh[imp_genes]
+
+names <- colnames(betahat_mat)[imp_genes]
+```
+
+We take the first 10 genes and perform look which pathways are they enriched for.
+
+```{r}
+write.table(names, file = "../utilities/bmi_ash/bmi_genes_ash_0_3.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+```{r}
+pathway2 <- read.delim("../utilities/bmi_ash/bmi_genes_ash_0_3_pathways.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 1, cexCol = 1, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+##  lfsr threshold 0.50
+
+```{r}
+num_lfsr_below_thresh <- apply(lfsr_mat, 2, function(x) return(length(which(x < 0.5))))
+
+imp_genes <- order(num_lfsr_below_thresh, decreasing = TRUE)[1:25]
+num_lfsr_below_thresh[imp_genes]
+
+names <- colnames(betahat_mat)[imp_genes]
+```
+
+```{r}
+write.table(names, file = "../utilities/bmi_ash/bmi_genes_ash_0_5.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+```{r}
+pathway2 <- read.delim("../utilities/bmi_ash/bmi_genes_ash_0_5_pathways.tab")
+cbind.data.frame(pathway2$q.value, pathway2$pathway, pathway2$members_input_overlap_geneids)
+```
+
+## Review - Important genes
+
+We look at the 5 genes that seemingly looked slightly interesting, they are 
+**ENSG00000070159** or **PTPN3**,  **ENSG00000138678** or **GPAT3**,  **ENSG00000064205** or **WISP2**,  **ENSG00000113119** or **TMC06** and **ENSG00000172236** or **TPSAB1**.
+
+I did not find anything interesting about PTPN3. 
+
+GPAT3: Epidemiological evidence indicates that thyrotropin (TSH) is positively correlated with the severity of obesity. TSH promoted triglyceride (TG) synthesis in differentiated adipocytes in a thyroid hormone-independent manner. TSH could directly induce the activity of glycerol-3-phosphate-acyltransferase 3 (GPAT3), the rate-limiting enzyme in TG synthesis, in differentiated 3T3-L1 adipocytes. However, following either the knockdown of Tshr and PPARγ or the constitutive activation of AMPK, the changes to TSH-triggered GPAT3 activity and adipogenesis disappeared. [Article](https://www.nature.com/articles/srep07633).
+
+Hypertrophic obesity is associated with an inability to recruit and differentiate new subcutaneous adipose cells. This is not due to lack of precursor cells but to an inability to induce their commitment and differentiation through inactivation of canonical WNT signaling and allowing bone morphogenetic protein 4 (BMP4) to initiate commitment of precursor cells. The WNT-inducible secreted protein 2 (WISP2) links WNT and BMP4 signaling. It is highly expressed in early adipogenic precursor cells and inhibits adipogenesis through dual mechanisms; cytosolic WISP2 forms a complex with ZNF423, a transcriptional activator of peroxisome proliferator–activated receptor γ (PPARγ), and this complex is dissociated by BMP4 allowing ZNF423 to enter the nucleus and initiate PPARγ activation. However, WISP2 is also a secreted protein that, through unclear mechanisms, directly inhibits PPARγ activation. WISP2 expression in human subcutaneous adipose tissue is associated with hypertrophic obesity, markers of ectopic fat accumulation, and degree of insulin resistance. [Article](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3749334/).
+
+Mast cells participate in atherogenesis by releasing cytokines to induce vascular cell protease expression. Tryptase is expressed highly in human atherosclerotic lesions and the inhibition of tryptase activity hampers its capacity to maintain cholesterol inside macrophague foam cells. TPSAB1 tryptase alpha/beta 1 is related to tryptase expression.
+
+We plot the t-scores for these genes.
+
+## ENSG00000070159 or PTPN3
+
+Check the read expression profile in GTEx here 
+
+[ENSG00000070159 or PTPN3](https://gtexportal.org/home/gene/ENSG00000070159)
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/bmi_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+```
+
+```{r}
+indices <- match("ENSG00000070159", colnames(betahat_mat))
+```
+
+
+```{r}
+plot(tmat[, indices], col="red")
+abline(0,0)
+```
+
+
+Which are the tissues with lowest lfsr 
+
+```{r}
+sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]
+```
+
+See that the minimum lfsr occurs in the Adipose tissues and Breast, all fatty tissues and muscle skeletal, all of which are related to increasing weight and obesity.
+
+We plot the gene expression of this gene with respect to weight for each of the tissues of interest.
+
+```{r}
+par(new=TRUE)
+par(mfrow = c(3,3))
+for(j in 1:53){
+  temp1 <- person_tissue_genes[,j,indices]
+  plot(sample_attributes$BMI, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$BMI, temp1, family = "gaussian"), 
+        col="red", lty=2, lwd=2)
+}
+```
+
+It does seem that PTPN3 has got something to do with weight that may not be well recorded.
+
+## ENSG00000138678 or GPAT3
+
+Check the read expression profile in GTEx here 
+
+[ENSG00000138678 or GPAT3](https://gtexportal.org/home/gene/ENSG00000138678)
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/bmi_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+```
+
+```{r}
+indices <- match("ENSG00000138678", colnames(betahat_mat))
+```
+
+
+```{r}
+plot(tmat[, indices], col="red")
+abline(0,0)
+```
+
+Which are the tissues with lowest lfsr 
+
+```{r}
+sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]
+```
+
+```{r}
+par(new=TRUE)
+par(mfrow = c(3,3))
+for(j in 1:53){
+  temp1 <- person_tissue_genes[,j,indices]
+  plot(sample_attributes$BMI, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$BMI, temp1, family = "gaussian"), 
+        col="red", lty=2, lwd=2)
+}
+```
+
+## ENSG00000064205 or WISP2
+
+Check the read expression profile in GTEx here 
+
+[ENSG00000064205 or WISP2](https://gtexportal.org/home/gene/ENSG00000064205)
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/bmi_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+```
+
+```{r}
+indices <- match("ENSG00000064205", colnames(betahat_mat))
+```
+
+
+```{r}
+plot(tmat[, indices], col="red")
+abline(0,0)
+```
+
+Which are the tissues with lowest lfsr 
+
+```{r}
+sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]
+```
+
+```{r}
+par(new=TRUE)
+par(mfrow = c(3,3))
+for(j in 1:53){
+  temp1 <- person_tissue_genes[,j,indices]
+  plot(sample_attributes$BMI, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$BMI, temp1, family = "gaussian"), 
+        col="red", lty=2, lwd=2)
+}
+```
+
+## ENSG00000113119 or TMC06
+
+Check the read expression profile in GTEx here 
+
+[ENSG00000113119 or TMC06](https://gtexportal.org/home/gene/ENSG00000113119)
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/bmi_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+```
+
+```{r}
+indices <- match("ENSG00000113119", colnames(betahat_mat))
+```
+
+
+```{r}
+plot(tmat[, indices], col="red")
+abline(0,0)
+```
+
+Which are the tissues with lowest lfsr 
+
+```{r}
+sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]
+```
+
+```{r}
+par(new=TRUE)
+par(mfrow = c(3,3))
+for(j in 1:53){
+  temp1 <- person_tissue_genes[,j,indices]
+  plot(sample_attributes$BMI, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$BMI, temp1, family = "gaussian"), 
+        col="red", lty=2, lwd=2)
+}
+```
+
+## ENSG00000172236 or TPSAB1
+
+Check the read expression profile in GTEx here 
+
+[ENSG00000172236 or TPSAB1](https://gtexportal.org/home/gene/ENSG00000172236)
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/bmi_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+```
+
+```{r}
+indices <- match("ENSG00000172236", colnames(betahat_mat))
+```
+
+
+```{r}
+plot(tmat[, indices], col="red")
+abline(0,0)
+```
+
+Which are the tissues with lowest lfsr 
+
+```{r}
+sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]
+```
+
+```{r}
+par(new=TRUE)
+par(mfrow = c(3,3))
+for(j in 1:53){
+  temp1 <- person_tissue_genes[,j,indices]
+  plot(sample_attributes$BMI, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$BMI, temp1, family = "gaussian"), 
+        col="red", lty=2, lwd=2)
+}
+```
+
+
