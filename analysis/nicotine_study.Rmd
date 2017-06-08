@@ -1,0 +1,50 @@
+---
+title: "Nicotine study genes vs samples"
+author: "Kushal K Dey"
+date: "6/4/2017"
+output: html_document
+---
+
+Since we do not have information of the smoking status of the individuals in the GTEx analysis, we 
+try to see how the genes which we know are related to nicotine content of the body behave in terms of expression across the samples for the different tissues.
+
+```{r}
+betahat_sebetahat <- get(load("../output/death_time_cor_nonmash.rda"))
+sample_attributes <- get(load("../output/sample_attributes_filtered.rda"))
+person_tissue_genes <- get(load("../output/person_tissue_genes_voom.rda"))
+```
+
+The nicotine pathway genes
+
+```{r}
+pathways <- read.delim("../utilities/CPDB_pathways_genes.tab")
+pathway_names <- pathways[,1]
+grep("Nicotine",pathway_names)
+```
+
+```{r}
+nicotine_pathways <- pathways[grep("Nicotine", pathway_names),]
+nicotine_genes <- strsplit(as.character(nicotine_pathways[3,4]), "[,]")[[1]]
+```
+
+
+```{r}
+dimnames(person_tissue_genes)[[2]]
+indices <- match(nicotine_genes, dimnames(person_tissue_genes)[[3]])
+indices <- indices[!is.na(indices)]
+```
+
+```{r}
+par(mfrow = c(3,3))
+j <- 9
+plot(person_tissue_genes[,36,indices[j]], ylab = "lung")
+plot(person_tissue_genes[,50,indices[j]], ylab = "thyroid")
+plot(person_tissue_genes[,53,indices[j]], ylab = "blood")
+plot(person_tissue_genes[,12,indices[j]], ylab = "cerebellum")
+plot(person_tissue_genes[,1,indices[j]], ylab = "adipose")
+plot(person_tissue_genes[,33,indices[j]], ylab = "heart")
+plot(person_tissue_genes[,35,indices[j]], ylab = "liver")
+plot(person_tissue_genes[,34,indices[j]], ylab = "kidney")
+```
+We do not see any distinct clusters in the expression patterns of Nicotine pathway genes, which implies that most likely the nicotine information is not something that can create clusters among the samples.
+
