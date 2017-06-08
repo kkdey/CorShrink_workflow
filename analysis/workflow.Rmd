@@ -98,13 +98,34 @@ more about systemic effects.
 
 The idea is to compute the gene and tissue specific correlation across samples with respect to sample meta-characteristics such as age, sex, time of death, body temperature etc. We then check if there are genes that show significant effect in regression coefficient across most tissues an whether they can be traced back to the pathways we obtained from tissue-tissue correlations in CorShrink.
 
+First we used a quantile based pathway enrichment analysis of the genes based on the effects of the genes on age, sex, death time and BMI.
+
 - [BMI systemic effects analysis](bmi_compare_study.html)
 - [Circadian rhythm/clock trajectories](circadian_rhythm_analysis.html)
 - [Circadian rhythm/clock effects analysis](death_time_comparison.html)
 - [Age specific systemic analysis](age_comparison_study.html)
 - [Sex specific systemic analysis](sex_comparison_study.html)
 - [Sex specific systemic analysis - part 2](sex_comparison_study_2.html)
+
+We then applied adaptive shrinkage across tissues for each gene and then compared the
+number of tissues for which a given lfsr threshold is exceeded by a gene. This is a 
+preliminary analysis before the more formal MASH analysis.
+
+ - [BMI systemic effects study with tissue wide adaptive shrinkage](bmi_compare_study_ash.html)
+ - [Age systemic effects study with tissue wide adaptive shrinkage](age_compare_study_ash.html)
+ - [Sex systemic effects study with tissue wide adaptive shrinkage](sex_compare_study_ash.html)
+ - [Circadian systemic effects study with tissue wide adaptive shrinkage](circadian_compare_study_ash.html)
+
+We additionally observed how the expression trjectories for Nicotine pathways look and whether they cluster by individuals clearly.
+
 - [Is there visible effect of Nicotine pathways](nicotine_study.html)
+
+We also looked at genes that show trends with respect to body temperature. But we did not find anything interesting.
+
+- [Is there a trend in expression of genes with respect to body temperature](heat_effects_analysis.html)
+
+p53 pathway is an extremely important pathway for aging. So, we took a peak into the genes in this pathway and how they look like in this data.
+
 - [p53 and p63 gene studies](p53_p63_analysis.html)
 
 

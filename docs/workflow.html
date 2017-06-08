@@ -164,6 +164,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <h3>Systemic effects analysis in GTEx</h3>
 <p>CorShrink identifies genes that show high correlation across all tissues, both brain and non brain. In this section, we try to dig deeper into learning more about systemic effects.</p>
 <p>The idea is to compute the gene and tissue specific correlation across samples with respect to sample meta-characteristics such as age, sex, time of death, body temperature etc. We then check if there are genes that show significant effect in regression coefficient across most tissues an whether they can be traced back to the pathways we obtained from tissue-tissue correlations in CorShrink.</p>
+<p>First we used a quantile based pathway enrichment analysis of the genes based on the effects of the genes on age, sex, death time and BMI.</p>
 <ul>
 <li><a href="bmi_compare_study.html">BMI systemic effects analysis</a></li>
 <li><a href="circadian_rhythm_analysis.html">Circadian rhythm/clock trajectories</a></li>
@@ -171,7 +172,24 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <li><a href="age_comparison_study.html">Age specific systemic analysis</a></li>
 <li><a href="sex_comparison_study.html">Sex specific systemic analysis</a></li>
 <li><a href="sex_comparison_study_2.html">Sex specific systemic analysis - part 2</a></li>
+</ul>
+<p>We then applied adaptive shrinkage across tissues for each gene and then compared the number of tissues for which a given lfsr threshold is exceeded by a gene. This is a preliminary analysis before the more formal MASH analysis.</p>
+<ul>
+<li><a href="bmi_compare_study_ash.html">BMI systemic effects study with tissue wide adaptive shrinkage</a></li>
+<li><a href="age_compare_study_ash.html">Age systemic effects study with tissue wide adaptive shrinkage</a></li>
+<li><a href="sex_compare_study_ash.html">Sex systemic effects study with tissue wide adaptive shrinkage</a></li>
+<li><a href="circadian_compare_study_ash.html">Circadian systemic effects study with tissue wide adaptive shrinkage</a></li>
+</ul>
+<p>We additionally observed how the expression trjectories for Nicotine pathways look and whether they cluster by individuals clearly.</p>
+<ul>
 <li><a href="nicotine_study.html">Is there visible effect of Nicotine pathways</a></li>
+</ul>
+<p>We also looked at genes that show trends with respect to body temperature. But we did not find anything interesting.</p>
+<ul>
+<li><a href="heat_effects_analysis.html">Is there a trend in expression of genes with respect to body temperature</a></li>
+</ul>
+<p>p53 pathway is an extremely important pathway for aging. So, we took a peak into the genes in this pathway and how they look like in this data.</p>
+<ul>
 <li><a href="p53_p63_analysis.html">p53 and p63 gene studies</a></li>
 </ul>
 </div>
