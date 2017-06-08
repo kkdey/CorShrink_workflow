@@ -1,0 +1,3 @@
+p-value	q-value	term_goid	term_category	term_level	term_name	members_input_overlap	members_input_overlap_geneids	size	effective_size
+0.00114286643337	0.00457146573346	GO:0022412	b	3	cellular process involved in reproduction in multicellular organism	6795; 246777	ENSG00000105146; ENSG00000258484	262	262
+0.0096123677116	0.0520305374741	GO:0019953	b	2	sexual reproduction	6795; 246777	ENSG00000105146; ENSG00000258484	773	773

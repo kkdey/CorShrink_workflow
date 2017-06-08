@@ -100,6 +100,19 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 </div>
 
 <p>In this script, we look at the BMI comparison problem in the context of using lfsr for the adaptive shrinkage on the tissues for each gene. Adaptive shrinkage is performed using a normal distribution centered about 0.</p>
+<pre class="r"><code>ash_cor_mat &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_halfuniform_gtex_tissues.rda&quot;))</code></pre>
+<pre class="r"><code>common_samples &lt;- get(load(&quot;../output/common_samples.rda&quot;))
+tissue_labels &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;)[,3]
+
+#library(data.table)
+#data &lt;- data.frame(fread(&quot;../data/GTEX_V6/cis_gene_expression.txt&quot;))
+#matdata &lt;- t(data[,-c(1,2)])
+
+gene_names &lt;- as.character(read.table(file = &quot;../data/GTEX_V6/gene_names_GTEX_V6.txt&quot;)[,1])
+gene_names_1 &lt;- as.character(sapply(gene_names, function(x) return(strsplit(x, &quot;[.]&quot;)[[1]][1])))
+
+
+U &lt;- unique(tissue_labels)</code></pre>
 <pre class="r"><code>person_tissue_genes &lt;- get(load(&quot;../output/person_tissue_genes_voom.rda&quot;))
 betahat_sebetahat &lt;- get(load(&quot;../output/bmi_cor_ash.rda&quot;))
 sample_attributes &lt;- get(load(&quot;../output/sample_attributes_filtered.rda&quot;))
@@ -232,7 +245,7 @@ col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 1, cexCol = 1, col = col, zlim = c(-1,1),
         scale = &quot;none&quot;, margins = c(5, 5))</code></pre>
-<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 </div>
 <div id="lfsr-threshold-0.50" class="section level2">
 <h2>lfsr threshold 0.50</h2>
@@ -341,7 +354,7 @@ tmat &lt;- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat</code></pre
 <pre class="r"><code>indices &lt;- match(&quot;ENSG00000070159&quot;, colnames(betahat_mat))</code></pre>
 <pre class="r"><code>plot(tmat[, indices], col=&quot;red&quot;)
 abline(0,0)</code></pre>
-<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
 <p>Which are the tissues with lowest lfsr</p>
 <pre class="r"><code>sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]</code></pre>
 <pre><code>##       Adipose - Subcutaneous Adipose - Visceral (Omentum) 
@@ -361,7 +374,15 @@ for(j in 1:53){
   lines(loess.smooth(sample_attributes$BMI, temp1, family = &quot;gaussian&quot;), 
         col=&quot;red&quot;, lty=2, lwd=2)
 }</code></pre>
-<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-14-1.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-14-2.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-14-3.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-14-4.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-14-5.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-14-6.png" width="672" /></p>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-17-1.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-17-2.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-17-3.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-17-4.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-17-5.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-17-6.png" width="672" /></p>
+<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
 <p>It does seem that PTPN3 has got something to do with weight that may not be well recorded.</p>
 </div>
 <div id="ensg00000138678-or-gpat3" class="section level2">
@@ -373,7 +394,7 @@ tmat &lt;- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat</code></pre
 <pre class="r"><code>indices &lt;- match(&quot;ENSG00000138678&quot;, colnames(betahat_mat))</code></pre>
 <pre class="r"><code>plot(tmat[, indices], col=&quot;red&quot;)
 abline(0,0)</code></pre>
-<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
 <p>Which are the tissues with lowest lfsr</p>
 <pre class="r"><code>sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]</code></pre>
 <pre><code>##       Adipose - Subcutaneous Adipose - Visceral (Omentum) 
@@ -391,7 +412,15 @@ for(j in 1:53){
   lines(loess.smooth(sample_attributes$BMI, temp1, family = &quot;gaussian&quot;), 
         col=&quot;red&quot;, lty=2, lwd=2)
 }</code></pre>
-<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-19-1.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-19-2.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-19-3.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-19-4.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-19-5.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-19-6.png" width="672" /></p>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-23-1.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-23-2.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-23-3.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-23-4.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-23-5.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-23-6.png" width="672" /></p>
+<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
 </div>
 <div id="ensg00000064205-or-wisp2" class="section level2">
 <h2>ENSG00000064205 or WISP2</h2>
@@ -402,7 +431,7 @@ tmat &lt;- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat</code></pre
 <pre class="r"><code>indices &lt;- match(&quot;ENSG00000064205&quot;, colnames(betahat_mat))</code></pre>
 <pre class="r"><code>plot(tmat[, indices], col=&quot;red&quot;)
 abline(0,0)</code></pre>
-<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-27-1.png" width="672" /></p>
 <p>Which are the tissues with lowest lfsr</p>
 <pre class="r"><code>sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]</code></pre>
 <pre><code>##              Adipose - Subcutaneous Skin - Not Sun Exposed (Suprapubic) 
@@ -420,7 +449,15 @@ for(j in 1:53){
   lines(loess.smooth(sample_attributes$BMI, temp1, family = &quot;gaussian&quot;), 
         col=&quot;red&quot;, lty=2, lwd=2)
 }</code></pre>
-<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-24-1.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-24-2.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-24-3.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-24-4.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-24-5.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-24-6.png" width="672" /></p>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-29-1.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-29-2.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-29-3.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-29-4.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-29-5.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-29-6.png" width="672" /></p>
+<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-30-1.png" width="672" /></p>
 </div>
 <div id="ensg00000113119-or-tmc06" class="section level2">
 <h2>ENSG00000113119 or TMC06</h2>
@@ -431,7 +468,7 @@ tmat &lt;- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat</code></pre
 <pre class="r"><code>indices &lt;- match(&quot;ENSG00000113119&quot;, colnames(betahat_mat))</code></pre>
 <pre class="r"><code>plot(tmat[, indices], col=&quot;red&quot;)
 abline(0,0)</code></pre>
-<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-27-1.png" width="672" /></p>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-33-1.png" width="672" /></p>
 <p>Which are the tissues with lowest lfsr</p>
 <pre class="r"><code>sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]</code></pre>
 <pre><code>##      Breast - Mammary Tissue          Brain - Hippocampus 
@@ -449,7 +486,15 @@ for(j in 1:53){
   lines(loess.smooth(sample_attributes$BMI, temp1, family = &quot;gaussian&quot;), 
         col=&quot;red&quot;, lty=2, lwd=2)
 }</code></pre>
-<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-29-1.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-29-2.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-29-3.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-29-4.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-29-5.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-29-6.png" width="672" /></p>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-35-1.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-35-2.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-35-3.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-35-4.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-35-5.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-35-6.png" width="672" /></p>
+<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-36-1.png" width="672" /></p>
 </div>
 <div id="ensg00000172236-or-tpsab1" class="section level2">
 <h2>ENSG00000172236 or TPSAB1</h2>
@@ -460,7 +505,7 @@ tmat &lt;- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat</code></pre
 <pre class="r"><code>indices &lt;- match(&quot;ENSG00000172236&quot;, colnames(betahat_mat))</code></pre>
 <pre class="r"><code>plot(tmat[, indices], col=&quot;red&quot;)
 abline(0,0)</code></pre>
-<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-32-1.png" width="672" /></p>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-39-1.png" width="672" /></p>
 <p>Which are the tissues with lowest lfsr</p>
 <pre class="r"><code>sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]</code></pre>
 <pre><code>##              Esophagus - Muscularis                               Liver 
@@ -478,7 +523,15 @@ for(j in 1:53){
   lines(loess.smooth(sample_attributes$BMI, temp1, family = &quot;gaussian&quot;), 
         col=&quot;red&quot;, lty=2, lwd=2)
 }</code></pre>
-<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-34-1.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-34-2.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-34-3.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-34-4.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-34-5.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-34-6.png" width="672" /></p>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-41-1.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-41-2.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-41-3.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-41-4.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-41-5.png" width="672" /><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-41-6.png" width="672" /></p>
+<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="bmi_compare_study_ash_files/figure-html/unnamed-chunk-42-1.png" width="672" /></p>
 </div>
 
 <hr>
