@@ -6,7 +6,7 @@ library(ashr)
 
 person_tissue_genes <- get(load("../output/person_tissue_genes_voom.rda"))
 
-data <- get(load("../output/accident_cor_nonmash.rda"))
+data <- get(load("../output/cva_v_anoxia_cor_nonmash.rda"))
 betahat <- data$betahat
 sebetahat <- data$sebetahat
 
@@ -40,7 +40,7 @@ ll <- list("post.mean" = pos_mean,
            "post.sd" = pos_sd,
            "post.lfsr" = pos_lfsr)
 
-save(ll, file = "../output/accident_cor_ash.rda")
+save(ll, file = "../output/cva_v_anoxia_cor_ash.rda")
 
 plot(betahat[10,], col="red")
 points(ll$post.mean[10,], col="blue")

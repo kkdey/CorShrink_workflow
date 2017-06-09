@@ -129,10 +129,17 @@ p53 pathway is an extremely important pathway for aging. So, we took a peak into
 - [p53 and p63 gene studies](p53_p63_analysis.html)
 
 
+We also studied whether we can use detect some differences in gene expression between two causes of death - say Suicide and Natural Death, or Accident and Natural Death. We present the analyses corresponding to that below.
 
+- [Suicide vs Natural Death genetic effects](suicide_compare_study_ash.html)
+- [Accident vs Natural Death genetic effects](accident_compare_study_ash.html)
 
+We also checked between anoxia and heart disease and anoxia and cerebrovascular problems.
+The goal was to check if there are certain genes expressed more in one tissue in anoxia compared to heart disease and vice versa. Same for anoxia and cva.
 
-
+ - [Anoxia vs Cardiac disease](anoxia_v_heart_compare_study.html)
+ - [Anoxia vs CVA - cerbro vascular ](anoxia_v_cva_compare_study.html)
+ 
 ### Dimension Reduction and CorShrink
 
 In the GTEx data, CorShrink was previously applied one gene at a time on its tissue-tissue correlation matrix. However, one would assume that there will be sharing of information among genes and we can pool in this shared information while performing shrinkage to get a low dimensionla structyre of the correlation matrix together with shrinkage. To answer that question, we perform PCA, PMD and FLASH on the vectorized CorShrink matrices across genes. For the latter (FLASH), we also compare between FLASH on vectorized CorShrink and sample correlation matrices.
