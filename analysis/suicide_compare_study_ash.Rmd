@@ -1,0 +1,406 @@
+---
+title: "Suicide study with ash"
+author: "Kushal K Dey"
+date: "6/8/2017"
+output: html_document
+---
+
+In this script, we look at the Suicide comparison problem in the context of using lfsr for the adaptive shrinkage on the tissues for each gene. Adaptive shrinkage is performed using a normal distribution centered about 0. 
+
+```{r}
+ash_cor_mat <- get(load("../output/ash_cor_only_voom_pearson_halfuniform_gtex_tissues.rda"))
+```
+
+```{r}
+common_samples <- get(load("../output/common_samples.rda"))
+tissue_labels <- read.table(file = "../data/GTEX_V6/samples_id.txt")[,3]
+
+#library(data.table)
+#data <- data.frame(fread("../data/GTEX_V6/cis_gene_expression.txt"))
+#matdata <- t(data[,-c(1,2)])
+
+gene_names <- as.character(read.table(file = "../data/GTEX_V6/gene_names_GTEX_V6.txt")[,1])
+gene_names_1 <- as.character(sapply(gene_names, function(x) return(strsplit(x, "[.]")[[1]][1])))
+
+
+U <- unique(tissue_labels)
+```
+
+```{r echo=FALSE, eval=TRUE}
+order_index <- c();
+order_index <- c(order_index, grep("Brain", U))
+order_index <- c(order_index, grep("fibroblast", U))
+order_index <- c(order_index, grep("EBV", U))
+order_index <- c(order_index, grep("Spleen", U))
+order_index <- c(order_index, grep("Whole Blood", U))
+order_index <- c(order_index, grep("Muscle - Skeletal", U))
+order_index <- c(order_index, grep("Liver", U))
+order_index <- c(order_index, grep("Pancreas", U))
+order_index <- c(order_index, grep("Stomach", U))
+order_index <- c(order_index, grep("Kidney - Cortex", U))
+order_index <- c(order_index, grep("Adrenal Gland", U))
+order_index <- c(order_index, grep("Colon - Transverse", U))
+order_index <- c(order_index, grep("Small Intestine - Terminal Ileum", U))
+order_index <- c(order_index, grep("Heart - Atrial Appendage", U))
+order_index <- c(order_index, grep("Heart - Left Ventricle", U))
+order_index <- c(order_index, grep("Minor Salivary Gland", U))
+order_index <- c(order_index, grep("Skin - Sun Exposed", U))
+order_index <- c(order_index, grep("Skin - Not Sun Exposed", U))
+order_index <- c(order_index, grep("Lung", U))
+order_index <- c(order_index, grep("Ovary", U))
+order_index <- c(order_index, grep("Thyroid", U))
+order_index <- c(order_index, grep("Pituitary", U))
+order_index <- c(order_index, grep("Testis", U))
+order_index <- c(order_index, grep("Nerve - Tibial", U))
+order_index <- c(order_index, grep("Breast - Mammary Tissue", U))
+order_index <- c(order_index, grep("Adipose - Visceral", U))
+order_index <- c(order_index, grep("Adipose - Subcutaneous", U))
+order_index <- c(order_index, grep("Artery - Coronary", U))
+order_index <- c(order_index, grep("Artery - Tibial", U))
+order_index <- c(order_index, grep("Artery - Aorta", U))
+order_index <- c(order_index, grep("Esophagus - Mucosa", U))
+order_index <- c(order_index, grep("Vagina", U))
+order_index <- c(order_index, grep("Cervix - Endocervix", U))
+order_index <- c(order_index, grep("Esophagus - Gastroesophageal Junction", U))
+order_index <- c(order_index, grep("Colon - Sigmoid", U))
+order_index <- c(order_index, grep("Esophagus - Muscularis", U))
+order_index <- c(order_index, grep("Cervix - Ectocervix", U))
+order_index <- c(order_index, grep("Fallopian", U))
+order_index <- c(order_index, grep("Prostate", U))
+order_index <- c(order_index, grep("Uterus", U))
+order_index <- c(order_index, grep("Bladder", U))
+```
+
+
+```{r}
+person_tissue_genes <- get(load("../output/person_tissue_genes_voom.rda"))
+betahat_sebetahat <- get(load("../output/suicide_cor_ash.rda"))
+sample_attributes <- get(load("../output/sample_attributes_filtered.rda"))
+person_tissue_genes <- get(load("../output/person_tissue_genes_voom.rda"))
+```
+
+```{r}
+betahat_mat <- betahat_sebetahat$post.mean
+sebetahat_mat <- betahat_sebetahat$post.sd
+lfsr_mat <- betahat_sebetahat$post.lfsr
+```
+
+##  lfsr threshold 0.05
+
+We look at which genes have the most number of lfsr values below a chosen threshold.
+
+```{r}
+num_lfsr_below_thresh <- apply(lfsr_mat, 2, function(x) return(length(which(x < 0.1))))
+
+imp_genes <- order(num_lfsr_below_thresh, decreasing = TRUE)[1:10]
+num_lfsr_below_thresh[imp_genes]
+
+names <- colnames(betahat_mat)[imp_genes]
+```
+```{r}
+write.table(names, file = "../utilities/suicide_ash/suicide_genes_ash_0_1.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary, out$query)
+```
+We do not get any pathway with this. So, we relax the lfsr threshold a bit.
+
+```{r}
+num_lfsr_below_thresh <- apply(lfsr_mat, 2, function(x) return(length(which(x < 0.3))))
+
+imp_genes <- order(num_lfsr_below_thresh, decreasing = TRUE)[1:25]
+num_lfsr_below_thresh[imp_genes]
+
+names <- colnames(betahat_mat)[imp_genes]
+```
+
+```{r}
+write.table(names, file = "../utilities/suicide_ash/suicide_genes_ash_0_3.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary, out$query)
+```
+
+```{r}
+pathway2 <- read.delim("../utilities/suicide_ash/suicide_genes_0_3_pathways.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 1, cexCol = 1, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+Now there seem to be some Circadian genes that show up in this analysis. Are these genes meaningful?
+
+```{r}
+manner_of_death <- sample_attributes$DTHMNNR
+suicide_indices <- grep("Suicide", manner_of_death)
+time_of_suicides <- sample_attributes$DTHTIME[suicide_indices]
+time_of_suicides
+```
+
+We plot the density plot of these suicide times.
+
+```{r}
+times <- strsplit(as.character(sample_attributes$DTHTIME), "[:]")
+time_stamp <- unlist(lapply(times, function(x){
+  y <- as.numeric(x[1])
+  z <- as.numeric(x[2])
+  w <- y*60+z
+  return(w)
+}))/(24*60)
+
+times_1 <- time_stamp
+```
+
+```{r}
+plot(density(times_1[-suicide_indices], na.rm = TRUE), main = "Non suicide death times distribution")
+plot(density(times_1[suicide_indices], na.rm=TRUE), main = "Suicide death times distribution")
+```
+
+The suicide death times seem to be more concentrated towards the noon compared to the non suicidal deaths.
+
+Is that the reason the Circadian genes are found to be important?
+
+This [Article](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4285016/) does mention that circadian genes do play a role in mood disorders. Mood regulation is known to be affected by the change of seasons. Recent research findings have suggested that mood regulation may be influenced by the function of circadian clocks. In addition, the activity of brown adipocytes has been hypothesized to contribute to mood regulation. 
+
+Dysfunction of the proteins encoded from the circadian clock genes is hypothesized to play a role in the etiology of mood disorders (9). Here, I consider those proteins that are repressors of transcription to be most important, since they are essential to the normal function of circadian clocks (10). Among them, nuclear receptor subfamily 1, group D, member 1 (NR1D1) has a key position as a connecting node in the transcriptional and translational loops that constitute the circadian clock in a cell. 
+
+CRY2 and CRY1 are also related to depressive disorders. They are the key repressors of the Circadian clock. CRY2 opposes the actions of PER1.  
+
+so, what are the Circadian genes found by this approach? They are **ENSG00000126368** or **NR1D1** and **ENSG00000179094** or **PER1**.
+
+## ENSG00000126368 or NR1D1
+
+Check the read expression profile in GTEx here 
+
+[ENSG00000126368](https://gtexportal.org/home/gene/ENSG00000126368)
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/suicide_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+```
+
+```{r}
+indices <- match("ENSG00000126368", colnames(betahat_mat))
+```
+
+
+```{r}
+plot(tmat[, indices], col="red")
+abline(0,0)
+```
+Which are the tissues with lowest lfsr 
+
+```{r}
+sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]
+```
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices]
+  temp2 <- sample_attributes$DTHMNNR
+  suicide_indices <- grep("Suicide", manner_of_death)
+  natural_indices <- grep("Natural", manner_of_death)
+  total_indices <- c(suicide_indices, natural_indices)
+  temp11 <- temp1[total_indices]
+  temp21 <- temp2[total_indices]
+  temp1_M  <- temp11[which(temp21 == "Suicide")]
+  temp1_F  <- temp11[which(temp21 == "Natural")]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+```{r}
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices]),
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+```
+
+
+## ENSG00000179094 or PER1
+
+Check the read expression profile in GTEx here 
+
+[ENSG00000179094](https://gtexportal.org/home/gene/ENSG00000179094)
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/suicide_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+```
+
+```{r}
+indices <- match("ENSG00000179094", colnames(betahat_mat))
+```
+
+
+```{r}
+plot(tmat[, indices], col="red")
+abline(0,0)
+```
+
+Which are the tissues with lowest lfsr 
+
+```{r}
+sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]
+```
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices]
+  temp2 <- sample_attributes$DTHMNNR
+  manner_of_death <- temp2
+  suicide_indices <- grep("suicide", tolower(manner_of_death))
+  natural_indices <- grep("natural", tolower(manner_of_death))
+  total_indices <- c(suicide_indices, natural_indices)
+  temp11 <- temp1[total_indices]
+  temp21 <- temp2[total_indices]
+  temp1_M  <- temp11[which(temp21 == "Suicide")]
+  temp1_F  <- temp11[which(temp21 == "Natural")]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+```{r}
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices]),
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+```
+
+## ENSG00000107815 or TWNK
+
+Check the read expression profile in GTEx here 
+
+[ENSG00000107815](https://gtexportal.org/home/gene/ENSG00000107815)
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/suicide_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+```
+
+```{r}
+indices <- match("ENSG00000107815", colnames(betahat_mat))
+```
+
+
+```{r}
+plot(tmat[, indices], col="red")
+abline(0,0)
+```
+
+Which are the tissues with lowest lfsr 
+
+```{r}
+sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]
+```
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices]
+  temp2 <- sample_attributes$DTHMNNR
+  manner_of_death <- temp2
+  suicide_indices <- grep("suicide", tolower(manner_of_death))
+  natural_indices <- grep("natural", tolower(manner_of_death))
+  total_indices <- c(suicide_indices, natural_indices)
+  temp11 <- temp1[total_indices]
+  temp21 <- temp2[total_indices]
+  temp1_M  <- temp11[which(temp21 == "Suicide")]
+  temp1_F  <- temp11[which(temp21 == "Natural")]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+```{r}
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices]),
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+```
+
+## DAPK2 or ENSG00000035664
+
+Check the read expression profile in GTEx here 
+
+[ENSG00000035664](https://gtexportal.org/home/gene/ENSG00000035664)
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/suicide_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+```
+
+```{r}
+indices <- match("ENSG00000035664", colnames(betahat_mat))
+```
+
+
+```{r}
+plot(tmat[, indices], col="red")
+abline(0,0)
+```
+
+Which are the tissues with lowest lfsr 
+
+```{r}
+sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]
+```
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices]
+  temp2 <- sample_attributes$DTHMNNR
+  manner_of_death <- temp2
+  suicide_indices <- grep("suicide", tolower(manner_of_death))
+  natural_indices <- grep("natural", tolower(manner_of_death))
+  total_indices <- c(suicide_indices, natural_indices)
+  temp11 <- temp1[total_indices]
+  temp21 <- temp2[total_indices]
+  temp1_M  <- temp11[which(temp21 == "Suicide")]
+  temp1_F  <- temp11[which(temp21 == "Natural")]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+```{r}
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices]),
+      col=col, main=paste0("corshrink: "), cex.main=2,
+      xaxt = "n", yaxt = "n", zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+```
+
+
+

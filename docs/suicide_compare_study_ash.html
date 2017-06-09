@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Kushal K Dey" />
+
+
+<title>Suicide study with ash</title>
+
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="cosmo.css" type="text/css" />
+
+</head>
+
+<body>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
+    <link href="../docs/cosmo.css" rel="stylesheet">
+    <link href="../docs/cosmo.min.css" rel="stylesheet">
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../docs/bootstrap/js/bootstrap.min.js"></script>
+
+<body>
+
+<div class = "nav" align = "middle">
+<div class= "p1"></div>
+<p>
+  <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "workflow.html">WORKFLOW</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "about.html">METHODS</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "license.html">LICENSE</a> 
+   &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
+ </p>
+</div>  
+<!-- <div class="nav">
+  <a href="index.html">Home page</a> &nbsp &nbsp
+  <a href="musings.html">Musings</a> &nbsp &nbsp
+  <a href="town.html">My town</a> &nbsp &nbsp
+  <a href="links.html">Links</a>
+</div> -->
+
+<!-- Main content -->
+</body>
+</html>
+
+
+<h1 class="title toc-ignore">Suicide study with ash</h1>
+<h4 class="author"><em>Kushal K Dey</em></h4>
+<h4 class="date"><em>6/8/2017</em></h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#lfsr-threshold-0.05">lfsr threshold 0.05</a></li>
+<li><a href="#ensg00000126368-or-nr1d1">ENSG00000126368 or NR1D1</a></li>
+<li><a href="#ensg00000179094-or-per1">ENSG00000179094 or PER1</a></li>
+<li><a href="#ensg00000107815-or-twnk">ENSG00000107815 or TWNK</a></li>
+<li><a href="#dapk2-or-ensg00000035664">DAPK2 or ENSG00000035664</a></li>
+</ul>
+</div>
+
+<p>In this script, we look at the Suicide comparison problem in the context of using lfsr for the adaptive shrinkage on the tissues for each gene. Adaptive shrinkage is performed using a normal distribution centered about 0.</p>
+<pre class="r"><code>ash_cor_mat &lt;- get(load(&quot;../output/ash_cor_only_voom_pearson_halfuniform_gtex_tissues.rda&quot;))</code></pre>
+<pre class="r"><code>common_samples &lt;- get(load(&quot;../output/common_samples.rda&quot;))
+tissue_labels &lt;- read.table(file = &quot;../data/GTEX_V6/samples_id.txt&quot;)[,3]
+
+#library(data.table)
+#data &lt;- data.frame(fread(&quot;../data/GTEX_V6/cis_gene_expression.txt&quot;))
+#matdata &lt;- t(data[,-c(1,2)])
+
+gene_names &lt;- as.character(read.table(file = &quot;../data/GTEX_V6/gene_names_GTEX_V6.txt&quot;)[,1])
+gene_names_1 &lt;- as.character(sapply(gene_names, function(x) return(strsplit(x, &quot;[.]&quot;)[[1]][1])))
+
+
+U &lt;- unique(tissue_labels)</code></pre>
+<pre class="r"><code>person_tissue_genes &lt;- get(load(&quot;../output/person_tissue_genes_voom.rda&quot;))
+betahat_sebetahat &lt;- get(load(&quot;../output/suicide_cor_ash.rda&quot;))
+sample_attributes &lt;- get(load(&quot;../output/sample_attributes_filtered.rda&quot;))
+person_tissue_genes &lt;- get(load(&quot;../output/person_tissue_genes_voom.rda&quot;))</code></pre>
+<pre class="r"><code>betahat_mat &lt;- betahat_sebetahat$post.mean
+sebetahat_mat &lt;- betahat_sebetahat$post.sd
+lfsr_mat &lt;- betahat_sebetahat$post.lfsr</code></pre>
+<div id="lfsr-threshold-0.05" class="section level2">
+<h2>lfsr threshold 0.05</h2>
+<p>We look at which genes have the most number of lfsr values below a chosen threshold.</p>
+<pre class="r"><code>num_lfsr_below_thresh &lt;- apply(lfsr_mat, 2, function(x) return(length(which(x &lt; 0.1))))
+
+imp_genes &lt;- order(num_lfsr_below_thresh, decreasing = TRUE)[1:10]
+num_lfsr_below_thresh[imp_genes]</code></pre>
+<pre><code>## ENSG00000107815 ENSG00000112699 ENSG00000114867 ENSG00000126368 
+##               3               3               3               3 
+## ENSG00000146574 ENSG00000178409 ENSG00000271133 ENSG00000035664 
+##               3               3               3               2 
+## ENSG00000037897 ENSG00000066322 
+##               2               2</code></pre>
+<pre class="r"><code>names &lt;- colnames(betahat_mat)[imp_genes]</code></pre>
+<pre class="r"><code>write.table(names, file = &quot;../utilities/suicide_ash/suicide_genes_ash_0_1.txt&quot;, quote = FALSE, row.names = FALSE, col.names = FALSE)
+out &lt;- mygene::queryMany(names,  scopes=&quot;ensembl.gene&quot;, fields=c(&quot;name&quot;, &quot;summary&quot;), species=&quot;human&quot;);</code></pre>
+<pre><code>## Finished</code></pre>
+<pre class="r"><code>cbind.data.frame(out$name, out$summary, out$query)</code></pre>
+<pre><code>##                                                                  out$name
+## 1                                                  twinkle mtDNA helicase
+## 2                                             GDP-mannose 4,6-dehydratase
+## 3                      eukaryotic translation initiation factor 4 gamma 1
+## 4                           nuclear receptor subfamily 1 group D member 1
+## 5  CCZ1 homolog B, vacuolar protein trafficking and biogenesis associated
+## 6                                                 BEN domain containing 3
+## 7                                                                    &lt;NA&gt;
+## 8                                       death associated protein kinase 2
+## 9                                                methyltransferase like 1
+## 10                                            ELOVL fatty acid elongase 1
+##                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                out$summary
+## 1                                                                                                                                                   This gene encodes a hexameric DNA helicase which unwinds short stretches of double-stranded DNA in the 5&#39; to 3&#39; direction and, along with mitochondrial single-stranded DNA binding protein and mtDNA polymerase gamma, is thought to play a key role in mtDNA replication. The protein localizes to the mitochondrial matrix and mitochondrial nucleoids. Mutations in this gene cause infantile onset spinocerebellar ataxia (IOSCA) and progressive external ophthalmoplegia (PEO) and are also associated with several mitochondrial depletion syndromes. Alternative splicing results in multiple transcript variants encoding distinct isoforms.
+## 2                                                                                                                                                                                                                                                                                                                                                                                                                    GDP-mannose 4,6-dehydratase (GMD; EC 4.2.1.47) catalyzes the conversion of GDP-mannose to GDP-4-keto-6-deoxymannose, the first step in the synthesis of GDP-fucose from GDP-mannose, using NADP+ as a cofactor. The second and third steps of the pathway are catalyzed by a single enzyme, GDP-keto-6-deoxymannose 3,5-epimerase, 4-reductase, designated FX in humans (MIM 137020).
+## 3  The protein encoded by this gene is a component of the multi-subunit protein complex EIF4F. This complex facilitates the recruitment of mRNA to the ribosome, which is a rate-limiting step during the initiation phase of protein synthesis. The recognition of the mRNA cap and the ATP-dependent unwinding of 5&#39;-terminal secondary structure is catalyzed by factors in this complex. The subunit encoded by this gene is a large scaffolding protein that contains binding sites for other members of the EIF4F complex. A domain at its N-terminus can also interact with the poly(A)-binding protein, which may mediate the circularization of mRNA during translation. Alternative splicing results in multiple transcript variants, some of which are derived from alternative promoter usage.
+## 4                                                                                                                                                                                                                                                                                         This gene encodes a transcription factor that is a member of the nuclear receptor subfamily 1. The encoded protein is a ligand-sensitive transcription factor that negatively regulates the expression of core clock proteins. In particular this protein represses the circadian clock transcription factor aryl hydrocarbon receptor nuclear translocator-like protein 1 (ARNTL). This protein may also be involved in regulating genes that function in metabolic, inflammatory and cardiovascular processes.
+## 5                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     &lt;NA&gt;
+## 6                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     &lt;NA&gt;
+## 7                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     &lt;NA&gt;
+## 8                                                                                                                                                                                                                                                                                                                                                             This gene encodes a protein that belongs to the serine/threonine protein kinase family. This protein contains a N-terminal protein kinase domain followed by a conserved calmodulin-binding domain with significant similarity to that of death-associated protein kinase 1 (DAPK1), a positive regulator of programmed cell death. Overexpression of this gene was shown to induce cell apoptosis.  It uses multiple polyadenylation sites.
+## 9                                                                                                                                                                                                                                                                                                                                                                                                                                                                 This gene is similar in sequence to the S. cerevisiae YDL201w gene. The gene product contains a conserved S-adenosylmethionine-binding motif and is inactivated by phosphorylation. Alternative splice variants encoding different protein isoforms have been described for this gene. A pseudogene has been identified on chromosome X.
+## 10                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    &lt;NA&gt;
+##          out$query
+## 1  ENSG00000107815
+## 2  ENSG00000112699
+## 3  ENSG00000114867
+## 4  ENSG00000126368
+## 5  ENSG00000146574
+## 6  ENSG00000178409
+## 7  ENSG00000271133
+## 8  ENSG00000035664
+## 9  ENSG00000037897
+## 10 ENSG00000066322</code></pre>
+<p>We do not get any pathway with this. So, we relax the lfsr threshold a bit.</p>
+<pre class="r"><code>num_lfsr_below_thresh &lt;- apply(lfsr_mat, 2, function(x) return(length(which(x &lt; 0.3))))
+
+imp_genes &lt;- order(num_lfsr_below_thresh, decreasing = TRUE)[1:25]
+num_lfsr_below_thresh[imp_genes]</code></pre>
+<pre><code>## ENSG00000112299 ENSG00000126368 ENSG00000139197 ENSG00000176871 
+##               6               6               6               6 
+## ENSG00000107815 ENSG00000115761 ENSG00000146574 ENSG00000206172 
+##               5               5               5               5 
+## ENSG00000244734 ENSG00000271133 ENSG00000272734 ENSG00000030110 
+##               5               5               5               4 
+## ENSG00000101361 ENSG00000108387 ENSG00000112578 ENSG00000137101 
+##               4               4               4               4 
+## ENSG00000173267 ENSG00000178409 ENSG00000179094 ENSG00000198301 
+##               4               4               4               4 
+## ENSG00000037897 ENSG00000053372 ENSG00000058600 ENSG00000084652 
+##               3               3               3               3 
+## ENSG00000095970 
+##               3</code></pre>
+<pre class="r"><code>names &lt;- colnames(betahat_mat)[imp_genes]</code></pre>
+<pre class="r"><code>write.table(names, file = &quot;../utilities/suicide_ash/suicide_genes_ash_0_3.txt&quot;, quote = FALSE, row.names = FALSE, col.names = FALSE)
+out &lt;- mygene::queryMany(names,  scopes=&quot;ensembl.gene&quot;, fields=c(&quot;name&quot;, &quot;summary&quot;), species=&quot;human&quot;);</code></pre>
+<pre><code>## Finished</code></pre>
+<pre class="r"><code>cbind.data.frame(out$name, out$summary, out$query)</code></pre>
+<pre><code>##                                                                  out$name
+## 1                                                                 vanin 1
+## 2                           nuclear receptor subfamily 1 group D member 1
+## 3                                         peroxisomal biogenesis factor 5
+## 4                                     WD repeat and SOCS box containing 2
+## 5                                                  twinkle mtDNA helicase
+## 6                                                    nucleolar protein 10
+## 7  CCZ1 homolog B, vacuolar protein trafficking and biogenesis associated
+## 8                                              hemoglobin subunit alpha 1
+## 9                                                 hemoglobin subunit beta
+## 10                                                                   &lt;NA&gt;
+## 11                                                  ADIRF antisense RNA 1
+## 12                                               BCL2 antagonist/killer 1
+## 13                                                NOP56 ribonucleoprotein
+## 14                                                               septin 4
+## 15                                                            bystin like
+## 16                                                          CD72 molecule
+## 17                                                        synuclein gamma
+## 18                                                BEN domain containing 3
+## 19                                               period circadian clock 1
+## 20                                               SDA1 domain containing 1
+## 21                                               methyltransferase like 1
+## 22                               MRT4 homolog, ribosome maturation factor
+## 23                                           RNA polymerase III subunit E
+## 24                                                          taxilin alpha
+## 25                       triggering receptor expressed on myeloid cells 2
+##                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               out$summary
+## 1                                                                                                                                                                                                                                                                                      This gene encodes a member of the vanin family of proteins, which share extensive sequence similarity with each other, and also with biotinidase. The family includes secreted and membrane-associated proteins, a few of which have been reported to participate in hematopoietic cell trafficking. No biotinidase activity has been demonstrated for any of the vanin proteins, however, they possess pantetheinase activity, which may play a role in oxidative-stress response. This protein, like its mouse homolog, is likely a GPI-anchored cell surface molecule. The mouse protein is expressed by the perivascular thymic stromal cells and regulates migration of T-cell progenitors to the thymus. This gene lies in close proximity to, and in the same transcriptional orientation as, two other vanin genes on chromosome 6q23-q24.
+## 2                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        This gene encodes a transcription factor that is a member of the nuclear receptor subfamily 1. The encoded protein is a ligand-sensitive transcription factor that negatively regulates the expression of core clock proteins. In particular this protein represses the circadian clock transcription factor aryl hydrocarbon receptor nuclear translocator-like protein 1 (ARNTL). This protein may also be involved in regulating genes that function in metabolic, inflammatory and cardiovascular processes.
+## 3  The product of this gene binds to the C-terminal PTS1-type tripeptide peroxisomal targeting signal (SKL-type) and plays an essential role in peroxisomal protein import. Peroxins (PEXs) are proteins that are essential for the assembly of functional peroxisomes. The peroxisome biogenesis disorders (PBDs) are a group of genetically heterogeneous autosomal recessive, lethal diseases characterized by multiple defects in peroxisome function. The peroxisomal biogenesis disorders are a heterogeneous group with at least 14 complementation groups and with more than 1 phenotype being observed in cases falling into particular complementation groups. Although the clinical features of PBD patients vary, cells from all PBD patients exhibit a defect in the import of one or more classes of peroxisomal matrix proteins into the organelle. Defects in this gene are a cause of neonatal adrenoleukodystrophy (NALD), a cause of Zellweger syndrome (ZWS) as well as may be a cause of infantile Refsum disease (IRD). Alternatively spliced transcript variants encoding different isoforms have been identified.
+## 4                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 This gene encodes a member of the WD-protein subfamily. The encoded protein contains five WD-repeats spanning most of the protein and an SOCS box in the C-terminus. The SOCS box may act as a bridge between specific substrate-binding domains and E3 ubiquitin protein ligases. Three transcript variants encoding different isoforms have been found for this gene.
+## 5                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  This gene encodes a hexameric DNA helicase which unwinds short stretches of double-stranded DNA in the 5&#39; to 3&#39; direction and, along with mitochondrial single-stranded DNA binding protein and mtDNA polymerase gamma, is thought to play a key role in mtDNA replication. The protein localizes to the mitochondrial matrix and mitochondrial nucleoids. Mutations in this gene cause infantile onset spinocerebellar ataxia (IOSCA) and progressive external ophthalmoplegia (PEO) and are also associated with several mitochondrial depletion syndromes. Alternative splicing results in multiple transcript variants encoding distinct isoforms.
+## 6                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    &lt;NA&gt;
+## 7                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    &lt;NA&gt;
+## 8                                                                                                                                                                                                                                                                        The human alpha globin gene cluster located on chromosome 16 spans about 30 kb and includes seven loci: 5&#39;- zeta - pseudozeta - mu - pseudoalpha-1 - alpha-2 - alpha-1 - theta - 3&#39;. The alpha-2 (HBA2) and alpha-1 (HBA1) coding sequences are identical. These genes differ slightly over the 5&#39; untranslated regions and the introns, but they differ significantly over the 3&#39; untranslated regions. Two alpha chains plus two beta chains constitute HbA, which in normal adult life comprises about 97% of the total hemoglobin; alpha chains combine with delta chains to constitute HbA-2, which with HbF (fetal hemoglobin) makes up the remaining 3% of adult hemoglobin. Alpha thalassemias result from deletions of each of the alpha genes as well as deletions of both HBA2 and HBA1; some nondeletion alpha thalassemias have also been reported.
+## 9                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                The alpha (HBA) and beta (HBB) loci determine the structure of the 2 types of polypeptide chains in adult hemoglobin, Hb A. The normal adult hemoglobin tetramer consists of two alpha chains and two beta chains. Mutant beta globin causes sickle cell anemia. Absence of beta chain causes beta-zero-thalassemia. Reduced amounts of detectable beta globin causes beta-plus-thalassemia. The order of the genes in the beta-globin cluster is 5&#39;-epsilon -- gamma-G -- gamma-A -- delta -- beta--3&#39;.
+## 10                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   &lt;NA&gt;
+## 11                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   &lt;NA&gt;
+## 12                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  The protein encoded by this gene belongs to the BCL2 protein family. BCL2 family members form oligomers or heterodimers and act as anti- or pro-apoptotic regulators that are involved in a wide variety of cellular activities. This protein localizes to mitochondria, and functions to induce apoptosis. It interacts with and accelerates the opening of the mitochondrial voltage-dependent anion channel, which leads to a loss in membrane potential and the release of cytochrome c. This protein also interacts with the tumor suppressor P53 after exposure to cell stress.
+## 13                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      Nop56p is a yeast nucleolar protein that is part of a complex with the nucleolar proteins Nop58p and fibrillarin. Nop56p is required for assembly of the 60S ribosomal subunit and is involved in pre-rRNA processing. The protein encoded by this gene is similar in sequence to Nop56p and is also found in the nucleolus. Expansion of a GGCCTG repeat from 3-8 copies to 1500-2500 copies in an intron of this gene results in spinocerebellar ataxia 36. Multiple transcript variants encoding several different isoforms have been found for this gene, but the full-length nature of most of them has not been determined.
+## 14                                                                                                                                                                                                                                                                                                                                                                                                                                                                This gene is a member of the septin family of nucleotide binding proteins, originally described in yeast as cell division cycle regulatory proteins. Septins are highly conserved in yeast, Drosophila, and mouse, and appear to regulate cytoskeletal organization. Disruption of septin function disturbs cytokinesis and results in large multinucleate or polyploid cells. This gene is highly expressed in brain and heart. Alternatively spliced transcript variants encoding different isoforms have been described for this gene. One of the isoforms (known as ARTS) is distinct; it is localized to the mitochondria, and has a role in apoptosis and cancer.
+## 15                                                                                                                                                                                  Bystin is expressed as a 2-kb major transcript and a 3.6-kb minor transcript in SNG-M cells and in human trophoblastic teratocarcinoma HT-H cells. Protein binding assays determined that bystin binds directly to trophinin and tastin, and that binding is enhanced when cytokeratins 8 and 18 are present. Immunocytochemistry of HT-H cells showed that bystin colocalizes with trophinin, tastin, and the cytokeratins, suggesting that these molecules form a complex in trophectoderm cells at the time of implantation. Using immunohistochemistry it was determined that trophinin and bystin are found in the placenta from the sixth week of pregnancy. Both proteins were localized in the cytoplasm of the syncytiotrophoblast in the chorionic villi and in endometrial decidual cells at the uteroplacental interface. After week 10, the levels of trophinin, tastin, and bystin decreased and then disappeared from placental villi.
+## 16                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   &lt;NA&gt;
+## 17                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    This gene encodes a member of the synuclein family of proteins which are believed to be involved in the pathogenesis of neurodegenerative diseases. Mutations in this gene have also been associated with breast tumor development.
+## 18                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   &lt;NA&gt;
+## 19                                                                                                                                                                                                                                                                                                                                                                                                                                                                    This gene is a member of the Period family of genes and is expressed in a circadian pattern in the suprachiasmatic nucleus, the primary circadian pacemaker in the mammalian brain. Genes in this family encode components of the circadian rhythms of locomotor activity, metabolism, and behavior. This gene is upregulated by CLOCK/ARNTL heterodimers but then represses this upregulation in a feedback loop using PER/CRY heterodimers to interact with CLOCK/ARNTL. Polymorphisms in this gene may increase the risk of getting certain cancers. Alternative splicing has been observed in this gene; however, these variants have not been fully described.
+## 20                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   &lt;NA&gt;
+## 21                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               This gene is similar in sequence to the S. cerevisiae YDL201w gene. The gene product contains a conserved S-adenosylmethionine-binding motif and is inactivated by phosphorylation. Alternative splice variants encoding different protein isoforms have been described for this gene. A pseudogene has been identified on chromosome X.
+## 22                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            This gene encodes a protein sharing a low level of sequence similarity with ribosomal protein P0. While the precise function of the encoded protein is currently unknown, it appears to be involved in mRNA turnover and ribosome assembly.
+## 23                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   &lt;NA&gt;
+## 24                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   &lt;NA&gt;
+## 25                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              This gene encodes a membrane protein that forms a receptor signaling complex with the TYRO protein tyrosine kinase binding protein. The encoded protein functions in immune response and may be involved in chronic inflammation by triggering the production of constitutive inflammatory cytokines. Defects in this gene are a cause of polycystic lipomembranous osteodysplasia with sclerosing leukoencephalopathy (PLOSL). Alternative splicing results in multiple transcript variants encoding different isoforms.
+##          out$query
+## 1  ENSG00000112299
+## 2  ENSG00000126368
+## 3  ENSG00000139197
+## 4  ENSG00000176871
+## 5  ENSG00000107815
+## 6  ENSG00000115761
+## 7  ENSG00000146574
+## 8  ENSG00000206172
+## 9  ENSG00000244734
+## 10 ENSG00000271133
+## 11 ENSG00000272734
+## 12 ENSG00000030110
+## 13 ENSG00000101361
+## 14 ENSG00000108387
+## 15 ENSG00000112578
+## 16 ENSG00000137101
+## 17 ENSG00000173267
+## 18 ENSG00000178409
+## 19 ENSG00000179094
+## 20 ENSG00000198301
+## 21 ENSG00000037897
+## 22 ENSG00000053372
+## 23 ENSG00000058600
+## 24 ENSG00000084652
+## 25 ENSG00000095970</code></pre>
+<pre class="r"><code>pathway2 &lt;- read.delim(&quot;../utilities/suicide_ash/suicide_genes_0_3_pathways.tab&quot;)
+if(length(which(pathway2$q.value &lt; 0.05)) &gt; 2){
+  pathway2 &lt;- pathway2[which(pathway2$q.value &lt; 0.05),]
+}
+maxpath = 75
+pathway &lt;- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes &lt;- pathway$members_input_overlap
+pathway_list_genes &lt;- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), &quot;; &quot;)))
+all_genes &lt;- Reduce(union, pathway_list_genes)
+pathway_mat &lt;- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] &lt;- 1
+}
+
+pathway_bimat &lt;- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop &lt;- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 1, cexCol = 1, col = col, zlim = c(-1,1),
+        scale = &quot;none&quot;, margins = c(5, 5))</code></pre>
+<p><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>Now there seem to be some Circadian genes that show up in this analysis. Are these genes meaningful?</p>
+<pre class="r"><code>manner_of_death &lt;- sample_attributes$DTHMNNR
+suicide_indices &lt;- grep(&quot;Suicide&quot;, manner_of_death)
+time_of_suicides &lt;- sample_attributes$DTHTIME[suicide_indices]
+time_of_suicides</code></pre>
+<pre><code>##  [1] 12:30 12:26 16:37 17:23 17:10 19:48 05:43 18:18 03:36 14:00 13:42
+## [12] 19:00 09:03 13:02 11:27 03:41 09:40 19:45 22:35 08:10 15:13 21:44
+## [23] 15:33 07:26 03:49 13:30 12:41 12:40 18:15 16:00 09:36 20:10
+## 538 Levels:  00:05 00:06 00:07 00:09 00:10 00:12 00:17 00:19 ... 23:59</code></pre>
+<p>We plot the density plot of these suicide times.</p>
+<pre class="r"><code>times &lt;- strsplit(as.character(sample_attributes$DTHTIME), &quot;[:]&quot;)
+time_stamp &lt;- unlist(lapply(times, function(x){
+  y &lt;- as.numeric(x[1])
+  z &lt;- as.numeric(x[2])
+  w &lt;- y*60+z
+  return(w)
+}))/(24*60)
+
+times_1 &lt;- time_stamp</code></pre>
+<pre class="r"><code>plot(density(times_1[-suicide_indices], na.rm = TRUE), main = &quot;Non suicide death times distribution&quot;)</code></pre>
+<p><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<pre class="r"><code>plot(density(times_1[suicide_indices], na.rm=TRUE), main = &quot;Suicide death times distribution&quot;)</code></pre>
+<p><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-13-2.png" width="672" /></p>
+<p>The suicide death times seem to be more concentrated towards the noon compared to the non suicidal deaths.</p>
+<p>Is that the reason the Circadian genes are found to be important?</p>
+<p>This <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4285016/">Article</a> does mention that circadian genes do play a role in mood disorders. Mood regulation is known to be affected by the change of seasons. Recent research findings have suggested that mood regulation may be influenced by the function of circadian clocks. In addition, the activity of brown adipocytes has been hypothesized to contribute to mood regulation.</p>
+<p>Dysfunction of the proteins encoded from the circadian clock genes is hypothesized to play a role in the etiology of mood disorders (9). Here, I consider those proteins that are repressors of transcription to be most important, since they are essential to the normal function of circadian clocks (10). Among them, nuclear receptor subfamily 1, group D, member 1 (NR1D1) has a key position as a connecting node in the transcriptional and translational loops that constitute the circadian clock in a cell.</p>
+<p>CRY2 and CRY1 are also related to depressive disorders. They are the key repressors of the Circadian clock. CRY2 opposes the actions of PER1.</p>
+<p>so, what are the Circadian genes found by this approach? They are <strong>ENSG00000126368</strong> or <strong>NR1D1</strong> and <strong>ENSG00000179094</strong> or <strong>PER1</strong>.</p>
+</div>
+<div id="ensg00000126368-or-nr1d1" class="section level2">
+<h2>ENSG00000126368 or NR1D1</h2>
+<p>Check the read expression profile in GTEx here</p>
+<p><a href="https://gtexportal.org/home/gene/ENSG00000126368">ENSG00000126368</a></p>
+<pre class="r"><code>betahat_sebetahat_2 &lt;- get(load(&quot;../output/suicide_cor_nonmash.rda&quot;))
+tmat &lt;- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat</code></pre>
+<pre class="r"><code>indices &lt;- match(&quot;ENSG00000126368&quot;, colnames(betahat_mat))</code></pre>
+<pre class="r"><code>plot(tmat[, indices], col=&quot;red&quot;)
+abline(0,0)</code></pre>
+<p><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-16-1.png" width="672" /> Which are the tissues with lowest lfsr</p>
+<pre class="r"><code>sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]</code></pre>
+<pre><code>##             Brain - Cerebellum              Muscle - Skeletal 
+##                    0.005418017                    0.024232965 
+##                 Brain - Cortex Skin - Sun Exposed (Lower leg) 
+##                    0.051524755                    0.126750411 
+##   Brain - Frontal Cortex (BA9) 
+##                    0.152240090</code></pre>
+<pre class="r"><code>par(mfrow = c(3,3))
+for(j in 1:53){
+  ll &lt;-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 &lt;- person_tissue_genes[,j,indices]
+  temp2 &lt;- sample_attributes$DTHMNNR
+  suicide_indices &lt;- grep(&quot;Suicide&quot;, manner_of_death)
+  natural_indices &lt;- grep(&quot;Natural&quot;, manner_of_death)
+  total_indices &lt;- c(suicide_indices, natural_indices)
+  temp11 &lt;- temp1[total_indices]
+  temp21 &lt;- temp2[total_indices]
+  temp1_M  &lt;- temp11[which(temp21 == &quot;Suicide&quot;)]
+  temp1_F  &lt;- temp11[which(temp21 == &quot;Natural&quot;)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}</code></pre>
+<p><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-18-1.png" width="672" /><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-18-2.png" width="672" /><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-18-3.png" width="672" /><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-18-4.png" width="672" /><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-18-5.png" width="672" /><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-18-6.png" width="672" /></p>
+<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+</div>
+<div id="ensg00000179094-or-per1" class="section level2">
+<h2>ENSG00000179094 or PER1</h2>
+<p>Check the read expression profile in GTEx here</p>
+<p><a href="https://gtexportal.org/home/gene/ENSG00000179094">ENSG00000179094</a></p>
+<pre class="r"><code>betahat_sebetahat_2 &lt;- get(load(&quot;../output/suicide_cor_nonmash.rda&quot;))
+tmat &lt;- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat</code></pre>
+<pre class="r"><code>indices &lt;- match(&quot;ENSG00000179094&quot;, colnames(betahat_mat))</code></pre>
+<pre class="r"><code>plot(tmat[, indices], col=&quot;red&quot;)
+abline(0,0)</code></pre>
+<p><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<p>Which are the tissues with lowest lfsr</p>
+<pre class="r"><code>sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]</code></pre>
+<pre><code>##              Muscle - Skeletal Skin - Sun Exposed (Lower leg) 
+##                     0.02184444                     0.03349412 
+##                      Pituitary                Artery - Tibial 
+##                     0.15150112                     0.27654139 
+##         Adipose - Subcutaneous 
+##                     0.39047524</code></pre>
+<pre class="r"><code>par(mfrow = c(3,3))
+for(j in 1:53){
+  ll &lt;-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 &lt;- person_tissue_genes[,j,indices]
+  temp2 &lt;- sample_attributes$DTHMNNR
+  manner_of_death &lt;- temp2
+  suicide_indices &lt;- grep(&quot;suicide&quot;, tolower(manner_of_death))
+  natural_indices &lt;- grep(&quot;natural&quot;, tolower(manner_of_death))
+  total_indices &lt;- c(suicide_indices, natural_indices)
+  temp11 &lt;- temp1[total_indices]
+  temp21 &lt;- temp2[total_indices]
+  temp1_M  &lt;- temp11[which(temp21 == &quot;Suicide&quot;)]
+  temp1_F  &lt;- temp11[which(temp21 == &quot;Natural&quot;)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}</code></pre>
+<p><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-24-1.png" width="672" /><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-24-2.png" width="672" /><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-24-3.png" width="672" /><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-24-4.png" width="672" /><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-24-5.png" width="672" /><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-24-6.png" width="672" /></p>
+<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-25-1.png" width="672" /></p>
+</div>
+<div id="ensg00000107815-or-twnk" class="section level2">
+<h2>ENSG00000107815 or TWNK</h2>
+<p>Check the read expression profile in GTEx here</p>
+<p><a href="https://gtexportal.org/home/gene/ENSG00000107815">ENSG00000107815</a></p>
+<pre class="r"><code>betahat_sebetahat_2 &lt;- get(load(&quot;../output/suicide_cor_nonmash.rda&quot;))
+tmat &lt;- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat</code></pre>
+<pre class="r"><code>indices &lt;- match(&quot;ENSG00000107815&quot;, colnames(betahat_mat))</code></pre>
+<pre class="r"><code>plot(tmat[, indices], col=&quot;red&quot;)
+abline(0,0)</code></pre>
+<p><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-28-1.png" width="672" /></p>
+<p>Which are the tissues with lowest lfsr</p>
+<pre class="r"><code>sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]</code></pre>
+<pre><code>##                         Adrenal Gland 
+##                            0.08231696 
+##                Adipose - Subcutaneous 
+##                            0.09505627 
+##                                 Liver 
+##                            0.09930252 
+##                           Whole Blood 
+##                            0.19826267 
+## Esophagus - Gastroesophageal Junction 
+##                            0.25142960</code></pre>
+<pre class="r"><code>par(mfrow = c(3,3))
+for(j in 1:53){
+  ll &lt;-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 &lt;- person_tissue_genes[,j,indices]
+  temp2 &lt;- sample_attributes$DTHMNNR
+  manner_of_death &lt;- temp2
+  suicide_indices &lt;- grep(&quot;suicide&quot;, tolower(manner_of_death))
+  natural_indices &lt;- grep(&quot;natural&quot;, tolower(manner_of_death))
+  total_indices &lt;- c(suicide_indices, natural_indices)
+  temp11 &lt;- temp1[total_indices]
+  temp21 &lt;- temp2[total_indices]
+  temp1_M  &lt;- temp11[which(temp21 == &quot;Suicide&quot;)]
+  temp1_F  &lt;- temp11[which(temp21 == &quot;Natural&quot;)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}</code></pre>
+<p><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-30-1.png" width="672" /><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-30-2.png" width="672" /><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-30-3.png" width="672" /><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-30-4.png" width="672" /><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-30-5.png" width="672" /><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-30-6.png" width="672" /></p>
+<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-31-1.png" width="672" /></p>
+</div>
+<div id="dapk2-or-ensg00000035664" class="section level2">
+<h2>DAPK2 or ENSG00000035664</h2>
+<p>Check the read expression profile in GTEx here</p>
+<p><a href="https://gtexportal.org/home/gene/ENSG00000035664">ENSG00000035664</a></p>
+<pre class="r"><code>betahat_sebetahat_2 &lt;- get(load(&quot;../output/suicide_cor_nonmash.rda&quot;))
+tmat &lt;- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat</code></pre>
+<pre class="r"><code>indices &lt;- match(&quot;ENSG00000035664&quot;, colnames(betahat_mat))</code></pre>
+<pre class="r"><code>plot(tmat[, indices], col=&quot;red&quot;)
+abline(0,0)</code></pre>
+<p><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-34-1.png" width="672" /></p>
+<p>Which are the tissues with lowest lfsr</p>
+<pre class="r"><code>sort(lfsr_mat[,indices], decreasing = FALSE)[1:5]</code></pre>
+<pre><code>##      Artery - Aorta   Muscle - Skeletal     Artery - Tibial 
+##         0.003554507         0.050688834         0.901494037 
+##             Bladder Brain - Hippocampus 
+##         0.983512977         0.983721145</code></pre>
+<pre class="r"><code>par(mfrow = c(3,3))
+for(j in 1:53){
+  ll &lt;-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 &lt;- person_tissue_genes[,j,indices]
+  temp2 &lt;- sample_attributes$DTHMNNR
+  manner_of_death &lt;- temp2
+  suicide_indices &lt;- grep(&quot;suicide&quot;, tolower(manner_of_death))
+  natural_indices &lt;- grep(&quot;natural&quot;, tolower(manner_of_death))
+  total_indices &lt;- c(suicide_indices, natural_indices)
+  temp11 &lt;- temp1[total_indices]
+  temp21 &lt;- temp2[total_indices]
+  temp1_M  &lt;- temp11[which(temp21 == &quot;Suicide&quot;)]
+  temp1_F  &lt;- temp11[which(temp21 == &quot;Natural&quot;)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}</code></pre>
+<p><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-36-1.png" width="672" /><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-36-2.png" width="672" /><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-36-3.png" width="672" /><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-36-4.png" width="672" /><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-36-5.png" width="672" /><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-36-6.png" width="672" /></p>
+<pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(ash_cor_mat[order_index,order_index, indices]),
+      col=col, main=paste0(&quot;corshrink: &quot;), cex.main=2,
+      xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))
+axis(1, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)
+axis(2, at = seq(0, 1, length.out = 53), labels = U[order_index], las=2, cex.axis = 0.5)</code></pre>
+<p><img src="suicide_compare_study_ash_files/figure-html/unnamed-chunk-37-1.png" width="672" /></p>
+</div>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
