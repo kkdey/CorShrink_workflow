@@ -1,0 +1,3 @@
+p-value	q-value	pathway	source	external_id	members_input_overlap	members_input_overlap_geneids	size	effective_size
+0.00508768957713	0.106403462983	Validated transcriptional targets of TAp63 isoforms	PID	tap63pathway	ENSG00000161513; ENSG00000105327	27113; 2232	57	56
+0.00943294777136	0.106403462983	RNA degradation - Homo sapiens (human)	KEGG	path:hsa03018	ENSG00000088038; ENSG00000171824	5394; 4849	77	77

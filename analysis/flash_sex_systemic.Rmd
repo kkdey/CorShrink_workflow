@@ -1,0 +1,607 @@
+---
+title: "FLASH on systematic sex study"
+author: "Kushal K Dey"
+date: "6/14/2017"
+output: html_document
+---
+
+In this script, we carry out FLASH for systematic study of sex effect on gene expression.
+
+```{r}
+library(ggplot2)
+source("../code/FactorGGBar.R")
+source("../code/flash_factor_postprocess.R")
+```
+
+```{r}
+data <- get(load("../output/sex_cor_nonmash.rda"))
+betahat <- data$betahat
+sebetahat <- data$sebetahat
+zdat <- betahat/sebetahat
+```
+
+```{r}
+flash_out <- get(load("../output/sex_cor_flash.rda"))
+
+common_samples <- get(load("../output/common_samples.rda"))
+tissue_labels <- read.table(file = "../data/GTEX_V6/samples_id.txt")[,3]
+
+gene_names <- as.character(read.table(file = "../data/GTEX_V6/gene_names_GTEX_V6.txt")[,1])
+gene_names_1 <- as.character(sapply(gene_names, function(x) return(strsplit(x, "[.]")[[1]][1])))
+
+
+U <- unique(tissue_labels)
+```
+
+```{r}
+order_index <- c();
+order_index <- c(order_index, grep("Brain", U))
+order_index <- c(order_index, grep("fibroblast", U))
+order_index <- c(order_index, grep("EBV", U))
+order_index <- c(order_index, grep("Spleen", U))
+order_index <- c(order_index, grep("Whole Blood", U))
+order_index <- c(order_index, grep("Muscle - Skeletal", U))
+order_index <- c(order_index, grep("Liver", U))
+order_index <- c(order_index, grep("Pancreas", U))
+order_index <- c(order_index, grep("Stomach", U))
+order_index <- c(order_index, grep("Kidney - Cortex", U))
+order_index <- c(order_index, grep("Adrenal Gland", U))
+order_index <- c(order_index, grep("Colon - Transverse", U))
+order_index <- c(order_index, grep("Small Intestine - Terminal Ileum", U))
+order_index <- c(order_index, grep("Heart - Atrial Appendage", U))
+order_index <- c(order_index, grep("Heart - Left Ventricle", U))
+order_index <- c(order_index, grep("Minor Salivary Gland", U))
+order_index <- c(order_index, grep("Skin - Sun Exposed", U))
+order_index <- c(order_index, grep("Skin - Not Sun Exposed", U))
+order_index <- c(order_index, grep("Lung", U))
+order_index <- c(order_index, grep("Ovary", U))
+order_index <- c(order_index, grep("Thyroid", U))
+order_index <- c(order_index, grep("Pituitary", U))
+order_index <- c(order_index, grep("Testis", U))
+order_index <- c(order_index, grep("Nerve - Tibial", U))
+order_index <- c(order_index, grep("Breast - Mammary Tissue", U))
+order_index <- c(order_index, grep("Adipose - Visceral", U))
+order_index <- c(order_index, grep("Adipose - Subcutaneous", U))
+order_index <- c(order_index, grep("Artery - Coronary", U))
+order_index <- c(order_index, grep("Artery - Tibial", U))
+order_index <- c(order_index, grep("Artery - Aorta", U))
+order_index <- c(order_index, grep("Esophagus - Mucosa", U))
+order_index <- c(order_index, grep("Vagina", U))
+order_index <- c(order_index, grep("Cervix - Endocervix", U))
+order_index <- c(order_index, grep("Esophagus - Gastroesophageal Junction", U))
+order_index <- c(order_index, grep("Colon - Sigmoid", U))
+order_index <- c(order_index, grep("Esophagus - Muscularis", U))
+order_index <- c(order_index, grep("Cervix - Ectocervix", U))
+order_index <- c(order_index, grep("Fallopian", U))
+order_index <- c(order_index, grep("Prostate", U))
+order_index <- c(order_index, grep("Uterus", U))
+order_index <- c(order_index, grep("Bladder", U))
+```
+
+
+```{r fig.height=10, fig.weight =5}
+loadings <- flash_out$l[order_index,]
+rownames(loadings) <- 1:dim(flash_out$l)[1]
+annotation <- data.frame(sample_id = 1:NROW(loadings),
+                         label = factor(U[order_index], levels = U[order_index]))
+FactorGGBar(loadings, annotation = annotation, panel=list(panel_rows=3))
+```
+
+The proportion of variance explained by the factors are given by 
+
+```{r}
+postprocess <- flash_factor_postprocess(flash_out$l, flash_out$f, zdat)
+100*postprocess$PVE
+```
+
+It seems that the first factor corresponds to a specific effect in Breast-mammary tissue. The second factor was 
+high in everything else except the breast mammary tissue which is negative. Factor 3 is strong positive in the brain tissues and also negatively related to the adipose tissues. The 4th factor is mainly expressed in the skin tissues.
+It is not the case however that there are many tissue specific effects.
+
+We look at how the factors look like? Are they sparse?
+
+```{r}
+par(mfrow=c(2,2))
+plot(flash_out$f[,1], ylab = "Factor 1")
+plot(flash_out$f[,2], ylab = "Factor 2")
+plot(flash_out$f[,3], ylab = "Factor 3")
+plot(flash_out$f[,4], ylab = "Factor 4")
+```
+
+```{r}
+indices1 <- order(abs(flash_out$f[,1]), decreasing=TRUE)[1:50]
+indices2 <- order(abs(flash_out$f[,2]), decreasing=TRUE)[1:50]
+indices3 <- order(abs(flash_out$f[,3]), decreasing=TRUE)[1:50]
+indices4 <- order(abs(flash_out$f[,4]), decreasing=TRUE)[1:50]
+common_indices <- Reduce(intersect, list(indices1, indices2, indices3, indices4))
+union_indices <- Reduce(union, list(indices1, indices2, indices3, indices4))
+common_indices
+union_indices
+```
+
+The distribution of the z-scores for some of these genes are as follows.
+
+```{r}
+par(mfrow=c(2,2))
+
+plot(1:53, zdat[order_index,common_indices[1]], pch=20, type="b", xlab = "tissues", ylab="z scores")
+text(1:53, zdat[order_index,common_indices[1]], U[order_index], cex=0.3)
+
+plot(1:53, zdat[order_index,common_indices[2]], pch=20, type="b", xlab = "tissues", ylab="z scores")
+text(1:53, zdat[order_index,common_indices[2]], U[order_index], cex=0.3)
+
+plot(1:53, zdat[order_index,common_indices[3]], pch=20, type="b", xlab = "tissues", ylab="z scores")
+text(1:53, zdat[order_index,common_indices[3]], U[order_index], cex=0.3)
+
+```
+
+The genes in top 25 of the first cluster 
+
+```{r}
+par(mfrow=c(3,3))
+for(m in 1:50){
+  plot(1:53, zdat[order_index,union_indices[m]], pch=20, type="b", xlab = "tissues", ylab="z scores")
+  text(1:53, zdat[order_index,union_indices[m]], U[order_index], cex=0.3)
+}
+```
+## Factor 3
+
+```{r}
+indices <- order(abs(flash_out$f[,3]), decreasing=TRUE)[1:50]
+par(mfrow=c(3,3))
+for(m in 1:50){
+  plot(1:53, zdat[order_index,indices[m]], pch=20, type="b", xlab = "tissues", ylab="z scores")
+  text(1:53, zdat[order_index,indices[m]], U[order_index], cex=0.3)
+}
+```
+
+## Factor 4
+
+```{r}
+indices <- order(abs(flash_out$f[,4]), decreasing=TRUE)[1:50]
+par(mfrow=c(3,3))
+for(m in 1:50){
+  plot(1:53, zdat[order_index,indices[m]], pch=20, type="b", xlab = "tissues", ylab="z scores")
+  text(1:53, zdat[order_index,indices[m]], U[order_index], cex=0.3)
+}
+```
+
+## Factor 5
+
+```{r}
+indices <- order(abs(flash_out$f[,5]), decreasing=TRUE)[1:50]
+par(mfrow=c(3,3))
+for(m in 1:50){
+  plot(1:53, zdat[order_index,indices[m]], pch=20, type="b", xlab = "tissues", ylab="z scores")
+  text(1:53, zdat[order_index,indices[m]], U[order_index], cex=0.3)
+}
+```
+
+
+## Factor 8
+
+```{r}
+indices <- order(abs(flash_out$f[,8]), decreasing=TRUE)[1:50]
+par(mfrow=c(3,3))
+for(m in 1:50){
+  plot(1:53, zdat[order_index,indices[m]], pch=20, type="b", xlab = "tissues", ylab="z scores")
+  text(1:53, zdat[order_index,indices[m]], U[order_index], cex=0.3)
+}
+```
+
+
+We see there are some genes specifically correlated to sex in the Breast mammary tissue. Also, there are some genes that show enrichment with respect to the brain tissues, although one cannot call them brain specific. Apart from the breast mammary tissue and brain tissues, the other tissues of interest are thyroid and skin.
+
+## Enrichment of Breast Mammary tissue
+
+```{r}
+ash_data <- get(load("../output/sex_cor_ash.rda"))
+lfdr_mat <- ash_data$post.lfsr
+index <- grep("Breast", U)
+lfdr_thresh <- apply(lfdr_mat, 2, function(x) {
+            if(x[index] < 0.05 && min(x[-index]) >  0.90){
+              y <- 1
+            }else{ y <- 0}
+            return(y)})
+
+```
+
+The number of genes that satisfy this are 
+
+```{r}
+imp_genes_indices <- which(lfdr_thresh == 1)
+imp_genes_names <- gene_names_1[imp_genes_indices]
+imp_genes_names[1:10]
+```
+
+We look at the plot of the z-scores for the top 25 genes.
+
+```{r}
+par(mfrow=c(3,3))
+for(m in 1:25){
+  plot(1:53, zdat[order_index,imp_genes_indices[m]], pch=20, type="b", xlab = "tissues", ylab="z scores")
+  text(1:53, zdat[order_index,imp_genes_indices[m]], U[order_index], cex=0.3)
+}
+```
+
+We save the genes in a list and do enrichment analysis of these genes.
+
+```{r}
+write.table(imp_genes_names, file = "../utilities/sex_flash/breast_mammary.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+out <- mygene::queryMany(imp_genes_names[1:50],  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+```{r}
+pathway2 <- read.delim("../utilities/sex_flash/breast_mammary_pathway.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+## Enrichment in Brain tissues
+
+```{r}
+ash_data <- get(load("../output/sex_cor_ash.rda"))
+lfdr_mat <- ash_data$post.lfsr
+index <- grep("Brain", U)
+lfdr_thresh <- apply(lfdr_mat, 2, function(x) {
+            if(mean(x[index]) < 0.05 && mean(x[-index]) >  0.30){
+              y <- 1
+            }else{ y <- 0}
+            return(y)})
+
+```
+
+```{r}
+data <- get(load("../output/sex_cor_nonmash.rda"))
+zdat <- data$betahat/data$sebetahat
+index <- grep("Brain", U)
+zdat_thresh <- apply(abs(zdat), 2, function(x) {
+            y <- median(x[index]) - median(x[-index])
+            return(y)})
+```
+
+```{r}
+imp_genes_indices <- order(zdat_thresh, decreasing = TRUE)[1:100]
+imp_genes_names <- gene_names_1[imp_genes_indices]
+imp_genes_names[1:10]
+```
+
+```{r}
+par(mfrow=c(3,3))
+for(m in 1:length(imp_genes_indices)){
+  plot(1:53, zdat[order_index,imp_genes_indices[m]], pch=20, type="b", xlab = "tissues", ylab="z scores")
+  text(1:53, zdat[order_index,imp_genes_indices[m]], U[order_index], cex=0.3)
+}
+```
+```{r}
+write.table(imp_genes_names, file = "../utilities/sex_flash/brain.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+out <- mygene::queryMany(imp_genes_names[1:50],  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+```{r}
+pathway2 <- read.delim("../utilities/sex_flash/brain_pathway.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.1),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+
+## Enrichment of skin tissues 
+
+```{r}
+ash_data <- get(load("../output/sex_cor_ash.rda"))
+lfdr_mat <- ash_data$post.lfsr
+index <- grep("Skin", U)
+lfdr_thresh <- apply(lfdr_mat, 2, function(x) {
+            if(min(x[index]) < 0.05 && min(x[-index]) >  0.80){
+              y <- 1
+            }else{ y <- 0}
+            return(y)})
+
+```
+
+```{r}
+imp_genes_indices <- which(lfdr_thresh == 1)
+imp_genes_names <- gene_names_1[imp_genes_indices]
+imp_genes_names[1:10]
+```
+
+```{r}
+par(mfrow=c(3,3))
+for(m in 1:length(imp_genes_indices)){
+  plot(1:53, zdat[order_index,imp_genes_indices[m]], pch=20, type="b", xlab = "tissues", ylab="z scores")
+  text(1:53, zdat[order_index,imp_genes_indices[m]], U[order_index], cex=0.3)
+}
+```
+
+```{r}
+write.table(imp_genes_names, file = "../utilities/sex_flash/skin.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+out <- mygene::queryMany(imp_genes_names[1:50],  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+```{r}
+pathway2 <- read.delim("../utilities/sex_flash/skin_pathway.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.1),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+## Enrichment of adipose
+
+```{r}
+ash_data <- get(load("../output/sex_cor_ash.rda"))
+lfdr_mat <- ash_data$post.lfsr
+index <- grep("Adipose", U)
+lfdr_thresh <- apply(lfdr_mat, 2, function(x) {
+            if(min(x[index]) < 0.05 && min(x[-index]) >  0.80){
+              y <- 1
+            }else{ y <- 0}
+            return(y)})
+
+```
+
+```{r}
+imp_genes_indices <- which(lfdr_thresh == 1)
+imp_genes_names <- gene_names_1[imp_genes_indices]
+imp_genes_names[1:10]
+```
+
+```{r}
+par(mfrow=c(3,3))
+for(m in 1:length(imp_genes_indices)){
+  plot(1:53, zdat[order_index,imp_genes_indices[m]], pch=20, type="b", xlab = "tissues", ylab="z scores")
+  text(1:53, zdat[order_index,imp_genes_indices[m]], U[order_index], cex=0.3)
+}
+```
+
+```{r}
+write.table(imp_genes_names, file = "../utilities/sex_flash/adipose.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+out <- mygene::queryMany(imp_genes_names[1:50],  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+```{r}
+pathway2 <- read.delim("../utilities/sex_flash/adipose_pathway.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.1),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+## Enrichment of Thyroid
+
+```{r}
+ash_data <- get(load("../output/sex_cor_ash.rda"))
+lfdr_mat <- ash_data$post.lfsr
+index <- grep("Thyroid", U)
+lfdr_thresh <- apply(lfdr_mat, 2, function(x) {
+            if(min(x[index]) < 0.05 && min(x[-index]) >  0.80){
+              y <- 1
+            }else{ y <- 0}
+            return(y)})
+
+```
+
+```{r}
+imp_genes_indices <- which(lfdr_thresh == 1)
+imp_genes_names <- gene_names_1[imp_genes_indices]
+imp_genes_names[1:10]
+```
+
+```{r}
+par(mfrow=c(3,3))
+for(m in 1:length(imp_genes_indices)){
+  plot(1:53, zdat[order_index,imp_genes_indices[m]], pch=20, type="b", xlab = "tissues", ylab="z scores")
+  text(1:53, zdat[order_index,imp_genes_indices[m]], U[order_index], cex=0.3)
+}
+```
+
+```{r}
+write.table(imp_genes_names, file = "../utilities/sex_flash/thyroid.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+out <- mygene::queryMany(imp_genes_names[1:50],  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+```{r}
+pathway2 <- read.delim("../utilities/sex_flash/thyroid_pathway.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.1),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+## Reads expression exploration
+
+Here we explore the log CPM expression against sex across tissues for some genes of interest that we got from above.
+
+```{r}
+betahat_sebetahat <- get(load("../output/sex_cor_ash.rda"))
+sample_attributes <- get(load("../output/sample_attributes_filtered.rda"))
+person_tissue_genes <- get(load("../output/person_tissue_genes_voom.rda"))
+```
+
+### ENSG00000004139 (Breast specific)
+
+```{r}
+indices <- match("ENSG00000004139", gene_names_1)
+```
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices]
+  temp2 <- sample_attributes$SEX
+  temp11 <- temp1[which(!is.na(temp1))]
+  temp21 <- temp2[which(!is.na(temp1))]
+  temp1_M  <- temp11[which(temp21 == 1)]
+  temp1_F  <- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+### ENSG00000004399 (Breast specific)
+
+```{r}
+indices <- match("ENSG00000004399", gene_names_1)
+```
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices]
+  temp2 <- sample_attributes$SEX
+  temp11 <- temp1[which(!is.na(temp1))]
+  temp21 <- temp2[which(!is.na(temp1))]
+  temp1_M  <- temp11[which(temp21 == 1)]
+  temp1_F  <- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+### ENSG00000148337 (Brain specific)
+
+```{r}
+indices <- match("ENSG00000148337", gene_names_1)
+```
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices]
+  temp2 <- sample_attributes$SEX
+  temp11 <- temp1[which(!is.na(temp1))]
+  temp21 <- temp2[which(!is.na(temp1))]
+  temp1_M  <- temp11[which(temp21 == 1)]
+  temp1_F  <- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+### ENSG00000143110 (Thyroid specific)
+
+```{r}
+indices <- match("ENSG00000143110", gene_names_1)
+```
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices]
+  temp2 <- sample_attributes$SEX
+  temp11 <- temp1[which(!is.na(temp1))]
+  temp21 <- temp2[which(!is.na(temp1))]
+  temp1_M  <- temp11[which(temp21 == 1)]
+  temp1_F  <- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+### ENSG00000169896 (Adipose specific)
+
+```{r}
+indices <- match("ENSG00000169896", gene_names_1)
+```
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices]
+  temp2 <- sample_attributes$SEX
+  temp11 <- temp1[which(!is.na(temp1))]
+  temp21 <- temp2[which(!is.na(temp1))]
+  temp1_M  <- temp11[which(temp21 == 1)]
+  temp1_F  <- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```

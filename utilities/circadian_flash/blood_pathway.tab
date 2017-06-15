@@ -1,0 +1,6 @@
+p-value	q-value	pathway	source	external_id	members_input_overlap	members_input_overlap_geneids	size	effective_size
+0.000452403368595	0.00440500639111	Eicosanoid Synthesis	Wikipathways	WP167	ENSG00000148344; ENSG00000184381	8398; 9536	20	20
+0.000548974823691	0.00440500639111	CDP-diacylglycerol biosynthesis	HumanCyc	PWY-5667	ENSG00000026652; ENSG00000175066	56895; 256356	23	22
+0.000600682689696	0.00440500639111	hypoxia and p53 in the cardiovascular system	BioCarta	p53hypoxiapathway	ENSG00000177374; ENSG00000204388	3090; 3304	23	23
+0.00432531671713	0.0237892419442	Arachidonic acid metabolism - Homo sapiens (human)	KEGG	path:hsa00590	ENSG00000148344; ENSG00000184381	9536; 8398	62	62
+0.00989629854976	0.0435437136189	Glycerophospholipid metabolism - Homo sapiens (human)	KEGG	path:hsa00564	ENSG00000184381; ENSG00000026652	56895; 8398	95	95
