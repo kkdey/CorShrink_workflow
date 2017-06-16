@@ -79,12 +79,12 @@ order_index <- c(order_index, grep("Bladder", U))
 ```
 
 
-```{r fig.height=10, fig.weight =5}
+```{r fig.height=15, fig.weight =5}
 loadings <- flash_out$l[order_index,]
 rownames(loadings) <- 1:dim(flash_out$l)[1]
 annotation <- data.frame(sample_id = 1:NROW(loadings),
                          label = factor(U[order_index], levels = U[order_index]))
-FactorGGBar(loadings, annotation = annotation, panel=list(panel_rows=3))
+FactorGGBar(loadings, annotation = annotation, panel=list(panel_rows=4))
 ```
 
 ```{r}
@@ -141,6 +141,17 @@ for(m in 1:50){
   text(1:53, zdat[order_index,indices[m]], U[order_index], cex=0.3)
 }
 ```
+## Factor 7
+
+```{r}
+indices <- order(abs(flash_out$f[,7]), decreasing=TRUE)[1:50]
+par(mfrow=c(3,3))
+for(m in 1:50){
+  plot(1:53, zdat[order_index,indices[m]], pch=20, type="b", xlab = "tissues", ylab="z scores")
+  text(1:53, zdat[order_index,indices[m]], U[order_index], cex=0.3)
+}
+```
+
 
 ## Enrichment of brain tissues 
 
@@ -174,6 +185,8 @@ out <- mygene::queryMany(imp_genes_names[1:50],  scopes="ensembl.gene", fields=c
 cbind.data.frame(out$name, out$summary)
 ```
 
+Obesity and Brain [study](https://news.brown.edu/articles/2013/05/obesity).
+
 ```{r}
 pathway2 <- read.delim("../utilities/bmi_flash/brain_pathway.tab")
 if(length(which(pathway2$q.value < 0.05)) > 2){
@@ -197,6 +210,65 @@ col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
 heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
         scale = "none", margins = c(5, 5))
 ```
+
+### Enrichment of adipose tissues 
+
+```{r, message=FALSE, warning=FALSE}
+data <- get(load("../output/bmi_cor_nonmash.rda"))
+zdat <- data$betahat/data$sebetahat
+index <- grep("Adipose", U)
+zdat_thresh <- apply(abs(zdat), 2, function(x) {
+            y <- median(x[index]) - median(x[-index])
+            return(y)})
+
+```
+
+```{r}
+imp_genes_indices <- order(zdat_thresh, decreasing = TRUE)[1:50]
+imp_genes_names <- gene_names_1[imp_genes_indices]
+imp_genes_names[1:10]
+```
+
+```{r}
+par(mfrow=c(3,3))
+for(m in 1:50){
+  plot(1:53, zdat[order_index,imp_genes_indices[m]], pch=20, type="b", xlab = "tissues", ylab="z scores")
+  text(1:53, zdat[order_index,imp_genes_indices[m]], U[order_index], cex=0.3)
+}
+```
+
+```{r}
+write.table(imp_genes_names, file = "../utilities/bmi_flash/adipose.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+out <- mygene::queryMany(imp_genes_names[1:50],  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+
+```{r}
+pathway2 <- read.delim("../utilities/bmi_flash/adipose_pathway.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.1),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+
 
 
 
@@ -255,4 +327,56 @@ for(j in 1:53){
         col="red", lty=2, lwd=2)
 }
 ```
+
+
+
+### ENSG00000135124 (Brain specific)
+
+```{r}
+indices <- match("ENSG00000135124", gene_names_1)
+```
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  temp1 <- person_tissue_genes[,j,indices]
+  plot(sample_attributes$BMI, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$BMI, temp1, family = "gaussian"), 
+        col="red", lty=2, lwd=2)
+}
+```
+
+### ENSG00000133805 (Adipose + Breast)
+
+```{r}
+indices <- match("ENSG00000133805", gene_names_1)
+```
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  temp1 <- person_tissue_genes[,j,indices]
+  plot(sample_attributes$BMI, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$BMI, temp1, family = "gaussian"), 
+        col="red", lty=2, lwd=2)
+}
+```
+
+### ENSG00000070159 (Adipose + Breast)
+
+```{r}
+indices <- match("ENSG00000070159", gene_names_1)
+```
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  temp1 <- person_tissue_genes[,j,indices]
+  plot(sample_attributes$BMI, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$BMI, temp1, family = "gaussian"), 
+        col="red", lty=2, lwd=2)
+}
+```
+
+
 
