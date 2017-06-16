@@ -196,12 +196,10 @@ We see there are some genes specifically correlated to sex in the Breast mammary
 
 ```{r}
 ash_data <- get(load("../output/sex_cor_ash.rda"))
-lfdr_mat <- ash_data$post.lfsr
+zdat <- data$betahat/data$sebetahat
 index <- grep("Breast", U)
-lfdr_thresh <- apply(lfdr_mat, 2, function(x) {
-            if(x[index] < 0.05 && min(x[-index]) >  0.90){
-              y <- 1
-            }else{ y <- 0}
+zdat_thresh <- apply(abs(zdat), 2, function(x) {
+            y <- median(x[index]) - median(x[-index])
             return(y)})
 
 ```
@@ -209,7 +207,7 @@ lfdr_thresh <- apply(lfdr_mat, 2, function(x) {
 The number of genes that satisfy this are 
 
 ```{r}
-imp_genes_indices <- which(lfdr_thresh == 1)
+imp_genes_indices <- order(zdat_thresh, decreasing = TRUE)[1:100]
 imp_genes_names <- gene_names_1[imp_genes_indices]
 imp_genes_names[1:10]
 ```
@@ -258,7 +256,7 @@ heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, 
 
 ## Enrichment in Brain tissues
 
-```{r}
+```{r, echo=FALSE, eval=FALSE}
 ash_data <- get(load("../output/sex_cor_ash.rda"))
 lfdr_mat <- ash_data$post.lfsr
 index <- grep("Brain", U)
@@ -326,19 +324,16 @@ heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, 
 ## Enrichment of skin tissues 
 
 ```{r}
-ash_data <- get(load("../output/sex_cor_ash.rda"))
-lfdr_mat <- ash_data$post.lfsr
+data <- get(load("../output/sex_cor_nonmash.rda"))
+zdat <- data$betahat/data$sebetahat
 index <- grep("Skin", U)
-lfdr_thresh <- apply(lfdr_mat, 2, function(x) {
-            if(min(x[index]) < 0.05 && min(x[-index]) >  0.80){
-              y <- 1
-            }else{ y <- 0}
+zdat_thresh <- apply(abs(zdat), 2, function(x) {
+            y <- median(x[index]) - median(x[-index])
             return(y)})
-
 ```
 
 ```{r}
-imp_genes_indices <- which(lfdr_thresh == 1)
+imp_genes_indices <- order(zdat_thresh, decreasing = TRUE)[1:100]
 imp_genes_names <- gene_names_1[imp_genes_indices]
 imp_genes_names[1:10]
 ```
@@ -384,19 +379,16 @@ heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, 
 ## Enrichment of adipose
 
 ```{r}
-ash_data <- get(load("../output/sex_cor_ash.rda"))
-lfdr_mat <- ash_data$post.lfsr
+data <- get(load("../output/sex_cor_nonmash.rda"))
+zdat <- data$betahat/data$sebetahat
 index <- grep("Adipose", U)
-lfdr_thresh <- apply(lfdr_mat, 2, function(x) {
-            if(min(x[index]) < 0.05 && min(x[-index]) >  0.80){
-              y <- 1
-            }else{ y <- 0}
+zdat_thresh <- apply(abs(zdat), 2, function(x) {
+            y <- median(x[index]) - median(x[-index])
             return(y)})
-
 ```
 
 ```{r}
-imp_genes_indices <- which(lfdr_thresh == 1)
+imp_genes_indices <- order(zdat_thresh, decreasing = TRUE)[1:100]
 imp_genes_names <- gene_names_1[imp_genes_indices]
 imp_genes_names[1:10]
 ```
@@ -442,19 +434,16 @@ heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, 
 ## Enrichment of Thyroid
 
 ```{r}
-ash_data <- get(load("../output/sex_cor_ash.rda"))
-lfdr_mat <- ash_data$post.lfsr
+data <- get(load("../output/sex_cor_nonmash.rda"))
+zdat <- data$betahat/data$sebetahat
 index <- grep("Thyroid", U)
-lfdr_thresh <- apply(lfdr_mat, 2, function(x) {
-            if(min(x[index]) < 0.05 && min(x[-index]) >  0.80){
-              y <- 1
-            }else{ y <- 0}
+zdat_thresh <- apply(abs(zdat), 2, function(x) {
+            y <- median(x[index]) - median(x[-index])
             return(y)})
-
 ```
 
 ```{r}
-imp_genes_indices <- which(lfdr_thresh == 1)
+imp_genes_indices <- order(zdat_thresh, decreasing = TRUE)[1:100]
 imp_genes_names <- gene_names_1[imp_genes_indices]
 imp_genes_names[1:10]
 ```
@@ -507,10 +496,10 @@ sample_attributes <- get(load("../output/sample_attributes_filtered.rda"))
 person_tissue_genes <- get(load("../output/person_tissue_genes_voom.rda"))
 ```
 
-### ENSG00000004139 (Breast specific)
+### ENSG00000256462 (Breast specific)
 
 ```{r}
-indices <- match("ENSG00000004139", gene_names_1)
+indices <- match("ENSG00000256462", gene_names_1)
 ```
 
 ```{r}
@@ -526,30 +515,10 @@ for(j in 1:53){
   plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
 }
 ```
-### ENSG00000004399 (Breast specific)
+### ENSG00000147889 (Breast specific)
 
 ```{r}
-indices <- match("ENSG00000004399", gene_names_1)
-```
-
-```{r}
-par(mfrow = c(3,3))
-for(j in 1:53){
-  ll <-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
-  temp1 <- person_tissue_genes[,j,indices]
-  temp2 <- sample_attributes$SEX
-  temp11 <- temp1[which(!is.na(temp1))]
-  temp21 <- temp2[which(!is.na(temp1))]
-  temp1_M  <- temp11[which(temp21 == 1)]
-  temp1_F  <- temp11[which(temp21 == 2)]
-  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
-}
-```
-
-### ENSG00000148337 (Brain specific)
-
-```{r}
-indices <- match("ENSG00000148337", gene_names_1)
+indices <- match("ENSG00000147889", gene_names_1)
 ```
 
 ```{r}
@@ -566,10 +535,10 @@ for(j in 1:53){
 }
 ```
 
-### ENSG00000143110 (Thyroid specific)
+### ENSG00000259952 (Brain specific)
 
 ```{r}
-indices <- match("ENSG00000143110", gene_names_1)
+indices <- match("ENSG00000259952", gene_names_1)
 ```
 
 ```{r}
@@ -586,10 +555,30 @@ for(j in 1:53){
 }
 ```
 
-### ENSG00000169896 (Adipose specific)
+### ENSG00000171757 (Thyroid specific)
 
 ```{r}
-indices <- match("ENSG00000169896", gene_names_1)
+indices <- match("ENSG00000171757", gene_names_1)
+```
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices]
+  temp2 <- sample_attributes$SEX
+  temp11 <- temp1[which(!is.na(temp1))]
+  temp21 <- temp2[which(!is.na(temp1))]
+  temp1_M  <- temp11[which(temp21 == 1)]
+  temp1_F  <- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+### ENSG00000236698 (Adipose specific)
+
+```{r}
+indices <- match("ENSG00000236698", gene_names_1)
 ```
 
 ```{r}
