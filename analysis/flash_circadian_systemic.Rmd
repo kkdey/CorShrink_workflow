@@ -79,12 +79,12 @@ order_index <- c(order_index, grep("Bladder", U))
 ```
 
 
-```{r fig.height=10, fig.weight =5}
+```{r fig.height=15, fig.weight =5}
 loadings <- flash_out$l[order_index,]
 rownames(loadings) <- 1:dim(flash_out$l)[1]
 annotation <- data.frame(sample_id = 1:NROW(loadings),
                          label = factor(U[order_index], levels = U[order_index]))
-FactorGGBar(loadings, annotation = annotation, panel=list(panel_rows=3))
+FactorGGBar(loadings, annotation = annotation, panel=list(panel_rows=4))
 ```
 
 The proportion of variance explained by the factors are given by 
@@ -94,9 +94,7 @@ postprocess <- flash_factor_postprocess(flash_out$l, flash_out$f, zdat)
 100*postprocess$PVE
 ```
 
-It seems that the first factor corresponds to a specific effect in Breast-mammary tissue. The second factor was 
-high in everything else except the breast mammary tissue which is negative. Factor 3 is strong positive in the brain tissues and also negatively related to the adipose tissues. The 4th factor is mainly expressed in the skin tissues.
-It is not the case however that there are many tissue specific effects.
+It seems that the first factor corresponds to a specific effect in Liver. Factor 3 is strong positive in the brain tissues 
 
 We look at how the factors look like? Are they sparse?
 
@@ -234,7 +232,7 @@ We save the genes in a list and do enrichment analysis of these genes.
 
 ```{r}
 write.table(imp_genes_names, file = "../utilities/circadian_flash/cervix.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
-out <- mygene::queryMany(imp_genes_names[1:50],  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+out <- mygene::queryMany(imp_genes_names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
 cbind.data.frame(out$name, out$summary)
 ```
 
@@ -266,19 +264,15 @@ heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, 
 
 ```{r}
 ash_data <- get(load("../output/death_time_cor_ash.rda"))
-lfdr_mat <- ash_data$post.lfsr
+zdat <- data$betahat/data$sebetahat
 index <- grep("Liver", U)
-index_cervix <- grep("Cervix", U)
-lfdr_thresh <- apply(lfdr_mat, 2, function(x) {
-            if(x[index] < 0.1 && min(x[-c(index, index_cervix)]) >  0.30){
-              y <- 1
-            }else{ y <- 0}
+zdat_thresh <- apply(abs(zdat), 2, function(x) {
+            y <- median(x[index]) - median(x[-index])
             return(y)})
-
 ```
 
 ```{r}
-imp_genes_indices <- order(lfdr_thresh, decreasing = TRUE)[1:100]
+imp_genes_indices <- order(zdat_thresh, decreasing = TRUE)[1:100]
 imp_genes_names <- gene_names_1[imp_genes_indices]
 imp_genes_names[1:10]
 ```
@@ -297,7 +291,30 @@ out <- mygene::queryMany(imp_genes_names[1:50],  scopes="ensembl.gene", fields=c
 cbind.data.frame(out$name, out$summary)
 ```
 
-We did not find any significant pathway for the liver tissues.
+```{r}
+pathway2 <- read.delim("../utilities/circadian_flash/liver_pathway.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.1),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
 
 ## Enrichment of brain tissues 
 
@@ -312,7 +329,7 @@ zdat_thresh <- apply(abs(zdat), 2, function(x) {
 ```
 
 ```{r}
-imp_genes_indices <- order(zdat_thresh, decreasing = TRUE)[1:300]
+imp_genes_indices <- order(zdat_thresh, decreasing = TRUE)[1:100]
 imp_genes_names <- gene_names_1[imp_genes_indices]
 imp_genes_names[1:10]
 ```
@@ -472,7 +489,7 @@ heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, 
 Here we explore the log CPM expression against sex across tissues for some genes of interest that we got from above.
 
 ```{r}
-betahat_sebetahat <- get(load("../output/sex_cor_ash.rda"))
+betahat_sebetahat <- get(load("../output/death_time_cor_ash.rda"))
 sample_attributes <- get(load("../output/sample_attributes_filtered.rda"))
 person_tissue_genes <- get(load("../output/person_tissue_genes_voom.rda"))
 ```
@@ -496,23 +513,10 @@ uncos_times_1 <- uncos_times[-na_indices]
 ```
 
 
-### ENSG00000074181 (Cervix specific)
+### ENSG00000186017 (Liver specific)
 
 ```{r}
-indices <- match("ENSG00000074181", gene_names_1)
-```
-
-```{r}
-par(mfrow=c(3,3))
-for(j in 1:53){
-  plot(uncos_times_1, person_tissue_genes_1[,j, indices],
-       ylab = dimnames(person_tissue_genes)[[2]][j])
-}
-```
-### ENSG00000052795 (Liver specific)
-
-```{r}
-indices <- match("ENSG00000052795", gene_names_1)
+indices <- match("ENSG00000186017", gene_names_1)
 ```
 
 ```{r}
@@ -525,10 +529,10 @@ for(j in 1:53){
 }
 ```
 
-### ENSG00000066583 (Liver specific)
+### ENSG00000175048 (Liver specific)
 
 ```{r}
-indices <- match("ENSG00000066583", gene_names_1)
+indices <- match("ENSG00000175048", gene_names_1)
 ```
 
 ```{r}
@@ -536,8 +540,6 @@ par(mfrow=c(3,3))
 for(j in 1:53){
   plot(uncos_times_1, person_tissue_genes_1[,j, indices],
        ylab = dimnames(person_tissue_genes)[[2]][j])
-  lines(loess.smooth(uncos_times_1,person_tissue_genes_1[,j, indices]), 
-        col="red", lty=2, lwd=2)
 }
 ```
 
@@ -559,10 +561,10 @@ for(j in 1:53){
 }
 ```
 
-### ENSG00000121210 (Heart specific)
+### ENSG00000105516 (Heart specific)
 
 ```{r}
-indices <- match("ENSG00000121210", gene_names_1)
+indices <- match("ENSG00000105516", gene_names_1)
 ```
 
 ```{r}

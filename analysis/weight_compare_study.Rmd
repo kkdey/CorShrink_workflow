@@ -1,0 +1,81 @@
+---
+title: "Weight comparison"
+author: "Kushal K Dey"
+date: "6/3/2017"
+output: html_document
+---
+
+In this script, we check for the correlation structure between sex as a factor and gene expression of the samples for the different tissues.
+
+We first load the sample attributes file.
+
+```{r}
+betahat_sebetahat <- get(load("../output/weight_cor_nonmash.rda"))
+```
+
+```{r}
+betahat_mat <- betahat_sebetahat$betahat
+sebetahat_mat <- betahat_sebetahat$sebetahat
+pval_mat <- betahat_sebetahat$pval
+rsquare_mat <- betahat_sebetahat$rsquare
+```
+
+```{r}
+column_sum <- apply(betahat_mat, 2, function(x) return(quantile(x, 0.7)))
+
+sort(column_sum, decreasing = TRUE)[1:5]
+order(column_sum, decreasing = TRUE)[1:5]
+
+sort(column_sum, decreasing = FALSE)[1:5]
+order(column_sum, decreasing = FALSE)[1:5]
+
+```
+```{r}
+tmat <- betahat_mat/sebetahat_mat
+```
+
+```{r}
+tmat[,13045]
+```
+
+```{r}
+tmat[,11508]
+```
+
+```{r}
+ll <- lm(person_tissue_genes[,50,11508] ~ sample_attributes$WGHT)
+plot(person_tissue_genes[,50,9442], sample_attributes$WGHT, col = sample_attributes$SEX)
+```
+
+```{r}
+index_high <- which(person_tissue_genes[,50,13045] > -2)
+index_low <- which(person_tissue_genes[,50,13045] < -2)
+sample_attributes_1 <- sample_attributes[index_high,]
+sample_attributes_2 <- sample_attributes[index_low,]
+
+plot(person_tissue_genes[index_low, 50, 13045])
+```
+
+
+
+```{r}
+names <- dimnames(person_tissue_genes)[[3]][order(column_sum, decreasing = FALSE)][1:50]
+names <- names[-1]
+write.table(names, file = "../utilities/weight_negative_genes.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+ensembl = biomaRt::useMart("ensembl", dataset="hsapiens_gene_ensembl", host="www.ensembl.org")
+res = biomaRt::getBM(attributes = c("chromosome_name", "ensembl_gene_id", "external_gene_name", "description"), filters = c("ensembl_gene_id"), values = names,  
+mart = ensembl)
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out[[4]], out[[5]])
+```
+
+```{r}
+names <- dimnames(person_tissue_genes)[[3]][order(column_sum, decreasing = TRUE)][1:50]
+names <- names[-1]
+write.table(names, file = "../utilities/weight_positive_genes.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+ensembl = biomaRt::useMart("ensembl", dataset="hsapiens_gene_ensembl", host="www.ensembl.org")
+res = biomaRt::getBM(attributes = c("chromosome_name", "ensembl_gene_id", "external_gene_name", "description"), filters = c("ensembl_gene_id"), values = names,  
+mart = ensembl)
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out[[4]], out[[5]])
+```

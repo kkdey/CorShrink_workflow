@@ -1,0 +1,84 @@
+---
+title: "Heat effect analysis study"
+author: "Kushal K Dey"
+date: "6/4/2017"
+output: html_document
+---
+
+```{r}
+betahat_sebetahat <- get(load("../output/heat_cor_nonmash.rda"))
+sample_attributes <- get(load("../output/sample_attributes_filtered.rda"))
+person_tissue_genes <- get(load("../output/person_tissue_genes_voom.rda"))
+```
+
+```{r}
+betahat_mat <- betahat_sebetahat$betahat
+sebetahat_mat <- betahat_sebetahat$sebetahat
+pval_mat <- betahat_sebetahat$pval
+rsquare_mat <- betahat_sebetahat$rsquare
+```
+
+```{r}
+tmat <- betahat_mat/sebetahat_mat
+abs_tmat <- abs(tmat)
+column_sum_1 <- apply(abs_tmat, 2, function(x) return(quantile(x, 0.7)))
+```
+
+```{r}
+names <- dimnames(person_tissue_genes)[[3]][order(column_sum_1, decreasing = TRUE)[1:10]]
+names
+column_sum_1[order(column_sum_1, decreasing = TRUE)[1:10]]
+```
+
+```{r}
+temp_val <- sample_attributes$TRCRTMP
+temp_val_unit <- sample_attributes$TRCRTMPU
+
+temp_val_unit[329] <- "F"
+
+which_celsius <- which(temp_val_unit == "C")
+
+new_temp <- array(0, length(temp_val))
+new_temp[which_celsius] <- (temp_val[which_celsius]*9)/5 + 32
+new_temp[-which_celsius] <- temp_val[-which_celsius]
+
+```
+
+```{r}
+tmat[,order(column_sum_1, decreasing = TRUE)[1]]
+```
+
+```{r}
+plot(person_tissue_genes[,3, order(column_sum_1, decreasing = TRUE)[1]], new_temp)
+```
+
+HSF pathway 
+
+```{r}
+pathways <- read.delim("../utilities/CPDB_pathways_genes.tab")
+pathway_names <- pathways[,1]
+grep("HSF",pathway_names)
+```
+
+```{r}
+heat_pathways <- pathways[grep("HSF", pathway_names),]
+heat_genes <- strsplit(as.character(heat_pathways[1,4]), "[,]")[[1]]
+indices <- match(heat_genes, dimnames(person_tissue_genes)[[3]])
+indices <- indices[!is.na(indices)]
+```
+
+```{r}
+na_indices <- union(which(is.na(new_temp)), which(new_temp == 0))
+
+person_tissue_genes_1 <- person_tissue_genes[-na_indices,,]
+new_temp_1 <- new_temp[-na_indices]
+```
+
+```{r}
+par(mfrow=c(2,2))
+plot(log(new_temp_1), person_tissue_genes_1[,53, indices[1]], xlim=c(4.5, 4.7))
+plot(log(new_temp_1), person_tissue_genes_1[,30, indices[1]], xlim=c(4.5, 4.7))
+plot(log(new_temp_1), person_tissue_genes_1[,35, indices[1]], xlim=c(4.5, 4.7))
+plot(log(new_temp_1), person_tissue_genes_1[,12, indices[1]], xlim=c(4.5, 4.7))
+
+```

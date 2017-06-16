@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+
+<title>CorShrink : Adaptive correlation shrinkage with applications</title>
+
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="cosmo.css" type="text/css" />
+
+</head>
+
+<body>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
+    <link href="../docs/cosmo.css" rel="stylesheet">
+    <link href="../docs/cosmo.min.css" rel="stylesheet">
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../docs/bootstrap/js/bootstrap.min.js"></script>
+
+<body>
+
+<div class = "nav" align = "middle">
+<div class= "p1"></div>
+<p>
+  <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "index.html">WORKFLOW</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "about.html">METHODS</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "license.html">LICENSE</a> 
+   &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
+ </p>
+</div>  
+<!-- <div class="nav">
+  <a href="index.html">Home page</a> &nbsp &nbsp
+  <a href="musings.html">Musings</a> &nbsp &nbsp
+  <a href="town.html">My town</a> &nbsp &nbsp
+  <a href="links.html">Links</a>
+</div> -->
+
+<!-- Main content -->
+</body>
+</html>
+
+
+<h1 class="title toc-ignore">CorShrink : Adaptive correlation shrinkage with applications</h1>
+
+
+
+<div id="what-is-corshrink" class="section level2">
+<h2>What is CorShrink?</h2>
+<p><code>CorShrink</code> is an adaptive correlation shrinkage algorithm inspired from the adaptive shrinkage (<em>ash</em>) method of <a href="https://academic.oup.com/biostatistics/article/18/2/275/2557030/False-discovery-rates-a-new-deal">Stephens 2016</a>. It provides a way to efficiently handle large scale missing data while adjusting the degree of shrinkage of the correlations or cosine similarities. Unlike other popular correlation shrinkage algorithms such as <em>corpcor</em>, <em>CovShrinkMat</em> and <em>GLASSO</em>, <em>CorShrink</em> does not need to resort to imputing the data before applying shrinkage, thereby making it free of any imputation error. Also unlike other methods which globally shrink the observed correlation matrix to a target, our method has a a specific shrinkage level for each cell of the correlation matrix, making it more flexible.</p>
+</div>
+<div id="sneak-peek-at-workflow" class="section level2">
+<h2>Sneak peek at workflow</h2>
+<p>In our workflow, we replicate the examples and the analysis referenced in the paper. Primarily, the analysis is focused on comparison <code>Corshrink</code> with other correlation shrinkage methods like GLASSO, <code>corpcor</code> etc, application of our method to gene wise human tissue-tissue correlation matrix shrinkage based on bulk RNA-seq data from Genotype Tissue Expression (GTEx) project and how dimension reduction methods are related to our shrinkage method. We also present applications to motivate how <code>CorShrink</code> can be used to produce more robust rankings from the word2vec output in Natural Language Processing.</p>
+<p>Okay, so lets get started !!</p>
+</div>
+<div id="detailed-workflow" class="section level2">
+<h2>Detailed workflow</h2>
+<div id="comaprison-of-corshrink-with-corpcor-and-glasso" class="section level3">
+<h3>Comaprison of CorShrink with corpcor and GLASSO</h3>
+<p>In this section, we perform simulation experiments to compare out <code>CorShrink</code> approach with that of the more popular approaches to correlation shrinkage - namely <code>corpcor</code> and <code>GLASSO</code>. We focus on two simulation designs with missing data. We consider two approaches to imputing the missing data. Approach 1 is an ad-hoc way of replacing the missing values by resampling from each tissue distribution over the non-NA samples for each gene. Approach 2 was to use SoftImpute that uses a low dimensional structure representation to impute the values.</p>
+<ul>
+<li><a href="../docs/corshrink_corpcor_glasso.html">CorShrink vs corpcor vs GLASSO : Approach 1</a></li>
+<li><a href="../docs/CorShrink_softimpute.html">CorShrink vs corpcor vs GLASSO : Approach 2</a></li>
+</ul>
+</div>
+<div id="corshrink-and-countclust-clusters-on-gtex-data" class="section level3">
+<h3>CorShrink and CountClust clusters on GTEx data</h3>
+<p><a href="http://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1006599">Dey et al 2017</a> obtained clusters of GTEx tissue samples from the gene expression data using a Grade of Membership approach. Here we try to relate the clusters obtained there and the genes that were found to drive these clusters with their tissue-tissue correlation structure patterns. Also of interest is how this correlation structure depends on the expression patterns of the genes.</p>
+<ul>
+<li><a href="../docs/one_gene_correlation.html">CorShrink demo on one gene in GTEx</a></li>
+<li><a href="../docs/gtex_corshrink.html">CorShrink of top genes driving GTEx Countclust clusters</a></li>
+<li><a href="../docs/corshrink_brain_func.html">Curious case of high correlation in Brain</a></li>
+<li><a href="../docs/gsea_corshrink_corpcor.html">GSEA of CorShrink correlation patterns on all tissues</a></li>
+<li><a href="../docs/gsea_corshrink_corpcor_2.html">GSEA of CorShrink correlation patterns on brain tissues</a></li>
+</ul>
+</div>
+<div id="expression-vs-corshrink" class="section level3">
+<h3>Expression vs CorShrink</h3>
+<p>In this section, we check how the reads expression of the genes in the GTEx data are connected to the CorShrink correlations and how small sample size can indeed produce big correlation values.</p>
+<ul>
+<li><a href="reads_expression_CorShrink.html">Reads expression and CorShrink</a></li>
+</ul>
+</div>
+<div id="dimension-reduction-and-corshrink" class="section level3">
+<h3>Dimension Reduction and CorShrink</h3>
+<p>In the GTEx data, CorShrink was previously applied one gene at a time on its tissue-tissue correlation matrix. However, one would assume that there will be sharing of information among genes and we can pool in this shared information while performing shrinkage to get a low dimensionla structyre of the correlation matrix together with shrinkage. To answer that question, we perform PCA, PMD and FLASH on the vectorized CorShrink matrices across genes. For the latter (FLASH), we also compare between FLASH on vectorized CorShrink and sample correlation matrices.</p>
+<ul>
+<li><a href="../docs/corshrink_pca.html">Principal Component Analysis on CorShrink matrix</a></li>
+<li><a href="../docs/corshrink_pmd.html">Penalized Matrix Decomposition on CorShrink matrix</a></li>
+<li><a href="../docs/corshrink_flash.html">FLASH on CorShrink matrix</a></li>
+<li><a href="../docs/cor_flash.html">FLASH on sample correlation matrix</a></li>
+</ul>
+</div>
+</div>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

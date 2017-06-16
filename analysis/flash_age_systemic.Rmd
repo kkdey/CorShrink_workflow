@@ -79,12 +79,12 @@ order_index <- c(order_index, grep("Bladder", U))
 ```
 
 
-```{r fig.height=10, fig.weight =5}
+```{r fig.height=15, fig.weight =5}
 loadings <- flash_out$l[order_index,]
 rownames(loadings) <- 1:dim(flash_out$l)[1]
 annotation <- data.frame(sample_id = 1:NROW(loadings),
                          label = factor(U[order_index], levels = U[order_index]))
-FactorGGBar(loadings, annotation = annotation, panel=list(panel_rows=3))
+FactorGGBar(loadings, annotation = annotation, panel=list(panel_rows=4))
 ```
 
 The proportion of variance explained by the factors are given by 
@@ -135,28 +135,6 @@ for(m in 1:50){
 }
 ```
 
-## Factor 5
-
-```{r}
-indices <- order(abs(flash_out$f[,5]), decreasing=TRUE)[1:50]
-par(mfrow=c(3,3))
-for(m in 1:50){
-  plot(1:53, zdat[order_index,indices[m]], pch=20, type="b", xlab = "tissues", ylab="z scores")
-  text(1:53, zdat[order_index,indices[m]], U[order_index], cex=0.3)
-}
-```
-
-## Factor 6
-
-```{r}
-indices <- order(abs(flash_out$f[,6]), decreasing=TRUE)[1:50]
-par(mfrow=c(3,3))
-for(m in 1:50){
-  plot(1:53, zdat[order_index,indices[m]], pch=20, type="b", xlab = "tissues", ylab="z scores")
-  text(1:53, zdat[order_index,indices[m]], U[order_index], cex=0.3)
-}
-```
-
 ## Factor 7
 
 ```{r}
@@ -172,6 +150,28 @@ for(m in 1:50){
 
 ```{r}
 indices <- order(abs(flash_out$f[,8]), decreasing=TRUE)[1:50]
+par(mfrow=c(3,3))
+for(m in 1:50){
+  plot(1:53, zdat[order_index,indices[m]], pch=20, type="b", xlab = "tissues", ylab="z scores")
+  text(1:53, zdat[order_index,indices[m]], U[order_index], cex=0.3)
+}
+```
+
+## Factor 9
+
+```{r}
+indices <- order(abs(flash_out$f[,9]), decreasing=TRUE)[1:50]
+par(mfrow=c(3,3))
+for(m in 1:50){
+  plot(1:53, zdat[order_index,indices[m]], pch=20, type="b", xlab = "tissues", ylab="z scores")
+  text(1:53, zdat[order_index,indices[m]], U[order_index], cex=0.3)
+}
+```
+
+## Factor 10
+
+```{r}
+indices <- order(abs(flash_out$f[,10]), decreasing=TRUE)[1:50]
 par(mfrow=c(3,3))
 for(m in 1:50){
   plot(1:53, zdat[order_index,indices[m]], pch=20, type="b", xlab = "tissues", ylab="z scores")

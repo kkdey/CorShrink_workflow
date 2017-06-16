@@ -89,10 +89,10 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <ul>
 <li><a href="#factor-3">Factor 3</a></li>
 <li><a href="#factor-4">Factor 4</a></li>
-<li><a href="#factor-5">Factor 5</a></li>
-<li><a href="#factor-6">Factor 6</a></li>
 <li><a href="#factor-7">Factor 7</a></li>
 <li><a href="#factor-8">Factor 8</a></li>
+<li><a href="#factor-9">Factor 9</a></li>
+<li><a href="#factor-10">Factor 10</a></li>
 <li><a href="#enrichment-of-brain-tissues">Enrichment of brain tissues</a></li>
 <li><a href="#enrichment-of-blood-tissues">Enrichment of blood tissues</a></li>
 <li><a href="#enrichment-of-adipose-tissues">Enrichment of adipose tissues</a></li>
@@ -172,13 +172,15 @@ order_index &lt;- c(order_index, grep(&quot;Bladder&quot;, U))</code></pre>
 rownames(loadings) &lt;- 1:dim(flash_out$l)[1]
 annotation &lt;- data.frame(sample_id = 1:NROW(loadings),
                          label = factor(U[order_index], levels = U[order_index]))
-FactorGGBar(loadings, annotation = annotation, panel=list(panel_rows=3))</code></pre>
+FactorGGBar(loadings, annotation = annotation, panel=list(panel_rows=4))</code></pre>
 <p><img src="flash_age_systemic_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 <p>The proportion of variance explained by the factors are given by</p>
 <pre class="r"><code>postprocess &lt;- flash_factor_postprocess(flash_out$l, flash_out$f, zdat)
 100*postprocess$PVE</code></pre>
-<pre><code>## [1] 13.136045 11.566564  5.913519  4.720088  3.430293  2.841167  2.339020
-## [8]  2.093397  1.716142</code></pre>
+<pre><code>##  [1] 13.1360451 11.5665639  5.9135190  4.7200880  3.4302929  2.8411668
+##  [7]  2.3390202  2.0933965  1.7161415  1.5006059  1.1878437  0.8572915
+## [13]  0.7096073  0.5149306  0.4919791  0.4605595  0.4126531  0.3135805
+## [19]  0.2793438</code></pre>
 <pre class="r"><code>par(mfrow=c(2,2))
 plot(flash_out$f[,1], ylab = &quot;Factor 1&quot;)
 plot(flash_out$f[,2], ylab = &quot;Factor 2&quot;)
@@ -212,26 +214,6 @@ for(m in 1:50){
 }</code></pre>
 <p><img src="flash_age_systemic_files/figure-html/unnamed-chunk-10-1.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-10-2.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-10-3.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-10-4.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-10-5.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-10-6.png" width="672" /></p>
 </div>
-<div id="factor-5" class="section level2">
-<h2>Factor 5</h2>
-<pre class="r"><code>indices &lt;- order(abs(flash_out$f[,5]), decreasing=TRUE)[1:50]
-par(mfrow=c(3,3))
-for(m in 1:50){
-  plot(1:53, zdat[order_index,indices[m]], pch=20, type=&quot;b&quot;, xlab = &quot;tissues&quot;, ylab=&quot;z scores&quot;)
-  text(1:53, zdat[order_index,indices[m]], U[order_index], cex=0.3)
-}</code></pre>
-<p><img src="flash_age_systemic_files/figure-html/unnamed-chunk-11-1.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-11-2.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-11-3.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-11-4.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-11-5.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-11-6.png" width="672" /></p>
-</div>
-<div id="factor-6" class="section level2">
-<h2>Factor 6</h2>
-<pre class="r"><code>indices &lt;- order(abs(flash_out$f[,6]), decreasing=TRUE)[1:50]
-par(mfrow=c(3,3))
-for(m in 1:50){
-  plot(1:53, zdat[order_index,indices[m]], pch=20, type=&quot;b&quot;, xlab = &quot;tissues&quot;, ylab=&quot;z scores&quot;)
-  text(1:53, zdat[order_index,indices[m]], U[order_index], cex=0.3)
-}</code></pre>
-<p><img src="flash_age_systemic_files/figure-html/unnamed-chunk-12-1.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-12-2.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-12-3.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-12-4.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-12-5.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-12-6.png" width="672" /></p>
-</div>
 <div id="factor-7" class="section level2">
 <h2>Factor 7</h2>
 <pre class="r"><code>indices &lt;- order(abs(flash_out$f[,7]), decreasing=TRUE)[1:50]
@@ -240,11 +222,31 @@ for(m in 1:50){
   plot(1:53, zdat[order_index,indices[m]], pch=20, type=&quot;b&quot;, xlab = &quot;tissues&quot;, ylab=&quot;z scores&quot;)
   text(1:53, zdat[order_index,indices[m]], U[order_index], cex=0.3)
 }</code></pre>
-<p><img src="flash_age_systemic_files/figure-html/unnamed-chunk-13-1.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-13-2.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-13-3.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-13-4.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-13-5.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-13-6.png" width="672" /></p>
+<p><img src="flash_age_systemic_files/figure-html/unnamed-chunk-11-1.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-11-2.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-11-3.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-11-4.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-11-5.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-11-6.png" width="672" /></p>
 </div>
 <div id="factor-8" class="section level2">
 <h2>Factor 8</h2>
 <pre class="r"><code>indices &lt;- order(abs(flash_out$f[,8]), decreasing=TRUE)[1:50]
+par(mfrow=c(3,3))
+for(m in 1:50){
+  plot(1:53, zdat[order_index,indices[m]], pch=20, type=&quot;b&quot;, xlab = &quot;tissues&quot;, ylab=&quot;z scores&quot;)
+  text(1:53, zdat[order_index,indices[m]], U[order_index], cex=0.3)
+}</code></pre>
+<p><img src="flash_age_systemic_files/figure-html/unnamed-chunk-12-1.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-12-2.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-12-3.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-12-4.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-12-5.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-12-6.png" width="672" /></p>
+</div>
+<div id="factor-9" class="section level2">
+<h2>Factor 9</h2>
+<pre class="r"><code>indices &lt;- order(abs(flash_out$f[,9]), decreasing=TRUE)[1:50]
+par(mfrow=c(3,3))
+for(m in 1:50){
+  plot(1:53, zdat[order_index,indices[m]], pch=20, type=&quot;b&quot;, xlab = &quot;tissues&quot;, ylab=&quot;z scores&quot;)
+  text(1:53, zdat[order_index,indices[m]], U[order_index], cex=0.3)
+}</code></pre>
+<p><img src="flash_age_systemic_files/figure-html/unnamed-chunk-13-1.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-13-2.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-13-3.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-13-4.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-13-5.png" width="672" /><img src="flash_age_systemic_files/figure-html/unnamed-chunk-13-6.png" width="672" /></p>
+</div>
+<div id="factor-10" class="section level2">
+<h2>Factor 10</h2>
+<pre class="r"><code>indices &lt;- order(abs(flash_out$f[,10]), decreasing=TRUE)[1:50]
 par(mfrow=c(3,3))
 for(m in 1:50){
   plot(1:53, zdat[order_index,indices[m]], pch=20, type=&quot;b&quot;, xlab = &quot;tissues&quot;, ylab=&quot;z scores&quot;)

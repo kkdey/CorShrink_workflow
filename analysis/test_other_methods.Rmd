@@ -1,0 +1,53 @@
+---
+title: "Testing correlation shrinkage in other methods"
+author: "Kushal K Dey"
+date: "5/24/2017"
+output: html_document
+---
+
+In this script, we look into some popular correlation shrinkage methods in the 
+literature.
+
+## spcov
+
+spcov is a LASSO penalty based approach by Bien and Tibshirani 
+
+```{r}
+library(spcov)
+```
+
+```{r}
+set.seed(1)
+n <- 100
+p <- 20
+# generate a covariance matrix:
+model <- GenerateCliquesCovariance(ncliques=4, cliquesize=p / 4, 1)
+# generate data matrix with x[i, ] ~ N(0, model$Sigma):
+x <- matrix(rnorm(n * p), ncol=p) %*% model$A
+S <- var(x)
+```
+```{r}
+S <- cov2cor(S)
+S[1:5,1:5]
+```
+
+```{r}
+step.size <- 100
+tol <- 1e-3
+P <- matrix(1, p, p)
+diag(P) <- 0
+P[1:5,1:5]
+```
+
+```{r}
+lam <- 0.06
+mm <- spcov(Sigma=S, S=S, lambda=lam * P,
+step.size=step.size, n.inner.steps=200,
+thr.inner=0, tol.outer=tol, trace=1)
+```
+
+```{r}
+Sest <- cov2cor(mm$Sigma)
+Sest[1:5,1:5]
+```
+
