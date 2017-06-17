@@ -164,7 +164,7 @@ order_index &lt;- c(order_index, grep(&quot;Bladder&quot;, U))</code></pre>
 rownames(loadings) &lt;- 1:dim(flash_out$l)[1]
 annotation &lt;- data.frame(sample_id = 1:NROW(loadings),
                          label = factor(U[order_index], levels = U[order_index]))
-FactorGGBar(loadings, annotation = annotation, panel=list(panel_rows=3))</code></pre>
+FactorGGBar(loadings, annotation = annotation, panel=list(panel_rows=5))</code></pre>
 <p><img src="flash_suicide_systemic_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 <div id="factor-2" class="section level2">
 <h2>Factor 2</h2>

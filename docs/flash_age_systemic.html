@@ -172,7 +172,7 @@ order_index &lt;- c(order_index, grep(&quot;Bladder&quot;, U))</code></pre>
 rownames(loadings) &lt;- 1:dim(flash_out$l)[1]
 annotation &lt;- data.frame(sample_id = 1:NROW(loadings),
                          label = factor(U[order_index], levels = U[order_index]))
-FactorGGBar(loadings, annotation = annotation, panel=list(panel_rows=4))</code></pre>
+FactorGGBar(loadings, annotation = annotation, panel=list(panel_rows=6))</code></pre>
 <p><img src="flash_age_systemic_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 <p>The proportion of variance explained by the factors are given by</p>
 <pre class="r"><code>postprocess &lt;- flash_factor_postprocess(flash_out$l, flash_out$f, zdat)

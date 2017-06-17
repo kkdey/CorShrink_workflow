@@ -76,12 +76,12 @@ order_index <- c(order_index, grep("Bladder", U))
 ```
 
 
-```{r fig.height=10, fig.weight =5}
+```{r fig.height=20, fig.weight =5}
 loadings <- flash_out$l[order_index,]
 rownames(loadings) <- 1:dim(flash_out$l)[1]
 annotation <- data.frame(sample_id = 1:NROW(loadings),
                          label = factor(U[order_index], levels = U[order_index]))
-FactorGGBar(loadings, annotation = annotation, panel=list(panel_rows=3))
+FactorGGBar(loadings, annotation = annotation, panel=list(panel_rows=5))
 ```
 
 ## Factor 2

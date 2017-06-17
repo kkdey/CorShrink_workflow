@@ -90,9 +90,8 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <li><a href="#factor-2">Factor 2</a></li>
 <li><a href="#factor-3">Factor 3</a></li>
 <li><a href="#factor-4">Factor 4</a></li>
-<li><a href="#enrichment-of-brain-tissues">Enrichment of brain tissues</a><ul>
+<li><a href="#enrichment-of-brain-tissues">Enrichment of brain tissues</a></li>
 <li><a href="#enrichment-of-adipose-tissues">Enrichment of adipose tissues</a></li>
-</ul></li>
 <li><a href="#reads-expression">Reads expression</a><ul>
 <li><a href="#ensg00000197989-brain-specific">ENSG00000197989 (Brain specific)</a></li>
 <li><a href="#ensg00000197989-brain-specific-1">ENSG00000197989 (Brain specific)</a></li>
@@ -168,7 +167,7 @@ order_index &lt;- c(order_index, grep(&quot;Bladder&quot;, U))</code></pre>
 rownames(loadings) &lt;- 1:dim(flash_out$l)[1]
 annotation &lt;- data.frame(sample_id = 1:NROW(loadings),
                          label = factor(U[order_index], levels = U[order_index]))
-FactorGGBar(loadings, annotation = annotation, panel=list(panel_rows=4))</code></pre>
+FactorGGBar(loadings, annotation = annotation, panel=list(panel_rows=6))</code></pre>
 <p><img src="flash_bmi_systemic_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 <pre class="r"><code>postprocess &lt;- flash_factor_postprocess(flash_out$l, flash_out$f, zdat)
 100*postprocess$PVE</code></pre>
@@ -376,8 +375,9 @@ col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
 heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
         scale = &quot;none&quot;, margins = c(5, 5))</code></pre>
 <p><img src="flash_bmi_systemic_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
-<div id="enrichment-of-adipose-tissues" class="section level3">
-<h3>Enrichment of adipose tissues</h3>
+</div>
+<div id="enrichment-of-adipose-tissues" class="section level2">
+<h2>Enrichment of adipose tissues</h2>
 <pre class="r"><code>data &lt;- get(load(&quot;../output/bmi_cor_nonmash.rda&quot;))
 zdat &lt;- data$betahat/data$sebetahat
 index &lt;- grep(&quot;Adipose&quot;, U)
@@ -529,7 +529,6 @@ col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
 heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
         scale = &quot;none&quot;, margins = c(5, 5))</code></pre>
 <p><img src="flash_bmi_systemic_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
-</div>
 </div>
 <div id="reads-expression" class="section level2">
 <h2>Reads expression</h2>
