@@ -209,7 +209,7 @@ The number of genes that satisfy this are
 ```{r}
 imp_genes_indices <- order(zdat_thresh, decreasing = TRUE)[1:100]
 imp_genes_names <- gene_names_1[imp_genes_indices]
-imp_genes_names[1:10]
+imp_genes_names[1:50]
 ```
 
 We look at the plot of the z-scores for the top 25 genes.

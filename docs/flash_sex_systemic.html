@@ -279,11 +279,24 @@ zdat_thresh &lt;- apply(abs(zdat), 2, function(x) {
 <p>The number of genes that satisfy this are</p>
 <pre class="r"><code>imp_genes_indices &lt;- order(zdat_thresh, decreasing = TRUE)[1:100]
 imp_genes_names &lt;- gene_names_1[imp_genes_indices]
-imp_genes_names[1:10]</code></pre>
+imp_genes_names[1:50]</code></pre>
 <pre><code>##  [1] &quot;ENSG00000256462&quot; &quot;ENSG00000147889&quot; &quot;ENSG00000178363&quot;
 ##  [4] &quot;ENSG00000211895&quot; &quot;ENSG00000132465&quot; &quot;ENSG00000211890&quot;
 ##  [7] &quot;ENSG00000254709&quot; &quot;ENSG00000211675&quot; &quot;ENSG00000211679&quot;
-## [10] &quot;ENSG00000105369&quot;</code></pre>
+## [10] &quot;ENSG00000105369&quot; &quot;ENSG00000099958&quot; &quot;ENSG00000211899&quot;
+## [13] &quot;ENSG00000139193&quot; &quot;ENSG00000211677&quot; &quot;ENSG00000064655&quot;
+## [16] &quot;ENSG00000178372&quot; &quot;ENSG00000081059&quot; &quot;ENSG00000102837&quot;
+## [19] &quot;ENSG00000104783&quot; &quot;ENSG00000171346&quot; &quot;ENSG00000253364&quot;
+## [22] &quot;ENSG00000211896&quot; &quot;ENSG00000211893&quot; &quot;ENSG00000271795&quot;
+## [25] &quot;ENSG00000088340&quot; &quot;ENSG00000164078&quot; &quot;ENSG00000158806&quot;
+## [28] &quot;ENSG00000119787&quot; &quot;ENSG00000259820&quot; &quot;ENSG00000211897&quot;
+## [31] &quot;ENSG00000134755&quot; &quot;ENSG00000180914&quot; &quot;ENSG00000169031&quot;
+## [34] &quot;ENSG00000110756&quot; &quot;ENSG00000167077&quot; &quot;ENSG00000124813&quot;
+## [37] &quot;ENSG00000170962&quot; &quot;ENSG00000180346&quot; &quot;ENSG00000104332&quot;
+## [40] &quot;ENSG00000020633&quot; &quot;ENSG00000211892&quot; &quot;ENSG00000117115&quot;
+## [43] &quot;ENSG00000013016&quot; &quot;ENSG00000136560&quot; &quot;ENSG00000151914&quot;
+## [46] &quot;ENSG00000115884&quot; &quot;ENSG00000155760&quot; &quot;ENSG00000271359&quot;
+## [49] &quot;ENSG00000174171&quot; &quot;ENSG00000254829&quot;</code></pre>
 <p>We look at the plot of the z-scores for the top 25 genes.</p>
 <pre class="r"><code>par(mfrow=c(3,3))
 for(m in 1:25){
