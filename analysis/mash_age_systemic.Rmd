@@ -138,8 +138,8 @@ par(new=TRUE)
 par(mfrow = c(3,3))
 for(j in 1:53){
   temp1 <- person_tissue_genes[,j,indices]
-  plot(sample_attributes$BMI, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
-  lines(loess.smooth(sample_attributes$BMI, temp1, family = "gaussian"), 
+  plot(sample_attributes$AGE, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$AGE, temp1, family = "gaussian"), 
         col="red", lty=2, lwd=2)
 }
 ```

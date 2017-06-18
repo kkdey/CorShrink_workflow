@@ -1,0 +1,266 @@
+---
+title: "MASH on systemic age study (pool)"
+author: "Kushal K Dey"
+date: "6/18/2017"
+output: html_document
+---
+
+## MASH loadings
+
+```{r}
+library(mashr)
+```
+
+```{r}
+data <- get(load("../output/age_cor_nonmash.rda"))
+betahat <- data$betahat
+sebetahat <- data$sebetahat
+zdat <- betahat/sebetahat
+```
+
+```{r}
+common_samples <- get(load("../output/common_samples.rda"))
+tissue_labels <- read.table(file = "../data/GTEX_V6/samples_id.txt")[,3]
+
+gene_names <- as.character(read.table(file = "../data/GTEX_V6/gene_names_GTEX_V6.txt")[,1])
+gene_names_1 <- as.character(sapply(gene_names, function(x) return(strsplit(x, "[.]")[[1]][1])))
+
+U <- unique(tissue_labels)
+```
+
+```{r}
+person_tissue_genes <- get(load("../output/person_tissue_genes_voom.rda"))
+sample_attributes <- get(load("../output/sample_attributes_filtered.rda"))
+```
+
+```{r}
+mash_dat <- get(load("../output/mash_age_canonical_pool.rda"))
+```
+
+```{r}
+barplot(get_estimated_pi(mash_dat), las = 2, cex.names = 0.3)
+```
+
+
+## Brain specific genes 
+
+```{r}
+brain_specific <- apply(mash_dat$result$lfdr, 1, function(x) {
+      if(max(x[grep("Brain", U)]) < 0.05 && min(x[-grep("Brain", U)])> 0.9){
+        return(1)
+      }else{
+        return(0)
+      }
+})
+```
+
+
+```{r}
+lfdr_diff <- apply(mash_dat$result$lfdr, 1, function(x) {
+      y <- median(x[-grep("Brain", U)]) - median(x[grep("Brain", U)])
+      return(y)
+})
+```
+
+```{r}
+names <- gene_names_1[order(lfdr_diff, decreasing = TRUE)[1:50]]
+names[1:10]
+```
+
+```{r}
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+
+```{r}
+length(which(brain_specific==1))
+```
+
+```{r}
+imp_genes <- gene_names_1[which(brain_specific==1)]
+```
+
+```{r}
+write.table(imp_genes, file = "../utilities/age_mash_2/brain.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+```{r}
+pathway2 <- read.delim("../utilities/age_mash_2/brain_pathway.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+### ENSG00000175287
+
+```{r}
+indices <- match("ENSG00000175287", gene_names_1)
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/age_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+```{r}
+par(new=TRUE)
+par(mfrow = c(3,3))
+for(j in 1:53){
+  temp1 <- person_tissue_genes[,j,indices]
+  plot(sample_attributes$AGE, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$AGE, temp1, family = "gaussian"), 
+        col="red", lty=2, lwd=2)
+}
+```
+
+
+### ENSG00000264281
+
+```{r}
+indices <- match("ENSG00000264281", gene_names_1)
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/age_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+```{r}
+par(new=TRUE)
+par(mfrow = c(3,3))
+for(j in 1:53){
+  temp1 <- person_tissue_genes[,j,indices]
+  plot(sample_attributes$AGE, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$AGE, temp1, family = "gaussian"), 
+        col="red", lty=2, lwd=2)
+}
+```
+
+
+## Shared genes 
+
+
+```{r}
+num_lfsr_below_thresh <- apply(mash_dat$result$lfdr, 1, function(x) return(length(which(x < 0.001))))
+
+imp_indices <- which(num_lfsr_below_thresh == 53)
+imp_genes <- gene_names_1[imp_indices]
+length(imp_genes)
+```
+
+```{r}
+lfdr_diff <- apply(mash_dat$result$lfdr, 1, function(x) {
+      y <- max(x)
+      return(y)
+})
+```
+
+```{r}
+names <- gene_names_1[order(lfdr_diff, decreasing = FALSE)[1:50]]
+names[1:10]
+```
+
+
+```{r}
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+
+```{r}
+write.table(imp_genes, file = "../utilities/age_mash_2/all.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+```{r}
+pathway2 <- read.delim("../utilities/age_mash_2/all_pathway.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+### ENSG00000147889
+
+```{r}
+indices <- match("ENSG00000147889", gene_names_1)
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/age_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+```{r}
+par(new=TRUE)
+par(mfrow = c(3,3))
+for(j in 1:53){
+  temp1 <- person_tissue_genes[,j,indices]
+  plot(sample_attributes$AGE, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$AGE, temp1, family = "gaussian"), 
+        col="red", lty=2, lwd=2)
+}
+```
+
+### ENSG00000172667
+
+```{r}
+indices <- match("ENSG00000172667", gene_names_1)
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/age_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+```{r}
+par(new=TRUE)
+par(mfrow = c(3,3))
+for(j in 1:53){
+  temp1 <- person_tissue_genes[,j,indices]
+  plot(sample_attributes$AGE, temp1, ylab = dimnames(person_tissue_genes)[[2]][j])
+  lines(loess.smooth(sample_attributes$AGE, temp1, family = "gaussian"), 
+        col="red", lty=2, lwd=2)
+}
+```

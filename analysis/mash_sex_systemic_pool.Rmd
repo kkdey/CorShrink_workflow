@@ -1,0 +1,771 @@
+---
+title: "MASH on systemic sex study (pool)"
+author: "Kushal K Dey"
+date: "6/18/2017"
+output: html_document
+---
+
+## MASH loadings
+
+```{r}
+library(mashr)
+```
+
+```{r}
+data <- get(load("../output/sex_cor_nonmash.rda"))
+betahat <- data$betahat
+sebetahat <- data$sebetahat
+zdat <- betahat/sebetahat
+```
+
+```{r}
+common_samples <- get(load("../output/common_samples.rda"))
+tissue_labels <- read.table(file = "../data/GTEX_V6/samples_id.txt")[,3]
+
+gene_names <- as.character(read.table(file = "../data/GTEX_V6/gene_names_GTEX_V6.txt")[,1])
+gene_names_1 <- as.character(sapply(gene_names, function(x) return(strsplit(x, "[.]")[[1]][1])))
+
+U <- unique(tissue_labels)
+```
+
+```{r}
+person_tissue_genes <- get(load("../output/person_tissue_genes_voom.rda"))
+sample_attributes <- get(load("../output/sample_attributes_filtered.rda"))
+```
+
+```{r}
+mash_dat <- get(load("../output/mash_sex_canonical_pool.rda"))
+```
+
+```{r}
+barplot(get_estimated_pi(mash_dat), las = 2, cex.names = 0.3)
+```
+
+
+```{r}
+U[c(21, 38)]
+```
+
+## Breast specific genes 
+
+```{r}
+breast_specific <- apply(mash_dat$result$lfdr, 1, function(x) {
+      if(x[21] < 0.05 && min(x[-21])> 0.9){
+        return(1)
+      }else{
+        return(0)
+      }
+})
+```
+
+```{r}
+length(which(breast_specific==1))
+```
+
+```{r}
+lfdr_diff <- apply(mash_dat$result$lfdr, 1, function(x) {
+      y <- median(x[-grep("Breast", U)]) - median(x[grep("Breast", U)])
+      return(y)
+})
+```
+
+```{r}
+names <- gene_names_1[order(lfdr_diff, decreasing = TRUE)[1:50]]
+names[1:10]
+```
+
+```{r}
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+
+
+```{r}
+imp_genes <- gene_names_1[which(breast_specific==1)]
+```
+
+```{r}
+write.table(imp_genes, file = "../utilities/sex_mash_2/breast.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+```{r}
+pathway2 <- read.delim("../utilities/sex_mash_2/breast_pathway.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+### ENSG00000178363
+
+```{r}
+indices <- match("ENSG00000178363", gene_names_1)
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/sex_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices]
+  temp2 <- sample_attributes$SEX
+  temp11 <- temp1[which(!is.na(temp1))]
+  temp21 <- temp2[which(!is.na(temp1))]
+  temp1_M  <- temp11[which(temp21 == 1)]
+  temp1_F  <- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+### ENSG00000171346
+
+```{r}
+indices <- match("ENSG00000171346", gene_names_1)
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/sex_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices]
+  temp2 <- sample_attributes$SEX
+  temp11 <- temp1[which(!is.na(temp1))]
+  temp21 <- temp2[which(!is.na(temp1))]
+  temp1_M  <- temp11[which(temp21 == 1)]
+  temp1_F  <- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+
+## Brain specific genes 
+
+```{r}
+brain_specific <- apply(mash_dat$result$lfdr, 1, function(x) {
+      if(max(x[grep("Brain", U)]) < 0.05 && min(x[-grep("Brain", U)])> 0.9){
+        return(1)
+      }else{
+        return(0)
+      }
+})
+```
+
+
+```{r}
+lfdr_diff <- apply(mash_dat$result$lfdr, 1, function(x) {
+      y <- median(x[-grep("Brain", U)]) - median(x[grep("Brain", U)])
+      return(y)
+})
+```
+
+```{r}
+names <- gene_names_1[order(lfdr_diff, decreasing = TRUE)[1:50]]
+names[1:10]
+```
+
+```{r}
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+
+```{r}
+length(which(brain_specific==1))
+```
+
+```{r}
+imp_genes <- gene_names_1[which(brain_specific==1)]
+```
+
+```{r}
+write.table(imp_genes, file = "../utilities/sex_mash_2/brain.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+```{r}
+pathway2 <- read.delim("../utilities/sex_mash_2/brain_pathway.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+### ENSG00000244257
+
+```{r}
+indices <- match("ENSG00000244257", gene_names_1)
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/sex_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices]
+  temp2 <- sample_attributes$SEX
+  temp11 <- temp1[which(!is.na(temp1))]
+  temp21 <- temp2[which(!is.na(temp1))]
+  temp1_M  <- temp11[which(temp21 == 1)]
+  temp1_F  <- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+
+### ENSG00000100241
+
+```{r}
+indices <- match("ENSG00000100241", gene_names_1)
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/sex_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices]
+  temp2 <- sample_attributes$SEX
+  temp11 <- temp1[which(!is.na(temp1))]
+  temp21 <- temp2[which(!is.na(temp1))]
+  temp1_M  <- temp11[which(temp21 == 1)]
+  temp1_F  <- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+
+
+
+## Adipose tissues
+
+```{r}
+adipose_specific <- apply(mash_dat$result$lfdr, 1, function(x) {
+      if(max(x[grep("Adipose", U)]) < 0.05 && min(x[-grep("Adipose", U)])> 0.9){
+        return(1)
+      }else{
+        return(0)
+      }
+})
+```
+
+```{r}
+length(which(adipose_specific==1))
+```
+
+```{r}
+lfdr_diff <- apply(mash_dat$result$lfdr, 1, function(x) {
+      y <- median(x[-grep("Adipose", U)]) - median(x[grep("Adipose", U)])
+      return(y)
+})
+```
+
+```{r}
+names <- gene_names_1[order(lfdr_diff, decreasing = TRUE)[1:50]]
+names[1:10]
+```
+
+```{r}
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+```{r}
+imp_genes <- gene_names_1[which(adipose_specific==1)]
+```
+
+```{r}
+write.table(imp_genes, file = "../utilities/sex_mash_2/adipose.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+```{r}
+pathway2 <- read.delim("../utilities/sex_mash_2/adipose_pathway.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+### ENSG00000104853
+
+```{r}
+indices <- match("ENSG00000104853", gene_names_1)
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/sex_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices]
+  temp2 <- sample_attributes$SEX
+  temp11 <- temp1[which(!is.na(temp1))]
+  temp21 <- temp2[which(!is.na(temp1))]
+  temp1_M  <- temp11[which(temp21 == 1)]
+  temp1_F  <- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+### ENSG00000116353
+
+```{r}
+indices <- match("ENSG00000116353", gene_names_1)
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/sex_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices]
+  temp2 <- sample_attributes$SEX
+  temp11 <- temp1[which(!is.na(temp1))]
+  temp21 <- temp2[which(!is.na(temp1))]
+  temp1_M  <- temp11[which(temp21 == 1)]
+  temp1_F  <- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+
+
+## skin tissues
+
+```{r}
+skin_specific <- apply(mash_dat$result$lfdr, 1, function(x) {
+      if(max(x[grep("Skin", U)]) < 0.05 && min(x[-grep("Skin", U)])> 0.9){
+        return(1)
+      }else{
+        return(0)
+      }
+})
+```
+
+```{r}
+length(which(skin_specific==1))
+```
+
+```{r}
+lfdr_diff <- apply(mash_dat$result$lfdr, 1, function(x) {
+      y <- median(x[-grep("Skin", U)]) - median(x[grep("Skin", U)])
+      return(y)
+})
+```
+
+```{r}
+names <- gene_names_1[order(lfdr_diff, decreasing = TRUE)[1:50]]
+names[1:10]
+```
+
+```{r}
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+```{r}
+imp_genes <- gene_names_1[which(skin_specific==1)]
+```
+
+```{r}
+write.table(imp_genes, file = "../utilities/sex_mash_2/skin.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+```{r}
+pathway2 <- read.delim("../utilities/sex_mash_2/skin_pathway.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+### ENSG00000163710
+
+```{r}
+indices <- match("ENSG00000163710", gene_names_1)
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/sex_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices]
+  temp2 <- sample_attributes$SEX
+  temp11 <- temp1[which(!is.na(temp1))]
+  temp21 <- temp2[which(!is.na(temp1))]
+  temp1_M  <- temp11[which(temp21 == 1)]
+  temp1_F  <- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+
+### ENSG00000152377
+
+```{r}
+indices <- match("ENSG00000152377", gene_names_1)
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/sex_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices]
+  temp2 <- sample_attributes$SEX
+  temp11 <- temp1[which(!is.na(temp1))]
+  temp21 <- temp2[which(!is.na(temp1))]
+  temp1_M  <- temp11[which(temp21 == 1)]
+  temp1_F  <- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+
+
+## Muscle skeletal
+
+```{r}
+muscle_specific <- apply(mash_dat$result$lfdr, 1, function(x) {
+      if(max(x[grep("Muscle", U)]) < 0.05 && min(x[-grep("Muscle", U)])> 0.9){
+        return(1)
+      }else{
+        return(0)
+      }
+})
+```
+
+```{r}
+length(which(muscle_specific==1))
+```
+
+```{r}
+lfdr_diff <- apply(mash_dat$result$lfdr, 1, function(x) {
+      y <- median(x[-grep("Muscle", U)]) - median(x[grep("Muscle", U)])
+      return(y)
+})
+```
+
+```{r}
+names <- gene_names_1[order(lfdr_diff, decreasing = TRUE)[1:50]]
+names[1:10]
+```
+
+```{r}
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+```{r}
+imp_genes <- gene_names_1[which(muscle_specific==1)]
+```
+
+```{r}
+write.table(imp_genes, file = "../utilities/sex_mash_2/muscle.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+```{r}
+pathway2 <- read.delim("../utilities/sex_mash_2/muscle_pathway.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+### ENSG00000168785
+
+```{r}
+indices <- match("ENSG00000168785", gene_names_1)
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/sex_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices]
+  temp2 <- sample_attributes$SEX
+  temp11 <- temp1[which(!is.na(temp1))]
+  temp21 <- temp2[which(!is.na(temp1))]
+  temp1_M  <- temp11[which(temp21 == 1)]
+  temp1_F  <- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+### ENSG00000198231
+
+```{r}
+indices <- match("ENSG00000198231", gene_names_1)
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/sex_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices]
+  temp2 <- sample_attributes$SEX
+  temp11 <- temp1[which(!is.na(temp1))]
+  temp21 <- temp2[which(!is.na(temp1))]
+  temp1_M  <- temp11[which(temp21 == 1)]
+  temp1_F  <- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+
+## Shared genes 
+
+
+```{r}
+num_lfsr_below_thresh <- apply(mash_dat$result$lfdr, 1, function(x) return(length(which(x < 0.001))))
+
+imp_indices <- which(num_lfsr_below_thresh == 53)
+imp_genes <- gene_names_1[imp_indices]
+length(imp_genes)
+```
+
+```{r}
+lfdr_diff <- apply(mash_dat$result$lfdr, 1, function(x) {
+      y <- max(x)
+      return(y)
+})
+```
+
+```{r}
+names <- gene_names_1[order(lfdr_diff, decreasing = FALSE)[1:50]]
+names[1:10]
+```
+
+
+```{r}
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+
+```{r}
+write.table(imp_genes, file = "../utilities/sex_mash_2/all.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+```{r}
+pathway2 <- read.delim("../utilities/sex_mash_2/all_pathway.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+### ENSG00000225490
+
+```{r}
+indices <- match("ENSG00000225490", gene_names_1)
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/sex_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices]
+  temp2 <- sample_attributes$SEX
+  temp11 <- temp1[which(!is.na(temp1))]
+  temp21 <- temp2[which(!is.na(temp1))]
+  temp1_M  <- temp11[which(temp21 == 1)]
+  temp1_F  <- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+### ENSG00000080007
+
+```{r}
+indices <- match("ENSG00000080007", gene_names_1)
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/sex_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices]
+  temp2 <- sample_attributes$SEX
+  temp11 <- temp1[which(!is.na(temp1))]
+  temp21 <- temp2[which(!is.na(temp1))]
+  temp1_M  <- temp11[which(temp21 == 1)]
+  temp1_F  <- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
