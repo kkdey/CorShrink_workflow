@@ -1,0 +1,335 @@
+---
+title: "MASH on systemic sex study (extreme deconvolution)"
+author: "Kushal K Dey"
+date: "6/17/2017"
+output: html_document
+---
+
+```{r}
+library(mashr)
+```
+
+```{r}
+data <- get(load("../output/sex_cor_nonmash.rda"))
+betahat <- data$betahat
+sebetahat <- data$sebetahat
+zdat <- betahat/sebetahat
+```
+
+```{r}
+common_samples <- get(load("../output/common_samples.rda"))
+tissue_labels <- read.table(file = "../data/GTEX_V6/samples_id.txt")[,3]
+
+gene_names <- as.character(read.table(file = "../data/GTEX_V6/gene_names_GTEX_V6.txt")[,1])
+gene_names_1 <- as.character(sapply(gene_names, function(x) return(strsplit(x, "[.]")[[1]][1])))
+
+U <- unique(tissue_labels)
+```
+
+
+```{r}
+mash_dat <- get(load("../output/mash_sex_pool.rda"))
+```
+
+```{r}
+grep("Breast", U)
+```
+
+```{r}
+barplot(get_estimated_pi(mash_dat), las = 2, cex.names = 0.3)
+```
+
+How does the ED6 matrix look like?
+
+```{r}
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+          rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+image(as.matrix(mash_dat$fitted_g$Ulist$ED_6),
+          col=col, main=paste0("corr structure ED6 "), cex.main=2,
+          xaxt = "n", yaxt = "n", zlim=c(-0.05,0.05))
+    axis(1, at = seq(0, 1, length.out = 53), labels = U, las=2, cex.axis = 0.5)
+    axis(2, at = seq(0, 1, length.out = 53), labels = U, las=2, cex.axis = 0.5)
+```
+
+```{r}
+breast_specific <- apply(mash_dat$result$lfsr, 1, function(x) {
+      if(x[21] < 0.05 && min(x[-21])> 0.9){
+        return(1)
+      }else{
+        return(0)
+      }
+})
+```
+
+```{r}
+length(which(breast_specific==1))
+```
+
+We look at the gene set enrichment analysis of these genes 
+
+```{r}
+imp_genes <- gene_names_1[which(breast_specific==1)]
+imp_genes[1:10]
+```
+
+```{r}
+write.table(imp_genes, file = "../utilities/sex_mash/breast2.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+```{r}
+pathway2 <- read.delim("../utilities/sex_mash/breast_pathway2.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+## Shared genes 
+
+```{r}
+num_lfsr_below_thresh <- apply(mash_dat$result$lfsr, 1, function(x) return(length(which(x < 0.05))))
+
+imp_indices <- which(num_lfsr_below_thresh == 53)
+imp_genes <- gene_names_1[imp_indices]
+length(imp_genes)
+imp_genes[1:10]
+```
+
+```{r}
+write.table(imp_genes, file = "../utilities/sex_mash/all2.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+No pathways detected. 
+
+```{r}
+num_lfsr_below_thresh <- apply(mash_dat$result$lfsr, 1, function(x) return(length(which(x < 0.05))))
+
+imp_indices <- which(num_lfsr_below_thresh > 25)
+imp_genes <- gene_names_1[imp_indices]
+length(imp_genes)
+imp_genes[1:10]
+```
+
+```{r}
+write.table(imp_genes, file = "../utilities/sex_mash/half2.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+```{r}
+pathway2 <- read.delim("../utilities/sex_mash/half_pathway2.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+```{r}
+num_lfsr_below_thresh <- apply(mash_dat$result$lfsr, 1, function(x) return(length(which(x < 0.05))))
+
+imp_indices <- which(num_lfsr_below_thresh > 35)
+imp_genes <- gene_names_1[imp_indices]
+length(imp_genes)
+imp_genes[1:10]
+```
+
+```{r}
+write.table(imp_genes, file = "../utilities/sex_mash/three_quarter2.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+```{r}
+pathway2 <- read.delim("../utilities/sex_mash/three_quarter_pathway2.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+## Brain specific genes 
+
+```{r}
+grep("Brain", U)
+```
+
+```{r}
+brain_specific <- apply(mash_dat$result$lfsr, 1, function(x) 
+  {
+    if(min(x[grep("Brain", U)]) < 0.05 && median(x[-grep("Brain", U)]) > 0.3){
+      return(1)
+    }else{
+      return(0)
+    }
+  })
+imp_genes <- gene_names_1[which(brain_specific==1)]
+length(imp_genes)
+imp_genes[1:10]
+```
+
+```{r}
+write.table(imp_genes, file = "../utilities/sex_mash/brain2.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+```{r}
+pathway2 <- read.delim("../utilities/sex_mash/brain_pathway2.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+## Reads expression profiling 
+
+Here we do an expression profiling of some of the important genes we obtained from above
+
+### ENSG00000001084
+
+```{r}
+person_tissue_genes <- get(load("../output/person_tissue_genes_voom.rda"))
+sample_attributes <- get(load("../output/sample_attributes_filtered.rda"))
+```
+
+```{r}
+indices <- match("ENSG00000001084", gene_names_1)
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/sex_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices]
+  temp2 <- sample_attributes$SEX
+  temp11 <- temp1[which(!is.na(temp1))]
+  temp21 <- temp2[which(!is.na(temp1))]
+  temp1_M  <- temp11[which(temp21 == 1)]
+  temp1_F  <- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+
+### ENSG00000052344
+
+```{r}
+indices <- match("ENSG00000052344", gene_names_1)
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/sex_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices]
+  temp2 <- sample_attributes$SEX
+  temp11 <- temp1[which(!is.na(temp1))]
+  temp21 <- temp2[which(!is.na(temp1))]
+  temp1_M  <- temp11[which(temp21 == 1)]
+  temp1_F  <- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
+
+
+### ENSG00000003249
+
+```{r}
+indices <- match("ENSG00000003249", gene_names_1)
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/sex_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+```{r}
+par(mfrow = c(3,3))
+for(j in 1:53){
+  ll <-lm(person_tissue_genes[,j,indices] ~ sample_attributes$SEX)
+  temp1 <- person_tissue_genes[,j,indices]
+  temp2 <- sample_attributes$SEX
+  temp11 <- temp1[which(!is.na(temp1))]
+  temp21 <- temp2[which(!is.na(temp1))]
+  temp1_M  <- temp11[which(temp21 == 1)]
+  temp1_F  <- temp11[which(temp21 == 2)]
+  plot(temp11, col=factor(temp21), ylab = dimnames(person_tissue_genes)[[2]][j])
+}
+```
+
