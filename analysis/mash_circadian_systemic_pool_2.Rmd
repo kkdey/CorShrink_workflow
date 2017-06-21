@@ -1,0 +1,555 @@
+---
+title: "MASH on systemic circadian studies (pool 2)"
+author: "Kushal K Dey"
+date: "6/18/2017"
+output: html_document
+---
+
+```{r}
+library(mashr)
+```
+
+```{r}
+data <- get(load("../output/death_time_cor_nonmash.rda"))
+betahat <- data$betahat
+sebetahat <- data$sebetahat
+zdat <- betahat/sebetahat
+```
+
+```{r}
+common_samples <- get(load("../output/common_samples.rda"))
+tissue_labels <- read.table(file = "../data/GTEX_V6/samples_id.txt")[,3]
+
+gene_names <- as.character(read.table(file = "../data/GTEX_V6/gene_names_GTEX_V6.txt")[,1])
+gene_names_1 <- as.character(sapply(gene_names, function(x) return(strsplit(x, "[.]")[[1]][1])))
+
+U <- unique(tissue_labels)
+```
+
+```{r}
+person_tissue_genes <- get(load("../output/person_tissue_genes_voom.rda"))
+sample_attributes <- get(load("../output/sample_attributes_filtered.rda"))
+```
+
+```{r}
+times <- strsplit(as.character(sample_attributes$DTHTIME), "[:]")
+time_stamp <- unlist(lapply(times, function(x){
+  y <- as.numeric(x[1])
+  z <- as.numeric(x[2])
+  w <- y*60+z
+  return(w)
+}))/(24*60)
+
+cos_times <- cos(2*pi*time_stamp)
+uncos_times <- 2*pi*time_stamp
+na_indices <- which(is.na(cos_times))
+
+person_tissue_genes_1 <- person_tissue_genes[-na_indices,,]
+cos_times_1 <- cos_times[-na_indices]
+uncos_times_1 <- uncos_times[-na_indices]
+```
+
+
+
+```{r}
+mash_dat <- get(load("../output/mash_circadian_canonical_pool_2.rda"))
+```
+
+```{r}
+barplot(get_estimated_pi(mash_dat), las = 2, cex.names = 0.3)
+```
+
+```{r}
+U[c(7, 25, 31, 33, 35)]
+```
+
+## Liver specific genes 
+
+```{r}
+liver_specific <- apply(mash_dat$result$lfsr, 1, function(x) {
+      if(x[35] < 0.05 && min(x[-35])> 0.9){
+        return(1)
+      }else{
+        return(0)
+      }
+})
+```
+
+```{r}
+length(which(liver_specific==1))
+```
+
+```{r}
+lfdr_diff <- apply(mash_dat$result$lfdr, 1, function(x) {
+      y <- median(x[-grep("Liver", U)]) - median(x[grep("Liver", U)])
+      return(y)
+})
+```
+
+```{r}
+names <- gene_names_1[order(lfdr_diff, decreasing = TRUE)[1:50]]
+names[1:10]
+```
+
+```{r}
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+
+
+```{r}
+imp_genes <- gene_names_1[which(liver_specific==1)]
+```
+
+```{r}
+write.table(imp_genes, file = "../utilities/circadian_mash_3/liver.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+```{r}
+pathway2 <- read.delim("../utilities/circadian_mash_3/liver_pathway.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+### ENSG00000158321
+
+```{r}
+indices <- match("ENSG00000158321", gene_names_1)
+```
+
+```{r}
+mash_dat$result$lfdr[indices,]
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/death_time_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+```{r}
+par(mfrow=c(3,3))
+for(j in 1:53){
+  plot(uncos_times_1, person_tissue_genes_1[,j, indices],
+       ylab = dimnames(person_tissue_genes)[[2]][j])
+  #lines(loess.smooth(uncos_times_1,person_tissue_genes_1[,j, indices[1]]), 
+  #      col="red", lty=2, lwd=2)
+}
+```
+
+### ENSG00000173786
+
+```{r}
+indices <- match("ENSG00000173786", gene_names_1)
+```
+
+```{r}
+mash_dat$result$lfdr[indices,]
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/death_time_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+```{r}
+par(mfrow=c(3,3))
+for(j in 1:53){
+  plot(uncos_times_1, person_tissue_genes_1[,j, indices],
+       ylab = dimnames(person_tissue_genes)[[2]][j])
+  #lines(loess.smooth(uncos_times_1,person_tissue_genes_1[,j, indices[1]]), 
+  #      col="red", lty=2, lwd=2)
+}
+```
+
+
+
+## Brain specific genes 
+
+```{r}
+brain_specific <- apply(mash_dat$result$lfdr, 1, function(x) {
+      if(max(x[grep("Brain", U)]) < 0.05 && min(x[-grep("Brain", U)])> 0.9){
+        return(1)
+      }else{
+        return(0)
+      }
+})
+```
+
+```{r}
+which(brain_specific == 1)[1:20]
+```
+
+
+```{r}
+lfdr_diff <- apply(mash_dat$result$lfdr, 1, function(x) {
+      y <- median(x[-grep("Brain", U)]) - median(x[grep("Brain", U)])
+      return(y)
+})
+```
+
+```{r}
+names <- gene_names_1[order(lfdr_diff, decreasing = TRUE)[1:50]]
+names[1:10]
+```
+
+```{r}
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+
+
+```{r}
+length(which(brain_specific==1))
+```
+
+```{r}
+imp_genes <- gene_names_1[which(brain_specific==1)]
+```
+
+```{r}
+write.table(imp_genes, file = "../utilities/circadian_mash_3/brain.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+```{r}
+pathway2 <- read.delim("../utilities/circadian_mash_3/brain_pathway.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+### ENSG00000181274
+
+```{r}
+indices <- match("ENSG00000181274", gene_names_1)
+```
+
+```{r}
+mash_dat$result$lfdr[indices,]
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/death_time_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+```{r}
+par(mfrow=c(3,3))
+for(j in 1:53){
+  plot(uncos_times_1, person_tissue_genes_1[,j, indices],
+       ylab = dimnames(person_tissue_genes)[[2]][j])
+  #lines(loess.smooth(uncos_times_1,person_tissue_genes_1[,j, indices[1]]), 
+  #      col="red", lty=2, lwd=2)
+}
+```
+
+
+### ENSG00000138336
+
+```{r}
+indices <- match("ENSG00000138336", gene_names_1)
+```
+
+```{r}
+mash_dat$result$lfdr[indices,]
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/death_time_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+```{r}
+par(mfrow=c(3,3))
+for(j in 1:53){
+  plot(uncos_times_1, person_tissue_genes_1[,j, indices],
+       ylab = dimnames(person_tissue_genes)[[2]][j])
+  #lines(loess.smooth(uncos_times_1,person_tissue_genes_1[,j, indices[1]]), 
+  #      col="red", lty=2, lwd=2)
+}
+```
+
+
+## non brain genes
+
+```{r}
+nonbrain_specific <- apply(mash_dat$result$lfdr, 1, function(x) {
+      if(max(x[-grep("Brain", U)]) < 0.05 && min(x[grep("Brain", U)])> 0.5){
+        return(1)
+      }else{
+        return(0)
+      }
+})
+```
+
+```{r}
+length(which(nonbrain_specific==1))
+```
+
+```{r}
+lfdr_diff <- apply(mash_dat$result$lfdr, 1, function(x) {
+      y <- median(x[grep("Brain", U)]) - median(x[-grep("Brain", U)])
+      return(y)
+})
+```
+
+```{r}
+names <- gene_names_1[order(lfdr_diff, decreasing = TRUE)[1:50]]
+names[1:10]
+```
+
+```{r}
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+
+
+```{r}
+imp_genes <- gene_names_1[which(nonbrain_specific==1)]
+```
+
+```{r}
+write.table(imp_genes, file = "../utilities/circadian_mash_3/nonbrain.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+```{r}
+pathway2 <- read.delim("../utilities/circadian_mash_3/nonbrain_pathway.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+### ENSG00000164308
+
+```{r}
+indices <- match("ENSG00000164308", gene_names_1)
+```
+
+```{r}
+mash_dat$result$lfdr[indices,]
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/death_time_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+```{r}
+par(mfrow=c(3,3))
+for(j in 1:53){
+  plot(uncos_times_1, person_tissue_genes_1[,j, indices],
+       ylab = dimnames(person_tissue_genes)[[2]][j])
+  #lines(loess.smooth(uncos_times_1,person_tissue_genes_1[,j, indices[1]]), 
+  #      col="red", lty=2, lwd=2)
+}
+```
+
+### ENSG00000126368
+
+```{r}
+indices <- match("ENSG00000126368", gene_names_1)
+```
+
+```{r}
+mash_dat$result$lfdr[indices,]
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/death_time_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+```{r}
+par(mfrow=c(3,3))
+for(j in 1:53){
+  plot(uncos_times_1, person_tissue_genes_1[,j, indices],
+       ylab = dimnames(person_tissue_genes)[[2]][j])
+  #lines(loess.smooth(uncos_times_1,person_tissue_genes_1[,j, indices[1]]), 
+  #      col="red", lty=2, lwd=2)
+}
+```
+
+
+
+## shared genes 
+
+```{r}
+num_lfsr_below_thresh <- apply(mash_dat$result$lfdr, 1, function(x) return(length(which(x < 0.001))))
+
+imp_indices <- which(num_lfsr_below_thresh == 53)
+imp_genes <- gene_names_1[imp_indices]
+length(imp_genes)
+```
+
+```{r}
+lfdr_diff <- apply(mash_dat$result$lfdr, 1, function(x) {
+      y <- max(x)
+      return(y)
+})
+```
+
+```{r}
+names <- gene_names_1[order(lfdr_diff, decreasing = FALSE)[1:50]]
+names[1:10]
+```
+
+
+```{r}
+out <- mygene::queryMany(names,  scopes="ensembl.gene", fields=c("name", "summary"), species="human");
+cbind.data.frame(out$name, out$summary)
+```
+
+
+```{r}
+write.table(imp_genes, file = "../utilities/circadian_mash_3/all.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+```{r}
+pathway2 <- read.delim("../utilities/circadian_mash_3/all_pathway.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.3, cexCol = 0.3, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+
+
+### ENSG00000133794
+
+```{r}
+indices <- match("ENSG00000133794", gene_names_1)
+```
+
+```{r}
+mash_dat$result$lfdr[indices,]
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/death_time_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+```{r}
+par(mfrow=c(3,3))
+for(j in 1:53){
+  plot(uncos_times_1, person_tissue_genes_1[,j, indices],
+       ylab = dimnames(person_tissue_genes)[[2]][j])
+  #lines(loess.smooth(uncos_times_1,person_tissue_genes_1[,j, indices[1]]), 
+  #      col="red", lty=2, lwd=2)
+}
+```
+
+
+### ENSG00000132326
+
+```{r}
+indices <- match("ENSG00000132326", gene_names_1)
+```
+
+```{r}
+mash_dat$result$lfdr[indices,]
+```
+
+```{r}
+betahat_sebetahat_2 <- get(load("../output/death_time_cor_nonmash.rda"))
+tmat <- betahat_sebetahat_2$betahat/betahat_sebetahat_2$sebetahat
+plot(1:53, tmat[,indices], type = "b", xlab = "tissues", ylab="t scores")
+text(1:53, tmat[,indices], U, cex=0.3)
+```
+
+```{r}
+par(mfrow=c(3,3))
+for(j in 1:53){
+  plot(uncos_times_1, person_tissue_genes_1[,j, indices],
+       ylab = dimnames(person_tissue_genes)[[2]][j])
+  #lines(loess.smooth(uncos_times_1,person_tissue_genes_1[,j, indices[1]]), 
+  #      col="red", lty=2, lwd=2)
+}
+```
+
+
+

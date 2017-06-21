@@ -1,5 +1,5 @@
 ---
-title: "MASH on systemic sex study (extreme deconvolution)"
+title: "MASH on systemic sex study"
 author: "Kushal K Dey"
 date: "6/17/2017"
 output: html_document
