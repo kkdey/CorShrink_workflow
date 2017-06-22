@@ -32,6 +32,9 @@ a low dimensional structure representation to impute the values.
 - [CorShrink vs thresholding estimators](thresholding_Corshrink.html)
 - [CorShrink vs PDSCE](PDSCE_vs_CorShrink.html)
 - [CorShrink vs Sparse Cov Estimation (SPCOV)](spcov_CorShrink.html)
+- [CorShrink dsc simulation data: Diagonal](corshrink_dsc.html)
+- [Corshrink dsc simulation data: Toeplitz](corshrink_dsc_toeplitz.html)
+- [CorShrink dsc simulation data: Graph](corshrink_dsc_graph.html)
 
 ### CorShrink and tissues/CountClust clusters on GTEx data
 
