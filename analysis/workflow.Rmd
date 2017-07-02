@@ -178,7 +178,9 @@ We also next added two new correlation structures for each multiple tissue block
   - [MASH systemic effects study (tissue prior case 2): death time](mash_circadian_systemic_pool_2.html)
   - [MASH systemic effects study (tissue prior case 2): BMI](mash_bmi_systemic_pool_2.html)
   
+We tried to look into the sinusoidal patterns of expression of the liver specific genes and the circadian genes in general.
 
+ - [sinusoidal patterns of gene expression in Liver](cellcycler_patterns.html)
 
  
 ### Dimension Reduction and CorShrink
