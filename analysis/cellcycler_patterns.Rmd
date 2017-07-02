@@ -1,0 +1,301 @@
+---
+title: "sinusoidal patterns Liver"
+author: "Kushal K Dey"
+date: "7/1/2017"
+output: html_document
+---
+
+In this script, we fit sinusoidal graphs to the liver expression data for genes with  liver specific effects (from MASH analysis) and Circadian genes in relation to time of death and expression in the GTEx data.
+
+## Lver specific genes 
+
+The liver genes
+
+```{r}
+library(cellcycleR)
+liver_genes <- as.character(read.table("../utilities/circadian_mash_3/liver.txt")[,1])
+```
+
+
+```{r}
+data <- get(load("../output/cellcyler_data_liver_mash.rda"))
+
+times <- data$times
+cycle_data <- data$data
+G <- dim(cycle_data)[2]
+numcells <- dim(cycle_data)[1];
+sigma <- array(0,G);
+amp <- array(0,G);
+phi <- array(0,G);
+cell_times_iter <- times
+```
+
+```{r}
+lmfit_list <- lapply(1:G, function(g)
+{
+  temp1 <- scales::rescale(cycle_data[,g], to=c(0,1))
+  fit1 <- lm(temp1  ~ sin(0.5*cell_times_iter) + cos(0.5*cell_times_iter) -1);
+  #plot(cell_times_iter, fit1$fitted.values)
+  #points(cell_times_iter, temp1, col="blue")
+
+  temp2 <- scales::rescale(cycle_data[,g], to = c(-1, 0))
+  fit2 <- lm(temp2  ~ sin(0.5*cell_times_iter) + cos(0.5*cell_times_iter) -1);
+  #plot(cell_times_iter, fit2$fitted.values)
+  #points(cell_times_iter, temp2, col="blue")
+  s1 <- summary(fit1)$r.squared
+  s2 <- summary(fit2)$r.squared
+  if( s1 > s2 ){
+    fit <- fit1
+    scale <- 0
+  }else{
+    fit <- fit2
+    scale <- 1
+  }
+
+  out_sigma <- sd(fit$residuals);
+  beta1 <- fit$coefficients[1];
+  beta2 <- fit$coefficients[2];
+  if(beta1==0 & beta2==0){
+    stop(paste0("You have a gene with all 0 counts at gene",g));
+  }
+  out_amp <- sqrt(beta1^2 + beta2^2);
+  out_phi <- atan3(as.numeric(beta2), as.numeric(beta1));
+  ll <- list("out_amp"=out_amp, "out_phi"=out_phi, "out_sigma"=out_sigma,
+             "out_scale" = scale)
+  return(ll)
+})
+
+```
+
+```{r}
+amp <- as.numeric(unlist(lapply(1:length(lmfit_list), function(n) return(lmfit_list[[n]]$out_amp))));
+phi <- as.numeric(unlist(lapply(1:length(lmfit_list), function(n) return(lmfit_list[[n]]$out_phi))));
+sigma <- as.numeric(unlist(lapply(1:length(lmfit_list), function(n) return(lmfit_list[[n]]$out_sigma))));
+scale <- as.numeric(unlist(lapply(1:length(lmfit_list), function(n) return(lmfit_list[[n]]$out_scale))));
+```
+
+```{r}
+cycle_data_scaled <- matrix(0, dim(cycle_data)[1], dim(cycle_data)[2])
+for(l in 1:dim(cycle_data_scaled)[2]){
+  if(scale[l] == 0){
+    cycle_data_scaled[,l] <- scales::rescale(cycle_data[,l], to=c(0,1))
+  }else{
+    cycle_data_scaled[,l] <- scales::rescale(cycle_data[,l], to=c(-1,0))
+  }
+}
+```
+
+```{r}
+fitted_val <- matrix(0, dim(cycle_data)[1], dim(cycle_data)[2])
+for(g in 1:G){
+  fitted_val[,g] <- amp[g]*sin(0.5*cell_times_iter + phi[g])
+}
+```
+
+```{r}
+par(mfrow=c(3,3))
+for(g in 1:200){
+  plot(times, fitted_val[,g])
+  points(times, cycle_data_scaled[,g], col="blue", pch=20)
+}
+```
+
+```{r}
+up_genes <- liver_genes[which(scale == 1)]
+down_genes <- liver_genes[which(scale == 0)]
+write.table(up_genes, file = "../utilities/circadian_mash_3/up_liver_genes.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+write.table(down_genes, file = "../utilities/circadian_mash_3/down_liver_genes.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+```{r fig.height = 10}
+pathway2 <- read.delim("../utilities/circadian_mash_3/up_liver_pathway_1.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.5, cexCol = 0.5, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+
+```{r fig.height = 10}
+pathway2 <- read.delim("../utilities/circadian_mash_3/up_liver_pathway_2.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 0.5, cexCol = 0.5, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+
+```{r fig.height = 10}
+pathway2 <- read.delim("../utilities/circadian_mash_3/down_liver_pathway_2.tab")
+if(length(which(pathway2$q.value < 0.05)) > 2){
+  pathway2 <- pathway2[which(pathway2$q.value < 0.05),]
+}
+maxpath = 75
+pathway <- pathway2[1:min(maxpath, dim(pathway2)[1]), ]
+ensembl_genes <- pathway$members_input_overlap
+pathway_list_genes <- sapply(ensembl_genes, function(x) return(strsplit(as.character(x), "; ")))
+all_genes <- Reduce(union, pathway_list_genes)
+pathway_mat <- matrix(0, length(pathway_list_genes), length(all_genes))
+for(l in 1:dim(pathway_mat)[1]){
+  pathway_mat[l, match(pathway_list_genes[[l]], all_genes)] <- 1
+}
+
+pathway_bimat <- (pathway_mat)%*%t(pathway_mat)
+pathway_bimat_prop <- diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1]) %*% pathway_bimat %*% diag(1/sqrt(diag(pathway_bimat)), dim(pathway_bimat)[1])
+
+col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
+      rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
+heatmap(pathway_bimat_prop, labRow = pathway$pathway, labCol = pathway$pathway, cexRow = 1, cexCol = 1, col = col, zlim = c(-1,1),
+        scale = "none", margins = c(5, 5))
+```
+
+## Circadian genes 
+
+We carry out a similar analysis, but now for the Circadian genes.
+
+```{r}
+gene_names <- as.character(read.table(file = "../data/GTEX_V6/gene_names_GTEX_V6.txt")[,1])
+gene_names_1 <- as.character(sapply(gene_names, function(x) return(strsplit(x, "[.]")[[1]][1])))
+
+
+pathways <- read.delim("../utilities/CPDB_pathways_genes.tab")
+pathway_names <- pathways[,1]
+grep("Circadian",pathway_names)
+circadian_pathways <- pathways[grep("Circadian", pathway_names),]
+circadian_genes <- list()
+for (i in 1:dim(circadian_pathways)[1]){
+  circadian_genes[[i]] <- strsplit(as.character(circadian_pathways[i,4]), "[,]")[[1]]
+}
+
+circ_names <- Reduce(union, circadian_genes)
+
+indices1 <- match(as.character(circ_names), gene_names_1)
+indices2 <- indices1[!is.na(indices1)]
+
+```
+
+```{r}
+data <- get(load("../output/cellcyler_data_liver_circadian.rda"))
+
+times <- data$times
+cycle_data <- data$data
+G <- dim(cycle_data)[2]
+numcells <- dim(cycle_data)[1];
+sigma <- array(0,G);
+amp <- array(0,G);
+phi <- array(0,G);
+cell_times_iter <- times
+```
+
+```{r}
+lmfit_list <- lapply(1:G, function(g)
+{
+  temp1 <- scales::rescale(cycle_data[,g], to=c(0,1))
+  fit1 <- lm(temp1  ~ sin(0.5*cell_times_iter) + cos(0.5*cell_times_iter) -1);
+  #plot(cell_times_iter, fit1$fitted.values)
+  #points(cell_times_iter, temp1, col="blue")
+
+  temp2 <- scales::rescale(cycle_data[,g], to = c(-1, 0))
+  fit2 <- lm(temp2  ~ sin(0.5*cell_times_iter) + cos(0.5*cell_times_iter) -1);
+  #plot(cell_times_iter, fit2$fitted.values)
+  #points(cell_times_iter, temp2, col="blue")
+  s1 <- summary(fit1)$r.squared
+  s2 <- summary(fit2)$r.squared
+  if( s1 > s2 ){
+    fit <- fit1
+    scale <- 0
+  }else{
+    fit <- fit2
+    scale <- 1
+  }
+
+  out_sigma <- sd(fit$residuals);
+  beta1 <- fit$coefficients[1];
+  beta2 <- fit$coefficients[2];
+  if(beta1==0 & beta2==0){
+    stop(paste0("You have a gene with all 0 counts at gene",g));
+  }
+  out_amp <- sqrt(beta1^2 + beta2^2);
+  out_phi <- atan3(as.numeric(beta2), as.numeric(beta1));
+  ll <- list("out_amp"=out_amp, "out_phi"=out_phi, "out_sigma"=out_sigma,
+             "out_scale" = scale)
+  return(ll)
+})
+
+```
+
+```{r}
+amp <- as.numeric(unlist(lapply(1:length(lmfit_list), function(n) return(lmfit_list[[n]]$out_amp))));
+phi <- as.numeric(unlist(lapply(1:length(lmfit_list), function(n) return(lmfit_list[[n]]$out_phi))));
+sigma <- as.numeric(unlist(lapply(1:length(lmfit_list), function(n) return(lmfit_list[[n]]$out_sigma))));
+scale <- as.numeric(unlist(lapply(1:length(lmfit_list), function(n) return(lmfit_list[[n]]$out_scale))));
+```
+
+```{r}
+cycle_data_scaled <- matrix(0, dim(cycle_data)[1], dim(cycle_data)[2])
+for(l in 1:dim(cycle_data_scaled)[2]){
+  if(scale[l] == 0){
+    cycle_data_scaled[,l] <- scales::rescale(cycle_data[,l], to=c(0,1))
+  }else{
+    cycle_data_scaled[,l] <- scales::rescale(cycle_data[,l], to=c(-1,0))
+  }
+}
+```
+
+```{r}
+fitted_val <- matrix(0, dim(cycle_data)[1], dim(cycle_data)[2])
+for(g in 1:G){
+  fitted_val[,g] <- amp[g]*sin(0.5*cell_times_iter + phi[g])
+}
+```
+
+```{r}
+par(mfrow=c(3,3))
+for(g in 1:G){
+  plot(times, fitted_val[,g])
+  points(times, cycle_data_scaled[,g], col="blue", pch=20)
+}
+```
+
+```{r}
+circ_genes <- colnames(cycle_data)
+up_genes <- circ_genes[which(scale == 1)]
+down_genes <- circ_genes[which(scale == 0)]
+write.table(up_genes, file = "../utilities/circadian_mash_3/up_circ_genes.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+write.table(down_genes, file = "../utilities/circadian_mash_3/down_circ_genes.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+We do not find all Circadian genes to have a sinusoidal curve but some of them do have it. But here also, you can see that the peaks of the sine curves are more or less in the same position. This is the problem with this, since in cellcycleR, we draw information from different sets of genes having different phases, which removes the identifiability problem.
+
