@@ -169,7 +169,7 @@ corSigma &lt;- cov2cor(Sigma)</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(corSigma),
-      col=col, main=paste0(&quot;sample corr: &quot;), cex.main=2,
+      col=col, main=paste0(&quot;pop corr: &quot;), cex.main=2,
       xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))</code></pre>
 <p><img src="corshrink_dsc_graph_files/figure-html/unnamed-chunk-4-1.png" width="576" /></p>
 <pre class="r"><code>Pat &lt;- matrix(1, P, P)
@@ -182,26 +182,26 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 <pre><code>## ---
 ## using Nesterov, backtracking line search
 ## ---
-## objective:  60.93443
+## objective:  71.58441
 ## step size given to GGDescent/Nesterov: 100
-## objective:  -41.17473  ( 200 iterations, max step size: 0.0064 )
+## objective:  -38.01335  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 20
 ## step size given to GGDescent/Nesterov: 20
-## objective:  -41.8206  ( 200 iterations, max step size: 0.0064 )
+## objective:  -39.45003  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 4
 ## step size given to GGDescent/Nesterov: 4
-## objective:  -41.82967  ( 200 iterations, max step size: 0.00128 )
+## objective:  -39.46565  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.8
 ## step size given to GGDescent/Nesterov: 0.8
-## objective:  -41.83117  ( 200 iterations, max step size: 0.00128 )
+## objective:  -39.46736  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.16
 ## step size given to GGDescent/Nesterov: 0.16
-## objective:  -41.83155  ( 200 iterations, max step size: 0.00128 )
+## objective:  -39.46776  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.032
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  -41.83166  ( 200 iterations, max step size: 0.00128 )
+## objective:  -39.46788  ( 200 iterations, max step size: 0.00128 )
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  -41.83169  ( 200 iterations, max step size: 0.00128 )
+## objective:  -39.46791  ( 200 iterations, max step size: 0.00128 )
 ## MM converged in 7 steps!</code></pre>
 <pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)</code></pre>
 <pre class="r"><code>#devtools::install_github(&quot;kkdey/CorShrink&quot;)
@@ -209,27 +209,27 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 #sessionInfo()
 cov_mat &lt;- cov(data);
 system.time(strimmer_sample &lt;- corpcor::cov.shrink(data))</code></pre>
-<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.6234 
+<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 1 
 ## 
-## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.8522</code></pre>
+## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.8449</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.005   0.000   0.007</code></pre>
+##   0.003   0.000   0.006</code></pre>
 <pre class="r"><code>system.time(glasso_sample_005 &lt;- glasso::glasso(cov_mat, rho = 0.05))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.373   0.002   0.380</code></pre>
+##   0.397   0.001   0.402</code></pre>
 <pre class="r"><code>system.time(glasso_sample_05 &lt;- glasso::glasso(cov_mat, rho = 0.5))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.039   0.001   0.041</code></pre>
+##   0.029   0.000   0.029</code></pre>
 <pre class="r"><code>system.time(glasso_sample_1 &lt;- glasso::glasso(cov_mat, rho = 1))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.003   0.000   0.003</code></pre>
+##   0.002   0.000   0.002</code></pre>
 <pre class="r"><code>system.time(glasso_sample_10 &lt;- glasso::glasso(cov_mat, rho = 10))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.001   0.001   0.001</code></pre>
-<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 100)))</code></pre>
+##   0.002   0.000   0.002</code></pre>
+<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 10)))</code></pre>
 <pre><code>## ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>##    user  system elapsed 
-##   1.015   0.037   1.093</code></pre>
+##   0.817   0.037   0.875</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cov2cor(cov_mat)),
@@ -288,28 +288,28 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 <pre><code>## ---
 ## using Nesterov, backtracking line search
 ## ---
-## objective:  76.73524
+## objective:  75.20115
 ## step size given to GGDescent/Nesterov: 100
-## objective:  40.56502  ( 200 iterations, max step size: 0.0064 )
+## objective:  42.36049  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 20
 ## step size given to GGDescent/Nesterov: 20
-## objective:  39.68396  ( 200 iterations, max step size: 0.0064 )
+## objective:  41.4754  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 4
 ## step size given to GGDescent/Nesterov: 4
-## objective:  39.62491  ( 200 iterations, max step size: 0.0064 )
+## objective:  41.41366  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 0.8
 ## step size given to GGDescent/Nesterov: 0.8
-## objective:  39.61736  ( 200 iterations, max step size: 0.0064 )
+## objective:  41.40577  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 0.16
 ## step size given to GGDescent/Nesterov: 0.16
-## objective:  39.61574  ( 200 iterations, max step size: 0.0064 )
+## objective:  41.40408  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 0.032
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  39.61528  ( 200 iterations, max step size: 0.0064 )
+## objective:  41.4036  ( 200 iterations, max step size: 0.0064 )
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  39.61514  ( 200 iterations, max step size: 0.0064 )
+## objective:  41.40345  ( 200 iterations, max step size: 0.0064 )
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  39.61509  ( 200 iterations, max step size: 0.0064 )
+## objective:  41.4034  ( 200 iterations, max step size: 0.0064 )
 ## MM converged in 8 steps!</code></pre>
 <pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)</code></pre>
 <pre class="r"><code>#devtools::install_github(&quot;kkdey/CorShrink&quot;)
@@ -317,27 +317,27 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 #sessionInfo()
 cov_mat &lt;- cov(data);
 system.time(strimmer_sample &lt;- corpcor::cov.shrink(data))</code></pre>
-<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.9489 
+<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 1 
 ## 
-## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.7727</code></pre>
+## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.839</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.006   0.000   0.006</code></pre>
+##   0.005   0.000   0.006</code></pre>
 <pre class="r"><code>system.time(glasso_sample_005 &lt;- glasso::glasso(cov_mat, rho = 0.05))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.167   0.001   0.169</code></pre>
+##   0.139   0.000   0.139</code></pre>
 <pre class="r"><code>system.time(glasso_sample_05 &lt;- glasso::glasso(cov_mat, rho = 0.5))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.002   0.000   0.002</code></pre>
+##   0.002   0.000   0.001</code></pre>
 <pre class="r"><code>system.time(glasso_sample_1 &lt;- glasso::glasso(cov_mat, rho = 1))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.002   0.000   0.001</code></pre>
+##   0.002   0.000   0.003</code></pre>
 <pre class="r"><code>system.time(glasso_sample_10 &lt;- glasso::glasso(cov_mat, rho = 10))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.001   0.000   0.001</code></pre>
-<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 100)))</code></pre>
+##   0.001   0.000   0.002</code></pre>
+<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 10)))</code></pre>
 <pre><code>## ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.884   0.043   0.934</code></pre>
+##   1.019   0.057   1.093</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cov2cor(cov_mat)),
@@ -396,26 +396,26 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 <pre><code>## ---
 ## using Nesterov, backtracking line search
 ## ---
-## objective:  104.3048
+## objective:  120.8319
 ## step size given to GGDescent/Nesterov: 100
-## objective:  -62.04774  ( 200 iterations, max step size: 0.0064 )
+## objective:  -57.83396  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 20
 ## step size given to GGDescent/Nesterov: 20
-## objective:  -64.5215  ( 200 iterations, max step size: 0.032 )
+## objective:  -62.06624  ( 200 iterations, max step size: 0.032 )
 ## Reducing step size to 4
 ## step size given to GGDescent/Nesterov: 4
-## objective:  -64.53696  ( 200 iterations, max step size: 0.00128 )
+## objective:  -62.08867  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.8
 ## step size given to GGDescent/Nesterov: 0.8
-## objective:  -64.53873  ( 200 iterations, max step size: 0.00128 )
+## objective:  -62.0903  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.16
 ## step size given to GGDescent/Nesterov: 0.16
-## objective:  -64.53919  ( 200 iterations, max step size: 0.00128 )
+## objective:  -62.09069  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.032
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  -64.53931  ( 200 iterations, max step size: 0.00128 )
+## objective:  -62.0908  ( 200 iterations, max step size: 0.00128 )
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  -64.53935  ( 200 iterations, max step size: 0.00128 )
+## objective:  -62.09083  ( 200 iterations, max step size: 0.00128 )
 ## MM converged in 7 steps!</code></pre>
 <pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)</code></pre>
 <pre class="r"><code>#devtools::install_github(&quot;kkdey/CorShrink&quot;)
@@ -423,27 +423,27 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 #sessionInfo()
 cov_mat &lt;- cov(data);
 system.time(strimmer_sample &lt;- corpcor::cov.shrink(data))</code></pre>
-<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.5415 
+<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.9574 
 ## 
 ## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.7252</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.003   0.000   0.003</code></pre>
+##   0.002   0.000   0.002</code></pre>
 <pre class="r"><code>system.time(glasso_sample_005 &lt;- glasso::glasso(cov_mat, rho = 0.05))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.579   0.003   0.585</code></pre>
+##   0.628   0.002   0.630</code></pre>
 <pre class="r"><code>system.time(glasso_sample_05 &lt;- glasso::glasso(cov_mat, rho = 0.5))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.054   0.000   0.054</code></pre>
+##   0.057   0.000   0.057</code></pre>
 <pre class="r"><code>system.time(glasso_sample_1 &lt;- glasso::glasso(cov_mat, rho = 1))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.009   0.000   0.009</code></pre>
+##   0.011   0.000   0.010</code></pre>
 <pre class="r"><code>system.time(glasso_sample_10 &lt;- glasso::glasso(cov_mat, rho = 10))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.002   0.000   0.001</code></pre>
-<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 100)))</code></pre>
+##   0.001   0.000   0.001</code></pre>
+<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 10)))</code></pre>
 <pre><code>## ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>##    user  system elapsed 
-##   1.107   0.067   1.188</code></pre>
+##  12.468   0.958  13.467</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cov2cor(cov_mat)),
@@ -498,7 +498,7 @@ corSigma &lt;- cov2cor(Sigma)</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(corSigma),
-      col=col, main=paste0(&quot;sample corr: &quot;), cex.main=2,
+      col=col, main=paste0(&quot;pop corr: &quot;), cex.main=2,
       xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))</code></pre>
 <p><img src="corshrink_dsc_graph_files/figure-html/unnamed-chunk-29-1.png" width="576" /></p>
 <pre class="r"><code>Pat &lt;- matrix(1, P, P)
@@ -511,52 +511,54 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 <pre><code>## ---
 ## using Nesterov, backtracking line search
 ## ---
-## objective:  71.34272
+## objective:  55.75957
 ## step size given to GGDescent/Nesterov: 100
-## objective:  -38.46789  ( 200 iterations, max step size: 0.0064 )
+## objective:  -42.2612  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 20
 ## step size given to GGDescent/Nesterov: 20
-## objective:  -38.85164  ( 200 iterations, max step size: 0.0064 )
+## objective:  -42.97646  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 4
 ## step size given to GGDescent/Nesterov: 4
-## objective:  -38.85877  ( 200 iterations, max step size: 0.00128 )
+## objective:  -42.98923  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.8
 ## step size given to GGDescent/Nesterov: 0.8
-## objective:  -38.86013  ( 200 iterations, max step size: 0.00128 )
+## objective:  -42.99083  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.16
 ## step size given to GGDescent/Nesterov: 0.16
-## objective:  -38.8605  ( 200 iterations, max step size: 0.00128 )
+## objective:  -42.99122  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.032
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  -38.86059  ( 200 iterations, max step size: 0.00128 )
-## MM converged in 6 steps!</code></pre>
+## objective:  -42.99132  ( 200 iterations, max step size: 0.00128 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  -42.99135  ( 200 iterations, max step size: 0.00128 )
+## MM converged in 7 steps!</code></pre>
 <pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)</code></pre>
 <pre class="r"><code>#devtools::install_github(&quot;kkdey/CorShrink&quot;)
 #library(CorShrink)
 #sessionInfo()
 cov_mat &lt;- cov(data);
 system.time(strimmer_sample &lt;- corpcor::cov.shrink(data))</code></pre>
-<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.905 
+<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.9377 
 ## 
-## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.8488</code></pre>
+## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.8546</code></pre>
 <pre><code>##    user  system elapsed 
 ##   0.002   0.000   0.002</code></pre>
 <pre class="r"><code>system.time(glasso_sample_005 &lt;- glasso::glasso(cov_mat, rho = 0.05))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.391   0.002   0.396</code></pre>
+##   0.341   0.001   0.341</code></pre>
 <pre class="r"><code>system.time(glasso_sample_05 &lt;- glasso::glasso(cov_mat, rho = 0.5))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.035   0.000   0.036</code></pre>
+##   0.024   0.000   0.023</code></pre>
 <pre class="r"><code>system.time(glasso_sample_1 &lt;- glasso::glasso(cov_mat, rho = 1))</code></pre>
 <pre><code>##    user  system elapsed 
 ##   0.002   0.000   0.002</code></pre>
 <pre class="r"><code>system.time(glasso_sample_10 &lt;- glasso::glasso(cov_mat, rho = 10))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.001   0.000   0.001</code></pre>
-<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 100)))</code></pre>
+##   0.001   0.000   0.002</code></pre>
+<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 10)))</code></pre>
 <pre><code>## ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.918   0.052   0.980</code></pre>
+##   1.092   0.059   1.153</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cov2cor(cov_mat)),
@@ -615,28 +617,28 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 <pre><code>## ---
 ## using Nesterov, backtracking line search
 ## ---
-## objective:  71.59399
+## objective:  73.17393
 ## step size given to GGDescent/Nesterov: 100
-## objective:  40.318  ( 200 iterations, max step size: 0.0064 )
+## objective:  39.53527  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 20
 ## step size given to GGDescent/Nesterov: 20
-## objective:  39.45411  ( 200 iterations, max step size: 0.0064 )
+## objective:  38.71049  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 4
 ## step size given to GGDescent/Nesterov: 4
-## objective:  39.39381  ( 200 iterations, max step size: 0.0064 )
+## objective:  38.65263  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 0.8
 ## step size given to GGDescent/Nesterov: 0.8
-## objective:  39.38615  ( 200 iterations, max step size: 0.0064 )
+## objective:  38.64535  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 0.16
 ## step size given to GGDescent/Nesterov: 0.16
-## objective:  39.38455  ( 200 iterations, max step size: 0.0064 )
+## objective:  38.64386  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 0.032
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  39.38411  ( 200 iterations, max step size: 0.0064 )
+## objective:  38.64345  ( 200 iterations, max step size: 0.0064 )
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  39.38397  ( 200 iterations, max step size: 0.0064 )
+## objective:  38.64333  ( 200 iterations, max step size: 0.0064 )
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  39.38393  ( 200 iterations, max step size: 0.0064 )
+## objective:  38.64329  ( 200 iterations, max step size: 0.0064 )
 ## MM converged in 8 steps!</code></pre>
 <pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)</code></pre>
 <pre class="r"><code>#devtools::install_github(&quot;kkdey/CorShrink&quot;)
@@ -644,14 +646,14 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 #sessionInfo()
 cov_mat &lt;- cov(data);
 system.time(strimmer_sample &lt;- corpcor::cov.shrink(data))</code></pre>
-<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 1 
+<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.8907 
 ## 
-## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.8347</code></pre>
+## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.7989</code></pre>
 <pre><code>##    user  system elapsed 
 ##   0.005   0.000   0.005</code></pre>
 <pre class="r"><code>system.time(glasso_sample_005 &lt;- glasso::glasso(cov_mat, rho = 0.05))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.150   0.001   0.152</code></pre>
+##   0.156   0.001   0.156</code></pre>
 <pre class="r"><code>system.time(glasso_sample_05 &lt;- glasso::glasso(cov_mat, rho = 0.5))</code></pre>
 <pre><code>##    user  system elapsed 
 ##   0.002   0.000   0.001</code></pre>
@@ -660,11 +662,11 @@ system.time(strimmer_sample &lt;- corpcor::cov.shrink(data))</code></pre>
 ##   0.001   0.000   0.001</code></pre>
 <pre class="r"><code>system.time(glasso_sample_10 &lt;- glasso::glasso(cov_mat, rho = 10))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.001   0.000   0.001</code></pre>
-<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 100)))</code></pre>
+##   0.001   0.000   0.002</code></pre>
+<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 10)))</code></pre>
 <pre><code>## ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.966   0.051   1.025</code></pre>
+##   0.950   0.041   0.994</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cov2cor(cov_mat)),
@@ -723,26 +725,26 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 <pre><code>## ---
 ## using Nesterov, backtracking line search
 ## ---
-## objective:  107.674
+## objective:  118.331
 ## step size given to GGDescent/Nesterov: 100
-## objective:  -47.85077  ( 200 iterations, max step size: 0.0064 )
+## objective:  -59.13111  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 20
 ## step size given to GGDescent/Nesterov: 20
-## objective:  -62.96021  ( 200 iterations, max step size: 0.0064 )
+## objective:  -62.0878  ( 200 iterations, max step size: 0.032 )
 ## Reducing step size to 4
 ## step size given to GGDescent/Nesterov: 4
-## objective:  -63.04571  ( 200 iterations, max step size: 0.00128 )
+## objective:  -62.10418  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.8
 ## step size given to GGDescent/Nesterov: 0.8
-## objective:  -63.04889  ( 200 iterations, max step size: 0.00128 )
+## objective:  -62.10579  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.16
 ## step size given to GGDescent/Nesterov: 0.16
-## objective:  -63.04947  ( 200 iterations, max step size: 0.00128 )
+## objective:  -62.10619  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.032
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  -63.04962  ( 200 iterations, max step size: 0.00128 )
+## objective:  -62.10631  ( 200 iterations, max step size: 0.00128 )
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  -63.04966  ( 200 iterations, max step size: 0.00128 )
+## objective:  -62.10634  ( 200 iterations, max step size: 0.00128 )
 ## MM converged in 7 steps!</code></pre>
 <pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)</code></pre>
 <pre class="r"><code>#devtools::install_github(&quot;kkdey/CorShrink&quot;)
@@ -750,27 +752,27 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 #sessionInfo()
 cov_mat &lt;- cov(data);
 system.time(strimmer_sample &lt;- corpcor::cov.shrink(data))</code></pre>
-<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.6734 
+<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.8255 
 ## 
-## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.7634</code></pre>
+## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.7443</code></pre>
 <pre><code>##    user  system elapsed 
 ##   0.002   0.000   0.002</code></pre>
 <pre class="r"><code>system.time(glasso_sample_005 &lt;- glasso::glasso(cov_mat, rho = 0.05))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.729   0.005   0.746</code></pre>
+##   0.570   0.001   0.573</code></pre>
 <pre class="r"><code>system.time(glasso_sample_05 &lt;- glasso::glasso(cov_mat, rho = 0.5))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.058   0.000   0.058</code></pre>
+##   0.057   0.000   0.058</code></pre>
 <pre class="r"><code>system.time(glasso_sample_1 &lt;- glasso::glasso(cov_mat, rho = 1))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.014   0.000   0.014</code></pre>
+##   0.011   0.000   0.010</code></pre>
 <pre class="r"><code>system.time(glasso_sample_10 &lt;- glasso::glasso(cov_mat, rho = 10))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.002   0.001   0.001</code></pre>
-<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 100)))</code></pre>
+##   0.002   0.000   0.001</code></pre>
+<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 10)))</code></pre>
 <pre><code>## ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.892   0.040   0.942</code></pre>
+##   1.052   0.054   1.108</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cov2cor(cov_mat)),
@@ -825,7 +827,7 @@ corSigma &lt;- cov2cor(Sigma)</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(corSigma),
-      col=col, main=paste0(&quot;sample corr: &quot;), cex.main=2,
+      col=col, main=paste0(&quot;pop corr: &quot;), cex.main=2,
       xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))</code></pre>
 <p><img src="corshrink_dsc_graph_files/figure-html/unnamed-chunk-54-1.png" width="576" /></p>
 <pre class="r"><code>Pat &lt;- matrix(1, P, P)
@@ -838,26 +840,26 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 <pre><code>## ---
 ## using Nesterov, backtracking line search
 ## ---
-## objective:  69.50274
+## objective:  76.70698
 ## step size given to GGDescent/Nesterov: 100
-## objective:  -39.7901  ( 200 iterations, max step size: 0.0064 )
+## objective:  -38.09189  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 20
 ## step size given to GGDescent/Nesterov: 20
-## objective:  -41.00727  ( 200 iterations, max step size: 0.0064 )
+## objective:  -39.05851  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 4
 ## step size given to GGDescent/Nesterov: 4
-## objective:  -41.01956  ( 200 iterations, max step size: 0.00128 )
+## objective:  -39.06928  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.8
 ## step size given to GGDescent/Nesterov: 0.8
-## objective:  -41.02113  ( 200 iterations, max step size: 0.00128 )
+## objective:  -39.07084  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.16
 ## step size given to GGDescent/Nesterov: 0.16
-## objective:  -41.02152  ( 200 iterations, max step size: 0.00128 )
+## objective:  -39.07123  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.032
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  -41.02163  ( 200 iterations, max step size: 0.00128 )
+## objective:  -39.07134  ( 200 iterations, max step size: 0.00128 )
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  -41.02166  ( 200 iterations, max step size: 0.00128 )
+## objective:  -39.07137  ( 200 iterations, max step size: 0.00128 )
 ## MM converged in 7 steps!</code></pre>
 <pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)</code></pre>
 <pre class="r"><code>#devtools::install_github(&quot;kkdey/CorShrink&quot;)
@@ -865,27 +867,27 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 #sessionInfo()
 cov_mat &lt;- cov(data);
 system.time(strimmer_sample &lt;- corpcor::cov.shrink(data))</code></pre>
-<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.8462 
+<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.9237 
 ## 
-## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.8307</code></pre>
+## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.8124</code></pre>
 <pre><code>##    user  system elapsed 
 ##   0.002   0.000   0.002</code></pre>
 <pre class="r"><code>system.time(glasso_sample_005 &lt;- glasso::glasso(cov_mat, rho = 0.05))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.405   0.005   0.463</code></pre>
+##   0.377   0.001   0.379</code></pre>
 <pre class="r"><code>system.time(glasso_sample_05 &lt;- glasso::glasso(cov_mat, rho = 0.5))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.030   0.001   0.034</code></pre>
+##   0.028   0.000   0.028</code></pre>
 <pre class="r"><code>system.time(glasso_sample_1 &lt;- glasso::glasso(cov_mat, rho = 1))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.003   0.000   0.002</code></pre>
+##   0.003   0.000   0.003</code></pre>
 <pre class="r"><code>system.time(glasso_sample_10 &lt;- glasso::glasso(cov_mat, rho = 10))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.001   0.000   0.002</code></pre>
-<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 100)))</code></pre>
+##   0.002   0.000   0.002</code></pre>
+<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 10)))</code></pre>
 <pre><code>## ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.777   0.030   0.875</code></pre>
+##   1.002   0.049   1.052</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cov2cor(cov_mat)),
@@ -944,28 +946,28 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 <pre><code>## ---
 ## using Nesterov, backtracking line search
 ## ---
-## objective:  93.36153
+## objective:  83.99654
 ## step size given to GGDescent/Nesterov: 100
-## objective:  40.6285  ( 200 iterations, max step size: 0.0064 )
+## objective:  39.1013  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 20
 ## step size given to GGDescent/Nesterov: 20
-## objective:  39.74224  ( 200 iterations, max step size: 0.0064 )
+## objective:  38.27159  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 4
 ## step size given to GGDescent/Nesterov: 4
-## objective:  39.68524  ( 200 iterations, max step size: 0.0064 )
+## objective:  38.21559  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 0.8
 ## step size given to GGDescent/Nesterov: 0.8
-## objective:  39.67793  ( 200 iterations, max step size: 0.0064 )
+## objective:  38.20821  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 0.16
 ## step size given to GGDescent/Nesterov: 0.16
-## objective:  39.67638  ( 200 iterations, max step size: 0.0064 )
+## objective:  38.20664  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 0.032
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  39.67596  ( 200 iterations, max step size: 0.0064 )
+## objective:  38.2062  ( 200 iterations, max step size: 0.0064 )
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  39.67583  ( 200 iterations, max step size: 0.0064 )
+## objective:  38.20607  ( 200 iterations, max step size: 0.0064 )
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  39.67579  ( 200 iterations, max step size: 0.0064 )
+## objective:  38.20603  ( 200 iterations, max step size: 0.0064 )
 ## MM converged in 8 steps!</code></pre>
 <pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)</code></pre>
 <pre class="r"><code>#devtools::install_github(&quot;kkdey/CorShrink&quot;)
@@ -973,27 +975,27 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 #sessionInfo()
 cov_mat &lt;- cov(data);
 system.time(strimmer_sample &lt;- corpcor::cov.shrink(data))</code></pre>
-<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 1 
+<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.7368 
 ## 
-## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.5532</code></pre>
+## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.6473</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.007   0.000   0.007</code></pre>
+##   0.005   0.000   0.005</code></pre>
 <pre class="r"><code>system.time(glasso_sample_005 &lt;- glasso::glasso(cov_mat, rho = 0.05))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.198   0.002   0.215</code></pre>
+##   0.170   0.001   0.171</code></pre>
 <pre class="r"><code>system.time(glasso_sample_05 &lt;- glasso::glasso(cov_mat, rho = 0.5))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.003   0.000   0.004</code></pre>
+##   0.002   0.000   0.002</code></pre>
 <pre class="r"><code>system.time(glasso_sample_1 &lt;- glasso::glasso(cov_mat, rho = 1))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.002   0.000   0.002</code></pre>
+##   0.001   0.000   0.001</code></pre>
 <pre class="r"><code>system.time(glasso_sample_10 &lt;- glasso::glasso(cov_mat, rho = 10))</code></pre>
 <pre><code>##    user  system elapsed 
 ##   0.002   0.000   0.002</code></pre>
-<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 100)))</code></pre>
+<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 10)))</code></pre>
 <pre><code>## ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.946   0.040   1.065</code></pre>
+##   1.808   0.098   1.957</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cov2cor(cov_mat)),
@@ -1052,26 +1054,26 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 <pre><code>## ---
 ## using Nesterov, backtracking line search
 ## ---
-## objective:  157.869
+## objective:  100.5123
 ## step size given to GGDescent/Nesterov: 100
-## objective:  -57.88115  ( 200 iterations, max step size: 0.0064 )
+## objective:  -55.94037  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 20
 ## step size given to GGDescent/Nesterov: 20
-## objective:  -59.77257  ( 200 iterations, max step size: 0.0064 )
+## objective:  -66.22464  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 4
 ## step size given to GGDescent/Nesterov: 4
-## objective:  -59.78953  ( 200 iterations, max step size: 0.00128 )
+## objective:  -66.23679  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.8
 ## step size given to GGDescent/Nesterov: 0.8
-## objective:  -59.79113  ( 200 iterations, max step size: 0.00128 )
+## objective:  -66.23834  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.16
 ## step size given to GGDescent/Nesterov: 0.16
-## objective:  -59.79153  ( 200 iterations, max step size: 0.00128 )
+## objective:  -66.23874  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.032
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  -59.79163  ( 200 iterations, max step size: 0.00128 )
+## objective:  -66.23885  ( 200 iterations, max step size: 0.00128 )
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  -59.79166  ( 200 iterations, max step size: 0.00128 )
+## objective:  -66.23888  ( 200 iterations, max step size: 0.00128 )
 ## MM converged in 7 steps!</code></pre>
 <pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)</code></pre>
 <pre class="r"><code>#devtools::install_github(&quot;kkdey/CorShrink&quot;)
@@ -1079,27 +1081,27 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 #sessionInfo()
 cov_mat &lt;- cov(data);
 system.time(strimmer_sample &lt;- corpcor::cov.shrink(data))</code></pre>
-<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.6426 
+<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 1 
 ## 
-## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.7125</code></pre>
+## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.718</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.002   0.000   0.002</code></pre>
+##   0.002   0.000   0.001</code></pre>
 <pre class="r"><code>system.time(glasso_sample_005 &lt;- glasso::glasso(cov_mat, rho = 0.05))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.760   0.008   0.835</code></pre>
+##   0.668   0.001   0.670</code></pre>
 <pre class="r"><code>system.time(glasso_sample_05 &lt;- glasso::glasso(cov_mat, rho = 0.5))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.076   0.000   0.078</code></pre>
+##   0.053   0.000   0.053</code></pre>
 <pre class="r"><code>system.time(glasso_sample_1 &lt;- glasso::glasso(cov_mat, rho = 1))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.017   0.000   0.020</code></pre>
+##   0.005   0.000   0.006</code></pre>
 <pre class="r"><code>system.time(glasso_sample_10 &lt;- glasso::glasso(cov_mat, rho = 10))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.002   0.000   0.002</code></pre>
-<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 100)))</code></pre>
+##   0.002   0.000   0.001</code></pre>
+<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 10)))</code></pre>
 <pre><code>## ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>##    user  system elapsed 
-##   1.093   0.063   1.226</code></pre>
+##   0.937   0.123   1.111</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cov2cor(cov_mat)),
@@ -1154,7 +1156,7 @@ corSigma &lt;- cov2cor(Sigma)</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(corSigma),
-      col=col, main=paste0(&quot;sample corr: &quot;), cex.main=2,
+      col=col, main=paste0(&quot;pop corr: &quot;), cex.main=2,
       xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))</code></pre>
 <p><img src="corshrink_dsc_graph_files/figure-html/unnamed-chunk-79-1.png" width="576" /></p>
 <pre class="r"><code>Pat &lt;- matrix(1, P, P)
@@ -1167,52 +1169,54 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 <pre><code>## ---
 ## using Nesterov, backtracking line search
 ## ---
-## objective:  69.67403
+## objective:  77.04022
 ## step size given to GGDescent/Nesterov: 100
-## objective:  -39.02209  ( 200 iterations, max step size: 0.0064 )
+## objective:  -35.95787  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 20
 ## step size given to GGDescent/Nesterov: 20
-## objective:  -39.32694  ( 200 iterations, max step size: 0.0064 )
+## objective:  -36.99794  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 4
 ## step size given to GGDescent/Nesterov: 4
-## objective:  -39.33375  ( 200 iterations, max step size: 0.00128 )
+## objective:  -37.00957  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.8
 ## step size given to GGDescent/Nesterov: 0.8
-## objective:  -39.33502  ( 200 iterations, max step size: 0.00128 )
+## objective:  -37.01111  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.16
 ## step size given to GGDescent/Nesterov: 0.16
-## objective:  -39.33536  ( 200 iterations, max step size: 0.00128 )
+## objective:  -37.01149  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.032
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  -39.33545  ( 200 iterations, max step size: 0.00128 )
-## MM converged in 6 steps!</code></pre>
+## objective:  -37.0116  ( 200 iterations, max step size: 0.00128 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  -37.01163  ( 200 iterations, max step size: 0.00128 )
+## MM converged in 7 steps!</code></pre>
 <pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)</code></pre>
 <pre class="r"><code>#devtools::install_github(&quot;kkdey/CorShrink&quot;)
 #library(CorShrink)
 #sessionInfo()
 cov_mat &lt;- cov(data);
 system.time(strimmer_sample &lt;- corpcor::cov.shrink(data))</code></pre>
-<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.898 
+<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.9849 
 ## 
-## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.8562</code></pre>
+## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.886</code></pre>
 <pre><code>##    user  system elapsed 
 ##   0.002   0.000   0.002</code></pre>
 <pre class="r"><code>system.time(glasso_sample_005 &lt;- glasso::glasso(cov_mat, rho = 0.05))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.376   0.006   0.446</code></pre>
+##   0.398   0.000   0.399</code></pre>
 <pre class="r"><code>system.time(glasso_sample_05 &lt;- glasso::glasso(cov_mat, rho = 0.5))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.034   0.001   0.046</code></pre>
+##   0.032   0.000   0.031</code></pre>
 <pre class="r"><code>system.time(glasso_sample_1 &lt;- glasso::glasso(cov_mat, rho = 1))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.002   0.001   0.005</code></pre>
+##   0.002   0.000   0.002</code></pre>
 <pre class="r"><code>system.time(glasso_sample_10 &lt;- glasso::glasso(cov_mat, rho = 10))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.003   0.000   0.004</code></pre>
-<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 100)))</code></pre>
+##   0.002   0.000   0.002</code></pre>
+<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 10)))</code></pre>
 <pre><code>## ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.949   0.049   1.395</code></pre>
+##   0.673   0.074   0.749</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cov2cor(cov_mat)),
@@ -1271,28 +1275,28 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 <pre><code>## ---
 ## using Nesterov, backtracking line search
 ## ---
-## objective:  78.5265
+## objective:  77.35571
 ## step size given to GGDescent/Nesterov: 100
-## objective:  44.97735  ( 200 iterations, max step size: 0.0064 )
+## objective:  43.40194  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 20
 ## step size given to GGDescent/Nesterov: 20
-## objective:  44.09724  ( 200 iterations, max step size: 0.0064 )
+## objective:  42.51915  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 4
 ## step size given to GGDescent/Nesterov: 4
-## objective:  44.03611  ( 200 iterations, max step size: 0.0064 )
+## objective:  42.4585  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 0.8
 ## step size given to GGDescent/Nesterov: 0.8
-## objective:  44.02836  ( 200 iterations, max step size: 0.0064 )
+## objective:  42.45084  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 0.16
 ## step size given to GGDescent/Nesterov: 0.16
-## objective:  44.02674  ( 200 iterations, max step size: 0.0064 )
+## objective:  42.4492  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 0.032
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  44.02628  ( 200 iterations, max step size: 0.0064 )
+## objective:  42.44874  ( 200 iterations, max step size: 0.0064 )
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  44.02614  ( 200 iterations, max step size: 0.0064 )
+## objective:  42.4486  ( 200 iterations, max step size: 0.0064 )
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  44.0261  ( 200 iterations, max step size: 0.0064 )
+## objective:  42.44855  ( 200 iterations, max step size: 0.0064 )
 ## MM converged in 8 steps!</code></pre>
 <pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)</code></pre>
 <pre class="r"><code>#devtools::install_github(&quot;kkdey/CorShrink&quot;)
@@ -1300,27 +1304,27 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 #sessionInfo()
 cov_mat &lt;- cov(data);
 system.time(strimmer_sample &lt;- corpcor::cov.shrink(data))</code></pre>
-<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 1 
+<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.8991 
 ## 
-## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.8436</code></pre>
+## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.8222</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.007   0.000   0.008</code></pre>
+##   0.005   0.000   0.005</code></pre>
 <pre class="r"><code>system.time(glasso_sample_005 &lt;- glasso::glasso(cov_mat, rho = 0.05))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.156   0.006   0.191</code></pre>
+##   0.158   0.000   0.160</code></pre>
 <pre class="r"><code>system.time(glasso_sample_05 &lt;- glasso::glasso(cov_mat, rho = 0.5))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.002   0.000   0.002</code></pre>
+##   0.001   0.000   0.001</code></pre>
 <pre class="r"><code>system.time(glasso_sample_1 &lt;- glasso::glasso(cov_mat, rho = 1))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.001   0.000   0.009</code></pre>
+##   0.002   0.001   0.002</code></pre>
 <pre class="r"><code>system.time(glasso_sample_10 &lt;- glasso::glasso(cov_mat, rho = 10))</code></pre>
 <pre><code>##    user  system elapsed 
 ##   0.002   0.000   0.002</code></pre>
-<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 100)))</code></pre>
+<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 10)))</code></pre>
 <pre><code>## ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.837   0.034   0.917</code></pre>
+##   0.788   0.094   0.883</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cov2cor(cov_mat)),
@@ -1379,52 +1383,54 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 <pre><code>## ---
 ## using Nesterov, backtracking line search
 ## ---
-## objective:  99.12727
+## objective:  109.7669
 ## step size given to GGDescent/Nesterov: 100
-## objective:  -63.13239  ( 200 iterations, max step size: 0.0064 )
+## objective:  -48.14035  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 20
 ## step size given to GGDescent/Nesterov: 20
-## objective:  -64.50144  ( 200 iterations, max step size: 0.0064 )
+## objective:  -62.83723  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 4
 ## step size given to GGDescent/Nesterov: 4
-## objective:  -64.51061  ( 200 iterations, max step size: 0.00128 )
+## objective:  -62.8798  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.8
 ## step size given to GGDescent/Nesterov: 0.8
-## objective:  -64.51194  ( 200 iterations, max step size: 0.00128 )
+## objective:  -62.88203  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.16
 ## step size given to GGDescent/Nesterov: 0.16
-## objective:  -64.5123  ( 200 iterations, max step size: 0.00128 )
+## objective:  -62.88252  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.032
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  -64.51239  ( 200 iterations, max step size: 0.00128 )
-## MM converged in 6 steps!</code></pre>
+## objective:  -62.88265  ( 200 iterations, max step size: 0.00128 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  -62.88269  ( 200 iterations, max step size: 0.00128 )
+## MM converged in 7 steps!</code></pre>
 <pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)</code></pre>
 <pre class="r"><code>#devtools::install_github(&quot;kkdey/CorShrink&quot;)
 #library(CorShrink)
 #sessionInfo()
 cov_mat &lt;- cov(data);
 system.time(strimmer_sample &lt;- corpcor::cov.shrink(data))</code></pre>
-<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.6113 
+<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.8694 
 ## 
-## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.7465</code></pre>
+## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.7584</code></pre>
 <pre><code>##    user  system elapsed 
 ##   0.002   0.000   0.002</code></pre>
 <pre class="r"><code>system.time(glasso_sample_005 &lt;- glasso::glasso(cov_mat, rho = 0.05))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.559   0.006   0.621</code></pre>
+##   0.635   0.001   0.636</code></pre>
 <pre class="r"><code>system.time(glasso_sample_05 &lt;- glasso::glasso(cov_mat, rho = 0.5))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.055   0.001   0.057</code></pre>
+##   0.058   0.000   0.057</code></pre>
 <pre class="r"><code>system.time(glasso_sample_1 &lt;- glasso::glasso(cov_mat, rho = 1))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.010   0.000   0.011</code></pre>
+##   0.008   0.000   0.008</code></pre>
 <pre class="r"><code>system.time(glasso_sample_10 &lt;- glasso::glasso(cov_mat, rho = 10))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.001   0.000   0.002</code></pre>
-<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 100)))</code></pre>
+##   0.002   0.000   0.001</code></pre>
+<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 10)))</code></pre>
 <pre><code>## ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.921   0.047   0.989</code></pre>
+##   0.702   0.078   0.781</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cov2cor(cov_mat)),
@@ -1479,7 +1485,7 @@ corSigma &lt;- cov2cor(Sigma)</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(corSigma),
-      col=col, main=paste0(&quot;sample corr: &quot;), cex.main=2,
+      col=col, main=paste0(&quot;pop corr: &quot;), cex.main=2,
       xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))</code></pre>
 <p><img src="corshrink_dsc_graph_files/figure-html/unnamed-chunk-104-1.png" width="576" /></p>
 <pre class="r"><code>Pat &lt;- matrix(1, P, P)
@@ -1492,54 +1498,52 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 <pre><code>## ---
 ## using Nesterov, backtracking line search
 ## ---
-## objective:  74.45362
+## objective:  64.06577
 ## step size given to GGDescent/Nesterov: 100
-## objective:  -36.44725  ( 200 iterations, max step size: 0.0064 )
+## objective:  -39.8016  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 20
 ## step size given to GGDescent/Nesterov: 20
-## objective:  -37.23089  ( 200 iterations, max step size: 0.0064 )
+## objective:  -40.41891  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 4
 ## step size given to GGDescent/Nesterov: 4
-## objective:  -37.24272  ( 200 iterations, max step size: 0.00128 )
+## objective:  -40.42898  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.8
 ## step size given to GGDescent/Nesterov: 0.8
-## objective:  -37.24429  ( 200 iterations, max step size: 0.00128 )
+## objective:  -40.43043  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.16
 ## step size given to GGDescent/Nesterov: 0.16
-## objective:  -37.24468  ( 200 iterations, max step size: 0.00128 )
+## objective:  -40.43079  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.032
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  -37.24479  ( 200 iterations, max step size: 0.00128 )
-## step size given to GGDescent/Nesterov: 0.032
-## objective:  -37.24482  ( 200 iterations, max step size: 0.00128 )
-## MM converged in 7 steps!</code></pre>
+## objective:  -40.43089  ( 200 iterations, max step size: 0.00128 )
+## MM converged in 6 steps!</code></pre>
 <pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)</code></pre>
 <pre class="r"><code>#devtools::install_github(&quot;kkdey/CorShrink&quot;)
 #library(CorShrink)
 #sessionInfo()
 cov_mat &lt;- cov(data);
 system.time(strimmer_sample &lt;- corpcor::cov.shrink(data))</code></pre>
-<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.9488 
+<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 1 
 ## 
-## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.8843</code></pre>
-<pre><code>##    user  system elapsed 
-##   0.002   0.000   0.003</code></pre>
-<pre class="r"><code>system.time(glasso_sample_005 &lt;- glasso::glasso(cov_mat, rho = 0.05))</code></pre>
-<pre><code>##    user  system elapsed 
-##   0.406   0.003   0.423</code></pre>
-<pre class="r"><code>system.time(glasso_sample_05 &lt;- glasso::glasso(cov_mat, rho = 0.5))</code></pre>
-<pre><code>##    user  system elapsed 
-##   0.035   0.000   0.038</code></pre>
-<pre class="r"><code>system.time(glasso_sample_1 &lt;- glasso::glasso(cov_mat, rho = 1))</code></pre>
-<pre><code>##    user  system elapsed 
-##   0.003   0.000   0.003</code></pre>
-<pre class="r"><code>system.time(glasso_sample_10 &lt;- glasso::glasso(cov_mat, rho = 10))</code></pre>
+## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.8569</code></pre>
 <pre><code>##    user  system elapsed 
 ##   0.002   0.000   0.002</code></pre>
-<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 100)))</code></pre>
+<pre class="r"><code>system.time(glasso_sample_005 &lt;- glasso::glasso(cov_mat, rho = 0.05))</code></pre>
+<pre><code>##    user  system elapsed 
+##   0.360   0.000   0.361</code></pre>
+<pre class="r"><code>system.time(glasso_sample_05 &lt;- glasso::glasso(cov_mat, rho = 0.5))</code></pre>
+<pre><code>##    user  system elapsed 
+##   0.027   0.000   0.027</code></pre>
+<pre class="r"><code>system.time(glasso_sample_1 &lt;- glasso::glasso(cov_mat, rho = 1))</code></pre>
+<pre><code>##    user  system elapsed 
+##   0.002   0.000   0.001</code></pre>
+<pre class="r"><code>system.time(glasso_sample_10 &lt;- glasso::glasso(cov_mat, rho = 10))</code></pre>
+<pre><code>##    user  system elapsed 
+##   0.001   0.000   0.002</code></pre>
+<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 10)))</code></pre>
 <pre><code>## ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.918   0.043   0.990</code></pre>
+##   0.648   0.065   0.715</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cov2cor(cov_mat)),
@@ -1598,28 +1602,28 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 <pre><code>## ---
 ## using Nesterov, backtracking line search
 ## ---
-## objective:  84.0348
+## objective:  83.22507
 ## step size given to GGDescent/Nesterov: 100
-## objective:  45.14652  ( 200 iterations, max step size: 0.0064 )
+## objective:  43.33035  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 20
 ## step size given to GGDescent/Nesterov: 20
-## objective:  44.26137  ( 200 iterations, max step size: 0.0064 )
+## objective:  42.4401  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 4
 ## step size given to GGDescent/Nesterov: 4
-## objective:  44.20162  ( 200 iterations, max step size: 0.0064 )
+## objective:  42.38017  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 0.8
 ## step size given to GGDescent/Nesterov: 0.8
-## objective:  44.19413  ( 200 iterations, max step size: 0.0064 )
+## objective:  42.37246  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 0.16
 ## step size given to GGDescent/Nesterov: 0.16
-## objective:  44.19258  ( 200 iterations, max step size: 0.0064 )
+## objective:  42.37081  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 0.032
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  44.19216  ( 200 iterations, max step size: 0.0064 )
+## objective:  42.37034  ( 200 iterations, max step size: 0.0064 )
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  44.19203  ( 200 iterations, max step size: 0.0064 )
+## objective:  42.3702  ( 200 iterations, max step size: 0.0064 )
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  44.19199  ( 200 iterations, max step size: 0.0064 )
+## objective:  42.37015  ( 200 iterations, max step size: 0.0064 )
 ## MM converged in 8 steps!</code></pre>
 <pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)</code></pre>
 <pre class="r"><code>#devtools::install_github(&quot;kkdey/CorShrink&quot;)
@@ -1627,27 +1631,27 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 #sessionInfo()
 cov_mat &lt;- cov(data);
 system.time(strimmer_sample &lt;- corpcor::cov.shrink(data))</code></pre>
-<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.8181 
+<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.9125 
 ## 
-## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.74</code></pre>
+## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.7233</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.006   0.000   0.005</code></pre>
+##   0.005   0.000   0.005</code></pre>
 <pre class="r"><code>system.time(glasso_sample_005 &lt;- glasso::glasso(cov_mat, rho = 0.05))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.178   0.001   0.181</code></pre>
+##   0.160   0.000   0.161</code></pre>
 <pre class="r"><code>system.time(glasso_sample_05 &lt;- glasso::glasso(cov_mat, rho = 0.5))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.002   0.000   0.002</code></pre>
+##   0.001   0.000   0.002</code></pre>
 <pre class="r"><code>system.time(glasso_sample_1 &lt;- glasso::glasso(cov_mat, rho = 1))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.002   0.000   0.002</code></pre>
+##   0.001   0.000   0.001</code></pre>
 <pre class="r"><code>system.time(glasso_sample_10 &lt;- glasso::glasso(cov_mat, rho = 10))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.002   0.000   0.002</code></pre>
-<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 100)))</code></pre>
+##   0.002   0.000   0.001</code></pre>
+<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 10)))</code></pre>
 <pre><code>## ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.800   0.033   0.843</code></pre>
+##   0.722   0.092   0.823</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cov2cor(cov_mat)),
@@ -1706,26 +1710,26 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 <pre><code>## ---
 ## using Nesterov, backtracking line search
 ## ---
-## objective:  106.4271
+## objective:  167.8495
 ## step size given to GGDescent/Nesterov: 100
-## objective:  -48.74665  ( 200 iterations, max step size: 0.0064 )
+## objective:  -32.89818  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 20
 ## step size given to GGDescent/Nesterov: 20
-## objective:  -63.63475  ( 200 iterations, max step size: 0.0064 )
+## objective:  -55.3639  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 4
 ## step size given to GGDescent/Nesterov: 4
-## objective:  -63.68559  ( 200 iterations, max step size: 0.00128 )
+## objective:  -55.50689  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 0.8
 ## step size given to GGDescent/Nesterov: 0.8
-## objective:  -63.68833  ( 200 iterations, max step size: 0.00128 )
+## objective:  -55.5093  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.16
 ## step size given to GGDescent/Nesterov: 0.16
-## objective:  -63.68892  ( 200 iterations, max step size: 0.00128 )
+## objective:  -55.50977  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.032
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  -63.68907  ( 200 iterations, max step size: 0.00128 )
+## objective:  -55.5099  ( 200 iterations, max step size: 0.00128 )
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  -63.68911  ( 200 iterations, max step size: 0.00128 )
+## objective:  -55.50993  ( 200 iterations, max step size: 0.00128 )
 ## MM converged in 7 steps!</code></pre>
 <pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)</code></pre>
 <pre class="r"><code>#devtools::install_github(&quot;kkdey/CorShrink&quot;)
@@ -1733,27 +1737,27 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 #sessionInfo()
 cov_mat &lt;- cov(data);
 system.time(strimmer_sample &lt;- corpcor::cov.shrink(data))</code></pre>
-<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.7532 
+<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.775 
 ## 
-## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.7525</code></pre>
+## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.7394</code></pre>
 <pre><code>##    user  system elapsed 
 ##   0.002   0.000   0.002</code></pre>
 <pre class="r"><code>system.time(glasso_sample_005 &lt;- glasso::glasso(cov_mat, rho = 0.05))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.558   0.003   0.568</code></pre>
+##   0.732   0.000   0.732</code></pre>
 <pre class="r"><code>system.time(glasso_sample_05 &lt;- glasso::glasso(cov_mat, rho = 0.5))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.052   0.001   0.053</code></pre>
+##   0.073   0.001   0.073</code></pre>
 <pre class="r"><code>system.time(glasso_sample_1 &lt;- glasso::glasso(cov_mat, rho = 1))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.009   0.000   0.009</code></pre>
+##   0.019   0.000   0.018</code></pre>
 <pre class="r"><code>system.time(glasso_sample_10 &lt;- glasso::glasso(cov_mat, rho = 10))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.001   0.000   0.001</code></pre>
-<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 100)))</code></pre>
+##   0.001   0.000   0.002</code></pre>
+<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 10)))</code></pre>
 <pre><code>## ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.967   0.040   1.025</code></pre>
+##   0.729   0.077   0.806</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cov2cor(cov_mat)),
@@ -1808,7 +1812,7 @@ corSigma &lt;- cov2cor(Sigma)</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(corSigma),
-      col=col, main=paste0(&quot;sample corr: &quot;), cex.main=2,
+      col=col, main=paste0(&quot;pop corr: &quot;), cex.main=2,
       xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, zlim=c(-1,1))</code></pre>
 <p><img src="corshrink_dsc_graph_files/figure-html/unnamed-chunk-129-1.png" width="576" /></p>
 <pre class="r"><code>Pat &lt;- matrix(1, P, P)
@@ -1821,26 +1825,26 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 <pre><code>## ---
 ## using Nesterov, backtracking line search
 ## ---
-## objective:  67.13261
+## objective:  56.28347
 ## step size given to GGDescent/Nesterov: 100
-## objective:  -38.3264  ( 200 iterations, max step size: 0.0064 )
+## objective:  -41.32945  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 20
 ## step size given to GGDescent/Nesterov: 20
-## objective:  -39.19997  ( 200 iterations, max step size: 0.0064 )
+## objective:  -41.76731  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 4
 ## step size given to GGDescent/Nesterov: 4
-## objective:  -39.21334  ( 200 iterations, max step size: 0.00128 )
+## objective:  -41.77652  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.8
 ## step size given to GGDescent/Nesterov: 0.8
-## objective:  -39.21491  ( 200 iterations, max step size: 0.00128 )
+## objective:  -41.77799  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.16
 ## step size given to GGDescent/Nesterov: 0.16
-## objective:  -39.21529  ( 200 iterations, max step size: 0.00128 )
+## objective:  -41.77836  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.032
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  -39.21539  ( 200 iterations, max step size: 0.00128 )
+## objective:  -41.77846  ( 200 iterations, max step size: 0.00128 )
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  -39.21542  ( 200 iterations, max step size: 0.00128 )
+## objective:  -41.77849  ( 200 iterations, max step size: 0.00128 )
 ## MM converged in 7 steps!</code></pre>
 <pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)</code></pre>
 <pre class="r"><code>#devtools::install_github(&quot;kkdey/CorShrink&quot;)
@@ -1848,27 +1852,27 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 #sessionInfo()
 cov_mat &lt;- cov(data);
 system.time(strimmer_sample &lt;- corpcor::cov.shrink(data))</code></pre>
-<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.7763 
+<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.82 
 ## 
-## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.8628</code></pre>
+## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.8805</code></pre>
 <pre><code>##    user  system elapsed 
 ##   0.002   0.000   0.002</code></pre>
 <pre class="r"><code>system.time(glasso_sample_005 &lt;- glasso::glasso(cov_mat, rho = 0.05))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.381   0.002   0.387</code></pre>
+##   0.350   0.000   0.351</code></pre>
 <pre class="r"><code>system.time(glasso_sample_05 &lt;- glasso::glasso(cov_mat, rho = 0.5))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.030   0.000   0.031</code></pre>
+##   0.028   0.000   0.028</code></pre>
 <pre class="r"><code>system.time(glasso_sample_1 &lt;- glasso::glasso(cov_mat, rho = 1))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.002   0.000   0.002</code></pre>
+##   0.001   0.000   0.001</code></pre>
 <pre class="r"><code>system.time(glasso_sample_10 &lt;- glasso::glasso(cov_mat, rho = 10))</code></pre>
 <pre><code>##    user  system elapsed 
 ##   0.001   0.000   0.001</code></pre>
-<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 100)))</code></pre>
+<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 10)))</code></pre>
 <pre><code>## ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>##    user  system elapsed 
-##   1.028   0.050   1.098</code></pre>
+##   0.665   0.067   0.734</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cov2cor(cov_mat)),
@@ -1927,54 +1931,56 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 <pre><code>## ---
 ## using Nesterov, backtracking line search
 ## ---
-## objective:  74.09321
+## objective:  79.11804
 ## step size given to GGDescent/Nesterov: 100
-## objective:  43.11232  ( 200 iterations, max step size: 0.0064 )
+## objective:  44.57655  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 20
 ## step size given to GGDescent/Nesterov: 20
-## objective:  42.26204  ( 200 iterations, max step size: 0.0064 )
+## objective:  43.69096  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 4
 ## step size given to GGDescent/Nesterov: 4
-## objective:  42.20176  ( 200 iterations, max step size: 0.0064 )
+## objective:  43.62965  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 0.8
 ## step size given to GGDescent/Nesterov: 0.8
-## objective:  42.19466  ( 200 iterations, max step size: 0.0064 )
+## objective:  43.62216  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 0.16
 ## step size given to GGDescent/Nesterov: 0.16
-## objective:  42.19331  ( 200 iterations, max step size: 0.0064 )
+## objective:  43.62065  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 0.032
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  42.19297  ( 200 iterations, max step size: 0.0064 )
+## objective:  43.62024  ( 200 iterations, max step size: 0.0064 )
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  42.19287  ( 200 iterations, max step size: 0.0064 )
-## MM converged in 7 steps!</code></pre>
+## objective:  43.62012  ( 200 iterations, max step size: 0.0064 )
+## step size given to GGDescent/Nesterov: 0.032
+## objective:  43.62008  ( 200 iterations, max step size: 0.0064 )
+## MM converged in 8 steps!</code></pre>
 <pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)</code></pre>
 <pre class="r"><code>#devtools::install_github(&quot;kkdey/CorShrink&quot;)
 #library(CorShrink)
 #sessionInfo()
 cov_mat &lt;- cov(data);
 system.time(strimmer_sample &lt;- corpcor::cov.shrink(data))</code></pre>
-<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.9128 
+<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.8891 
 ## 
-## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.8985</code></pre>
+## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.8408</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.005   0.000   0.005</code></pre>
+##   0.006   0.000   0.005</code></pre>
 <pre class="r"><code>system.time(glasso_sample_005 &lt;- glasso::glasso(cov_mat, rho = 0.05))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.144   0.001   0.149</code></pre>
+##   0.169   0.000   0.169</code></pre>
 <pre class="r"><code>system.time(glasso_sample_05 &lt;- glasso::glasso(cov_mat, rho = 0.5))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.002   0.000   0.001</code></pre>
+##   0.002   0.000   0.002</code></pre>
 <pre class="r"><code>system.time(glasso_sample_1 &lt;- glasso::glasso(cov_mat, rho = 1))</code></pre>
 <pre><code>##    user  system elapsed 
 ##   0.002   0.000   0.002</code></pre>
 <pre class="r"><code>system.time(glasso_sample_10 &lt;- glasso::glasso(cov_mat, rho = 10))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.002   0.000   0.002</code></pre>
-<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 100)))</code></pre>
+##   0.002   0.000   0.001</code></pre>
+<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 10)))</code></pre>
 <pre><code>## ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>##    user  system elapsed 
-##   1.028   0.051   1.092</code></pre>
+##   0.692   0.077   0.770</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cov2cor(cov_mat)),
@@ -2033,26 +2039,26 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 <pre><code>## ---
 ## using Nesterov, backtracking line search
 ## ---
-## objective:  129.6397
+## objective:  109.2405
 ## step size given to GGDescent/Nesterov: 100
-## objective:  -59.62945  ( 200 iterations, max step size: 0.0064 )
+## objective:  -60.07266  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 20
 ## step size given to GGDescent/Nesterov: 20
-## objective:  -60.86646  ( 200 iterations, max step size: 0.0064 )
+## objective:  -62.32766  ( 200 iterations, max step size: 0.0064 )
 ## Reducing step size to 4
 ## step size given to GGDescent/Nesterov: 4
-## objective:  -60.87475  ( 200 iterations, max step size: 0.00128 )
+## objective:  -62.33747  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.8
 ## step size given to GGDescent/Nesterov: 0.8
-## objective:  -60.87628  ( 200 iterations, max step size: 0.00128 )
+## objective:  -62.33919  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.16
 ## step size given to GGDescent/Nesterov: 0.16
-## objective:  -60.87668  ( 200 iterations, max step size: 0.00128 )
+## objective:  -62.33965  ( 200 iterations, max step size: 0.00128 )
 ## Reducing step size to 0.032
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  -60.8768  ( 200 iterations, max step size: 0.00128 )
+## objective:  -62.33977  ( 200 iterations, max step size: 0.00128 )
 ## step size given to GGDescent/Nesterov: 0.032
-## objective:  -60.87683  ( 200 iterations, max step size: 0.00128 )
+## objective:  -62.3398  ( 200 iterations, max step size: 0.00128 )
 ## MM converged in 7 steps!</code></pre>
 <pre class="r"><code>spcor_mat &lt;- cov2cor(mm$Sigma)</code></pre>
 <pre class="r"><code>#devtools::install_github(&quot;kkdey/CorShrink&quot;)
@@ -2060,27 +2066,27 @@ mm &lt;- spcov(Sigma=covmat+0.1*diag(1,P), S=covmat+0.1*diag(1,P), lambda=lam * 
 #sessionInfo()
 cov_mat &lt;- cov(data);
 system.time(strimmer_sample &lt;- corpcor::cov.shrink(data))</code></pre>
-<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.7147 
+<pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.7644 
 ## 
-## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.755</code></pre>
+## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.7628</code></pre>
 <pre><code>##    user  system elapsed 
 ##   0.002   0.000   0.002</code></pre>
 <pre class="r"><code>system.time(glasso_sample_005 &lt;- glasso::glasso(cov_mat, rho = 0.05))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.639   0.004   0.649</code></pre>
+##   0.582   0.000   0.582</code></pre>
 <pre class="r"><code>system.time(glasso_sample_05 &lt;- glasso::glasso(cov_mat, rho = 0.5))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.064   0.001   0.065</code></pre>
+##   0.053   0.000   0.054</code></pre>
 <pre class="r"><code>system.time(glasso_sample_1 &lt;- glasso::glasso(cov_mat, rho = 1))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.015   0.000   0.016</code></pre>
+##   0.012   0.000   0.012</code></pre>
 <pre class="r"><code>system.time(glasso_sample_10 &lt;- glasso::glasso(cov_mat, rho = 10))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.001   0.000   0.001</code></pre>
-<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 100)))</code></pre>
+##   0.001   0.000   0.002</code></pre>
+<pre class="r"><code>system.time(cov_sample_ML &lt;-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = &quot;normal&quot;, nullweight = 10)))</code></pre>
 <pre><code>## ash cor only and ash cor PD matrices are different</code></pre>
 <pre><code>##    user  system elapsed 
-##   1.047   0.057   1.118</code></pre>
+##   0.694   0.077   0.773</code></pre>
 <pre class="r"><code>col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(cov2cor(cov_mat)),

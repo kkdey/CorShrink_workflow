@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Kushal K Dey" />
+
+
+<title>cellcycleR on circadian data</title>
+
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="cosmo.css" type="text/css" />
+
+</head>
+
+<body>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,600" rel="stylesheet" type="text/css">
+    <link href="../docs/cosmo.css" rel="stylesheet">
+    <link href="../docs/cosmo.min.css" rel="stylesheet">
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../docs/bootstrap/js/bootstrap.min.js"></script>
+
+<body>
+
+<div class = "nav" align = "middle">
+<div class= "p1"></div>
+<p>
+  <a class="btn btn-large btn btn-primary" type="button" href = "corshrink_front.html">HOME</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "workflow.html">WORKFLOW</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "tissue_corr.html">GTEx DEMO</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "about.html">METHODS</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink">SOFTWARE</a> 
+  &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "license.html">LICENSE</a> 
+   &nbsp &nbsp
+  <a class="btn btn-large btn btn-primary" type="button" href = "https://github.com/kkdey/CorShrink_workflow">GITHUB</a> 
+ </p>
+</div>  
+<!-- <div class="nav">
+  <a href="index.html">Home page</a> &nbsp &nbsp
+  <a href="musings.html">Musings</a> &nbsp &nbsp
+  <a href="town.html">My town</a> &nbsp &nbsp
+  <a href="links.html">Links</a>
+</div> -->
+
+<!-- Main content -->
+</body>
+</html>
+
+
+<h1 class="title toc-ignore">cellcycleR on circadian data</h1>
+<h4 class="author"><em>Kushal K Dey</em></h4>
+<h4 class="date"><em>7/5/2017</em></h4>
+
+
+
+<pre class="r"><code>library(cellcycleR)</code></pre>
+<pre><code>## Loading required package: binhf</code></pre>
+<pre><code>## Loading required package: wavethresh</code></pre>
+<pre><code>## Loading required package: MASS</code></pre>
+<pre><code>## WaveThresh: R wavelet software, release 4.6.8, installed</code></pre>
+<pre><code>## Copyright Guy Nason and others 1993-2016</code></pre>
+<pre><code>## Note: nlevels has been renamed to nlevelsWT</code></pre>
+<pre><code>## Loading required package: adlift</code></pre>
+<pre><code>## Loading required package: EbayesThresh</code></pre>
+<pre><code>## 
+##  **********************************************
+##  adlift: a package to perform wavelet lifting schemes
+## 
+##  --- Written by Matt Nunes and Marina Knight ---
+##    Current package version:  1.3-2  ( 01/11/2012 ) 
+## 
+##              -+ packaged by MAN +-           
+##  **********************************************
+##  
+##  adlift 1.3-2 loaded</code></pre>
+<pre><code>## 
+## Attaching package: &#39;adlift&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:EbayesThresh&#39;:
+## 
+##     postmean.cauchy</code></pre>
+<pre><code>## 
+##  **********************************************
+##  binhf: Haar-Fisz functions for binomial data
+## 
+##  --- Written by Matt Nunes ---
+##    Current package version:  1.0-1  ( 24/04/2014 ) 
+## 
+##  
+##  **********************************************
+##  
+##  binhf 1.0-1 loaded</code></pre>
+<pre><code>## 
+## Attaching package: &#39;binhf&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:EbayesThresh&#39;:
+## 
+##     ebayesthresh.wavelet.wd, negloglik.laplace, wandafromx</code></pre>
+<pre><code>## The following object is masked from &#39;package:wavethresh&#39;:
+## 
+##     madmad</code></pre>
+<pre><code>## The following object is masked from &#39;package:base&#39;:
+## 
+##     norm</code></pre>
+<pre><code>## Loading required package: zoo</code></pre>
+<pre><code>## 
+## Attaching package: &#39;zoo&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     as.Date, as.Date.numeric</code></pre>
+<pre><code>## Loading required package: parallel</code></pre>
+<pre class="r"><code>data &lt;- get(load(&quot;../output/cellcyler_data_liver_mash.rda&quot;))
+
+times &lt;- data$times
+expr &lt;- data$data</code></pre>
+<pre class="r"><code>out &lt;- bump_cell_ordering_class(expr, celltime_levels = 100,
+                                num_iter=100,
+                                start = NULL,
+                                verbose = TRUE,
+                                save_path=&quot;../output/cell_order_liver_bump.rda&quot;)</code></pre>
+<pre class="r"><code>out &lt;- get(load(&quot;../output/cell_order_liver_bump.rda&quot;))</code></pre>
+<pre class="r"><code>for(l in 1:100){
+  par(mfrow=c(1,2))
+  plot(out$cell_times, expr[,l])
+  plot(times, expr[,l], col=&quot;red&quot;)
+}</code></pre>
+<p><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-1.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-2.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-3.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-4.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-5.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-6.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-7.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-8.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-9.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-10.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-11.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-12.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-13.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-14.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-15.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-16.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-17.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-18.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-19.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-20.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-21.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-22.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-23.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-24.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-25.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-26.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-27.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-28.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-29.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-30.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-31.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-32.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-33.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-34.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-35.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-36.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-37.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-38.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-39.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-40.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-41.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-42.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-43.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-44.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-45.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-46.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-47.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-48.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-49.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-50.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-51.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-52.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-53.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-54.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-55.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-56.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-57.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-58.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-59.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-60.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-61.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-62.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-63.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-64.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-65.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-66.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-67.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-68.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-69.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-70.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-71.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-72.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-73.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-74.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-75.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-76.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-77.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-78.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-79.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-80.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-81.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-82.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-83.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-84.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-85.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-86.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-87.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-88.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-89.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-90.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-91.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-92.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-93.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-94.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-95.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-96.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-97.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-98.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-99.png" width="960" /><img src="cellcycler_on_circadian_files/figure-html/unnamed-chunk-5-100.png" width="960" /></p>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

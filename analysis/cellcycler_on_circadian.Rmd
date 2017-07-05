@@ -1,0 +1,41 @@
+---
+title: "cellcycleR on circadian data"
+author: "Kushal K Dey"
+date: "7/5/2017"
+output: html_document
+---
+```{r}
+library(cellcycleR)
+```
+
+```{r}
+data <- get(load("../output/cellcyler_data_liver_mash.rda"))
+
+times <- data$times
+expr <- data$data
+```
+
+```{r eval=FALSE, results = "hide", message=FALSE, warning=FALSE}
+out <- bump_cell_ordering_class(expr, celltime_levels = 100,
+                                num_iter=100,
+                                start = NULL,
+                                verbose = TRUE,
+                                save_path="../output/cell_order_liver_bump.rda")
+
+```
+```{r}
+out <- get(load("../output/cell_order_liver_bump.rda"))
+```
+
+```{r fig.height = 7, fig.width = 10}
+for(l in 1:100){
+  par(mfrow=c(1,2))
+  plot(out$cell_times, expr[,l])
+  plot(times, expr[,l], col="red")
+}
+```
+
+```{r}
+
+```
+

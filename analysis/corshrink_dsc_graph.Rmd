@@ -52,7 +52,7 @@ corSigma <- cov2cor(Sigma)
 col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(corSigma),
-      col=col, main=paste0("sample corr: "), cex.main=2,
+      col=col, main=paste0("pop corr: "), cex.main=2,
       xaxt = "n", yaxt = "n", zlim=c(-1,1))
 ```
 
@@ -84,7 +84,7 @@ system.time(glasso_sample_005 <- glasso::glasso(cov_mat, rho = 0.05))
 system.time(glasso_sample_05 <- glasso::glasso(cov_mat, rho = 0.5))
 system.time(glasso_sample_1 <- glasso::glasso(cov_mat, rho = 1))
 system.time(glasso_sample_10 <- glasso::glasso(cov_mat, rho = 10))
-system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 100)))
+system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 10)))
 ```
 
 ```{r fig.width=6, fig.height=6}
@@ -173,7 +173,7 @@ system.time(glasso_sample_005 <- glasso::glasso(cov_mat, rho = 0.05))
 system.time(glasso_sample_05 <- glasso::glasso(cov_mat, rho = 0.5))
 system.time(glasso_sample_1 <- glasso::glasso(cov_mat, rho = 1))
 system.time(glasso_sample_10 <- glasso::glasso(cov_mat, rho = 10))
-system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 100)))
+system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 10)))
 ```
 
 ```{r fig.width=6, fig.height=6}
@@ -263,7 +263,7 @@ system.time(glasso_sample_005 <- glasso::glasso(cov_mat, rho = 0.05))
 system.time(glasso_sample_05 <- glasso::glasso(cov_mat, rho = 0.5))
 system.time(glasso_sample_1 <- glasso::glasso(cov_mat, rho = 1))
 system.time(glasso_sample_10 <- glasso::glasso(cov_mat, rho = 10))
-system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 100)))
+system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 10)))
 ```
 
 ```{r fig.width=6, fig.height=6}
@@ -333,7 +333,7 @@ corSigma <- cov2cor(Sigma)
 col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(corSigma),
-      col=col, main=paste0("sample corr: "), cex.main=2,
+      col=col, main=paste0("pop corr: "), cex.main=2,
       xaxt = "n", yaxt = "n", zlim=c(-1,1))
 ```
 
@@ -365,7 +365,7 @@ system.time(glasso_sample_005 <- glasso::glasso(cov_mat, rho = 0.05))
 system.time(glasso_sample_05 <- glasso::glasso(cov_mat, rho = 0.5))
 system.time(glasso_sample_1 <- glasso::glasso(cov_mat, rho = 1))
 system.time(glasso_sample_10 <- glasso::glasso(cov_mat, rho = 10))
-system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 100)))
+system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 10)))
 ```
 
 ```{r fig.width=6, fig.height=6}
@@ -454,7 +454,7 @@ system.time(glasso_sample_005 <- glasso::glasso(cov_mat, rho = 0.05))
 system.time(glasso_sample_05 <- glasso::glasso(cov_mat, rho = 0.5))
 system.time(glasso_sample_1 <- glasso::glasso(cov_mat, rho = 1))
 system.time(glasso_sample_10 <- glasso::glasso(cov_mat, rho = 10))
-system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 100)))
+system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 10)))
 ```
 
 ```{r fig.width=6, fig.height=6}
@@ -544,7 +544,7 @@ system.time(glasso_sample_005 <- glasso::glasso(cov_mat, rho = 0.05))
 system.time(glasso_sample_05 <- glasso::glasso(cov_mat, rho = 0.5))
 system.time(glasso_sample_1 <- glasso::glasso(cov_mat, rho = 1))
 system.time(glasso_sample_10 <- glasso::glasso(cov_mat, rho = 10))
-system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 100)))
+system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 10)))
 ```
 
 ```{r fig.width=6, fig.height=6}
@@ -614,7 +614,7 @@ corSigma <- cov2cor(Sigma)
 col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(corSigma),
-      col=col, main=paste0("sample corr: "), cex.main=2,
+      col=col, main=paste0("pop corr: "), cex.main=2,
       xaxt = "n", yaxt = "n", zlim=c(-1,1))
 ```
 
@@ -646,7 +646,7 @@ system.time(glasso_sample_005 <- glasso::glasso(cov_mat, rho = 0.05))
 system.time(glasso_sample_05 <- glasso::glasso(cov_mat, rho = 0.5))
 system.time(glasso_sample_1 <- glasso::glasso(cov_mat, rho = 1))
 system.time(glasso_sample_10 <- glasso::glasso(cov_mat, rho = 10))
-system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 100)))
+system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 10)))
 ```
 
 ```{r fig.width=6, fig.height=6}
@@ -735,7 +735,7 @@ system.time(glasso_sample_005 <- glasso::glasso(cov_mat, rho = 0.05))
 system.time(glasso_sample_05 <- glasso::glasso(cov_mat, rho = 0.5))
 system.time(glasso_sample_1 <- glasso::glasso(cov_mat, rho = 1))
 system.time(glasso_sample_10 <- glasso::glasso(cov_mat, rho = 10))
-system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 100)))
+system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 10)))
 ```
 
 ```{r fig.width=6, fig.height=6}
@@ -825,7 +825,7 @@ system.time(glasso_sample_005 <- glasso::glasso(cov_mat, rho = 0.05))
 system.time(glasso_sample_05 <- glasso::glasso(cov_mat, rho = 0.5))
 system.time(glasso_sample_1 <- glasso::glasso(cov_mat, rho = 1))
 system.time(glasso_sample_10 <- glasso::glasso(cov_mat, rho = 10))
-system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 100)))
+system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 10)))
 ```
 
 ```{r fig.width=6, fig.height=6}
@@ -895,7 +895,7 @@ corSigma <- cov2cor(Sigma)
 col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(corSigma),
-      col=col, main=paste0("sample corr: "), cex.main=2,
+      col=col, main=paste0("pop corr: "), cex.main=2,
       xaxt = "n", yaxt = "n", zlim=c(-1,1))
 ```
 
@@ -927,7 +927,7 @@ system.time(glasso_sample_005 <- glasso::glasso(cov_mat, rho = 0.05))
 system.time(glasso_sample_05 <- glasso::glasso(cov_mat, rho = 0.5))
 system.time(glasso_sample_1 <- glasso::glasso(cov_mat, rho = 1))
 system.time(glasso_sample_10 <- glasso::glasso(cov_mat, rho = 10))
-system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 100)))
+system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 10)))
 ```
 
 ```{r fig.width=6, fig.height=6}
@@ -1016,7 +1016,7 @@ system.time(glasso_sample_005 <- glasso::glasso(cov_mat, rho = 0.05))
 system.time(glasso_sample_05 <- glasso::glasso(cov_mat, rho = 0.5))
 system.time(glasso_sample_1 <- glasso::glasso(cov_mat, rho = 1))
 system.time(glasso_sample_10 <- glasso::glasso(cov_mat, rho = 10))
-system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 100)))
+system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 10)))
 ```
 
 ```{r fig.width=6, fig.height=6}
@@ -1106,7 +1106,7 @@ system.time(glasso_sample_005 <- glasso::glasso(cov_mat, rho = 0.05))
 system.time(glasso_sample_05 <- glasso::glasso(cov_mat, rho = 0.5))
 system.time(glasso_sample_1 <- glasso::glasso(cov_mat, rho = 1))
 system.time(glasso_sample_10 <- glasso::glasso(cov_mat, rho = 10))
-system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 100)))
+system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 10)))
 ```
 
 ```{r fig.width=6, fig.height=6}
@@ -1176,7 +1176,7 @@ corSigma <- cov2cor(Sigma)
 col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(corSigma),
-      col=col, main=paste0("sample corr: "), cex.main=2,
+      col=col, main=paste0("pop corr: "), cex.main=2,
       xaxt = "n", yaxt = "n", zlim=c(-1,1))
 ```
 
@@ -1208,7 +1208,7 @@ system.time(glasso_sample_005 <- glasso::glasso(cov_mat, rho = 0.05))
 system.time(glasso_sample_05 <- glasso::glasso(cov_mat, rho = 0.5))
 system.time(glasso_sample_1 <- glasso::glasso(cov_mat, rho = 1))
 system.time(glasso_sample_10 <- glasso::glasso(cov_mat, rho = 10))
-system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 100)))
+system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 10)))
 ```
 
 ```{r fig.width=6, fig.height=6}
@@ -1297,7 +1297,7 @@ system.time(glasso_sample_005 <- glasso::glasso(cov_mat, rho = 0.05))
 system.time(glasso_sample_05 <- glasso::glasso(cov_mat, rho = 0.5))
 system.time(glasso_sample_1 <- glasso::glasso(cov_mat, rho = 1))
 system.time(glasso_sample_10 <- glasso::glasso(cov_mat, rho = 10))
-system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 100)))
+system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 10)))
 ```
 
 ```{r fig.width=6, fig.height=6}
@@ -1387,7 +1387,7 @@ system.time(glasso_sample_005 <- glasso::glasso(cov_mat, rho = 0.05))
 system.time(glasso_sample_05 <- glasso::glasso(cov_mat, rho = 0.5))
 system.time(glasso_sample_1 <- glasso::glasso(cov_mat, rho = 1))
 system.time(glasso_sample_10 <- glasso::glasso(cov_mat, rho = 10))
-system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 100)))
+system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 10)))
 ```
 
 ```{r fig.width=6, fig.height=6}
@@ -1458,7 +1458,7 @@ corSigma <- cov2cor(Sigma)
 col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
       rgb(1,seq(1,0,length=1000),seq(1,0,length=1000)))
 image(as.matrix(corSigma),
-      col=col, main=paste0("sample corr: "), cex.main=2,
+      col=col, main=paste0("pop corr: "), cex.main=2,
       xaxt = "n", yaxt = "n", zlim=c(-1,1))
 ```
 
@@ -1490,7 +1490,7 @@ system.time(glasso_sample_005 <- glasso::glasso(cov_mat, rho = 0.05))
 system.time(glasso_sample_05 <- glasso::glasso(cov_mat, rho = 0.5))
 system.time(glasso_sample_1 <- glasso::glasso(cov_mat, rho = 1))
 system.time(glasso_sample_10 <- glasso::glasso(cov_mat, rho = 10))
-system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 100)))
+system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 10)))
 ```
 
 ```{r fig.width=6, fig.height=6}
@@ -1579,7 +1579,7 @@ system.time(glasso_sample_005 <- glasso::glasso(cov_mat, rho = 0.05))
 system.time(glasso_sample_05 <- glasso::glasso(cov_mat, rho = 0.5))
 system.time(glasso_sample_1 <- glasso::glasso(cov_mat, rho = 1))
 system.time(glasso_sample_10 <- glasso::glasso(cov_mat, rho = 10))
-system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 100)))
+system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 10)))
 ```
 
 ```{r fig.width=6, fig.height=6}
@@ -1669,7 +1669,7 @@ system.time(glasso_sample_005 <- glasso::glasso(cov_mat, rho = 0.05))
 system.time(glasso_sample_05 <- glasso::glasso(cov_mat, rho = 0.5))
 system.time(glasso_sample_1 <- glasso::glasso(cov_mat, rho = 1))
 system.time(glasso_sample_10 <- glasso::glasso(cov_mat, rho = 10))
-system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 100)))
+system.time(cov_sample_ML <-  CorShrinkML(cov2cor(cov_mat), nsamp_mat = matrix(n, P, P), sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 10)))
 ```
 
 ```{r fig.width=6, fig.height=6}

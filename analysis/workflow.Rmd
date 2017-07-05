@@ -181,6 +181,7 @@ We also next added two new correlation structures for each multiple tissue block
 We tried to look into the sinusoidal patterns of expression of the liver specific genes and the circadian genes in general.
 
  - [sinusoidal patterns of gene expression in Liver](cellcycler_patterns.html)
+ - [faulty cellcycleR application on liver expression data](cellcycler_on_circadian.html)
 
  
 ### Dimension Reduction and CorShrink
