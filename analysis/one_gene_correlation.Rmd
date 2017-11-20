@@ -2,18 +2,53 @@
 title: "GTEx : One gene correlation vs Corshrink"
 author: "Kushal K Dey"
 date: "5/18/2017"
-output: html_document
+output: 
+  html_document:
+    theme : cosmo
+    code_folding: hide
 ---
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+<!-- Add your analysis here -->
+
+
 
 This is the start of the GTEx analysis using CorShrink. Here we pick up one gene and use look at the Corshrink estimation of the tissue-tissue correlation for that single gene. This script can be used as a model script to check the Corshrink function as well when under development.
+
+
+
+**Name of the gene (see code chunk on the side) ** : 
 
 ```{r}
 name <- "ENSG00000166819"
 ```
 
+Load the (tissue, tissue, gene) 3-D table of correlations between pairs of tissues for each gene in `cor_data`.
+
 ```{r}
 cor_data <- get(load("../output/cor_tissues_non_ash_voom_pearson.rda"))
 ```
+
+Load the metadata - names of genes, names of samples, labels for the person providing each sample, the tissue origin of the sample. We also form a list of the unique person labels and the tissue labels.
+
+The tissue labels are organised so that tissues close to each other in terms of their origin or their clustering results are close together. 
 
 ```{r}
 gene_names <- as.character(read.table(file = "../data/GTEX_V6/gene_names_GTEX_V6.txt")[,1])
@@ -27,9 +62,7 @@ tissue_labels <- read.table(file = "../data/GTEX_V6/samples_id.txt")[,3]
 
 unique_persons <- unique(samples_person)
 unique_tissues <- unique(tissue_labels)
-```
 
-```{r echo=FALSE, eval=TRUE}
 order_index <- c();
 U <- unique_tissues
 order_index <- c(order_index, grep("Brain", U))
@@ -75,16 +108,17 @@ order_index <- c(order_index, grep("Uterus", U))
 order_index <- c(order_index, grep("Bladder", U))
 ```
 
-Now we apply CorShrink on this data.
+Now we apply [CorShrink](https://github.com/kkdey/CorShrink) on this data.
 
-```{r}
+```{r warning = FALSE}
 numg <- grep(name, gene_names_1)
 cor_mat <- diag(1,53)+cor_data[,,numg]
 common_samples <- get(load("../output/common_samples.rda"))
-system.time(cor_sample_ML <-  CorShrink::CorShrinkML(cor_mat, common_samples, sd_boot = FALSE,
-                                            ash.control = list(mixcompdist = "normal",
-                                                               nullweight = 100)))
+system.time(cor_sample_ML <-  CorShrink::CorShrinkML(cor_mat, common_samples, sd_boot = FALSE, ash.control = list(mixcompdist = "normal", nullweight = 10)))
 ```
+
+
+## Heatmap Plot of sample correlation table
 
 ```{r}
 col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
@@ -95,6 +129,8 @@ image(as.matrix(cor_mat)[order_index, order_index],
 axis(1, at = seq(0, 1, length.out = ncol(cor_mat)), labels = U[order_index], las=2, cex.axis = 0.4)
 axis(2, at = seq(0, 1, length.out = ncol(cor_mat)), labels = U[order_index], las=2, cex.axis = 0.4)
 ```
+
+## Heatmap Plot of CorShrink table (normal)
 
 
 ```{r}
@@ -108,14 +144,15 @@ axis(2, at = seq(0, 1, length.out = ncol(cor_mat)), labels = U[order_index], las
 
 ```
 
-```{r}
+```{r warning = FALSE}
 numg <- grep(name, gene_names_1)
 cor_mat <- diag(1,53)+cor_data[,,numg]
 common_samples <- get(load("../output/common_samples.rda"))
-system.time(cor_sample_ML <-  CorShrink::CorShrinkML(cor_mat, common_samples, sd_boot = FALSE,
-                                            ash.control = list(mixcompdist = "halfuniform",
-                                                               nullweight = 100)))
+system.time(cor_sample_ML <-  CorShrink::CorShrinkML(cor_mat, common_samples, sd_boot = FALSE, ash.control = list(mixcompdist = "halfuniform",
+                                   nullweight = 100)))
 ```
+
+## Heatmap Plot of Corshrink table (half-uniform)
 
 ```{r}
 col=c(rev(rgb(seq(1,0,length=1000),1,seq(1,0,length=1000))),
